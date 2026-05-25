@@ -7,6 +7,7 @@ import { AuthService } from 'src/app/core/services/auth.service';
 import { LeadFormModalComponent } from './lead-form-modal.component';
 import { LeadFollowupModalComponent } from './lead-followup-modal.component';
 import { LeadBulkUploadModalComponent } from './lead-bulk-upload-modal.component';
+import { downloadLeadCsvTemplate } from './lead-csv.util';
 import { HttpErrorResponse } from '@angular/common/http';
 import { confirmDelete } from 'src/app/core/utils/confirm.util';
 import { getApiErrorMessage } from 'src/app/core/utils/http-error.util';
@@ -73,6 +74,10 @@ export class LeadsComponent implements OnInit {
     ref.componentInstance.mode = 'edit';
     ref.componentInstance.lead = { ...row };
     ref.closed.subscribe(() => this.load());
+  }
+
+  downloadCsvTemplate() {
+    downloadLeadCsvTemplate();
   }
 
   openBulkUpload() {

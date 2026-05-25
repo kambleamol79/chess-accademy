@@ -5,16 +5,28 @@
 
 <div class="modal-body">
   <p class="text-muted small mb-3">
-    Upload a CSV with the same columns as your spreadsheet (DATE, CHILD NA, PARENTS, NUMBER, MAIL, AGE, STD,
-    CITY, and optional follow-up columns).
+    Use the template CSV (same columns as your spreadsheet). <strong>CHILD NA</strong> is required on each row.
+    Optional columns: Q1–Q3 (Yes/No), TIME, ATTD - NO, MODULE, INT, NOT INT, PAID, DNP, ADDITIONAL, REVIEW.
   </p>
 
   <div class="d-flex flex-wrap gap-2 mb-3">
     <button type="button" class="btn btn-outline-secondary btn-sm" (click)="downloadTemplate()">
       <i class="ti ti-download me-1"></i>
-      Download template
+      Download leads-upload-template.csv
     </button>
   </div>
+
+  <details class="small text-muted mb-3">
+    <summary class="mb-1">Column reference</summary>
+    <ul class="mb-0 ps-3">
+      <li><strong>DATE</strong> — e.g. 6/5/2025 13:00</li>
+      <li><strong>CHILD NA</strong> — child name (required)</li>
+      <li><strong>PARENTS, NUMBER, MAIL, AGE, STD, CITY</strong> — contact info</li>
+      <li><strong>Q1, Q2, Q3</strong> — Yes or No</li>
+      <li><strong>TIME</strong> — e.g. 07:00 PM - 0</li>
+      <li><strong>INT / PAID</strong> — use INT or PAID when applicable</li>
+    </ul>
+  </details>
 
   <div class="mb-3">
     <label class="form-label" for="leadCsvFile">CSV file</label>

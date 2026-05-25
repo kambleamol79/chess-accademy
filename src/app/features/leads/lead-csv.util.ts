@@ -21,28 +21,65 @@ export const LEAD_CSV_TEMPLATE_HEADERS = [
   'REVIEW'
 ] as const;
 
-export const LEAD_CSV_TEMPLATE_SAMPLE = [
-  '6/5/2025 13:00',
-  'Vedansh',
-  'Avantika sari',
-  '9876543210',
-  'parent@example.com',
-  '12',
-  '6th',
-  'Kanpur',
-  'Yes',
-  'No',
-  'Yes',
-  '07:00 PM - 0',
-  '',
-  'IB - 1',
-  'INT',
-  '',
-  '',
-  '',
-  '',
-  ''
-].join(',');
+/** Example rows for the downloadable template (matches spreadsheet layout). */
+export const LEAD_CSV_TEMPLATE_SAMPLE_ROWS: string[][] = [
+  [
+    '6/5/2025 13:00',
+    'Vedansh',
+    'Avantika sari',
+    '9876543210',
+    'parent@example.com',
+    '12',
+    '6th',
+    'Kanpur',
+    'Yes',
+    'No',
+    'Yes',
+    '07:00 PM - 0',
+    '',
+    'IB - 1',
+    'INT',
+    '',
+    '',
+    '',
+    ''
+  ],
+  [
+    '6/9/2025 10:30',
+    'Sahiba kaur',
+    'Puja Gope',
+    '9123456789',
+    'puja25.gope@gmail.com',
+    '7',
+    '4th',
+    'Navi Mumbai',
+    'No',
+    'Yes',
+    'No',
+    '08:00 PM - 0',
+    '',
+    'IB - 2',
+    '',
+    '',
+    '',
+    '',
+    ''
+  ]
+];
+
+/** Path served from app assets after build. */
+export const LEAD_CSV_TEMPLATE_ASSET_PATH = 'assets/templates/leads-upload-template.csv';
+
+function csvCell(value: string): string {
+  if (/[",\n\r]/.test(value)) {
+    return `"${value.replace(/"/g, '""')}"`;
+  }
+  return value;
+}
+
+function csvRow(cells: string[]): string {
+  return cells.map(csvCell).join(',');
+}
 
 const HEADER_MAP: Record<string, string> = {
   DATE: 'captured_at',
@@ -156,12 +193,15 @@ function normalizeField(field: string, value: string): unknown {
 }
 
 export function buildLeadCsvTemplate(): string {
-  const header = LEAD_CSV_TEMPLATE_HEADERS.join(',');
-  return `${header}\n${LEAD_CSV_TEMPLATE_SAMPLE}\n`;
+  const lines = [
+    csvRow([...LEAD_CSV_TEMPLATE_HEADERS]),
+    ...LEAD_CSV_TEMPLATE_SAMPLE_ROWS.map((row) => csvRow(row))
+  ];
+  return `${lines.join('\n')}\n`;
 }
 
 export function downloadLeadCsvTemplate(): void {
-  const blob = new Blob([buildLeadCsvTemplate()], { type: 'text/csv;charset=utf-8' });
+  const blob = new Blob(['\uFEFF', buildLeadCsvTemplate()], { type: 'text/csv;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
