@@ -15,4 +15,12 @@ export class CoachService {
   create(payload: Record<string, unknown>): Observable<ApiResponse<unknown>> {
     return this.http.post<ApiResponse<unknown>>(`${environment.apiUrl}/coaches`, payload);
   }
+
+  update(id: number, payload: Record<string, unknown>): Observable<ApiResponse<unknown>> {
+    return this.http.patch<ApiResponse<unknown>>(`${environment.apiUrl}/coaches/${id}`, payload);
+  }
+
+  delete(id: number): Observable<ApiResponse<unknown>> {
+    return this.http.delete<ApiResponse<unknown>>(`${environment.apiUrl}/coaches/${id}`);
+  }
 }

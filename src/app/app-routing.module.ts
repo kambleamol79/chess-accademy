@@ -21,6 +21,12 @@ const routes: Routes = [
         loadComponent: () => import('./features/batches/batches.component').then((c) => c.BatchesComponent)
       },
       {
+        path: 'leads',
+        loadComponent: () => import('./features/leads/leads.component').then((c) => c.LeadsComponent),
+        canActivate: [roleGuard],
+        data: { roles: ['admin', 'coach'] }
+      },
+      {
         path: 'students',
         loadComponent: () => import('./features/students/students.component').then((c) => c.StudentsComponent),
         canActivate: [roleGuard],

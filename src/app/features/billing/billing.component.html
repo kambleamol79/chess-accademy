@@ -27,9 +27,25 @@
               </span>
             </td>
             <td>{{ inv['due_date'] || '—' }}</td>
-            <td>
+            <td class="text-nowrap">
+              @if (canEdit()) {
+                <button type="button" class="btn btn-sm btn-outline-secondary me-1" title="Edit" (click)="openEditInvoice(inv)">
+                  <i class="ti ti-edit"></i>
+                </button>
+              }
               @if (inv['status'] !== 'paid') {
-                <button type="button" class="btn btn-sm btn-primary" (click)="markPaid(+inv['id'])">Mark paid</button>
+                <button type="button" class="btn btn-sm btn-primary me-1" (click)="markPaid(+inv['id'])">Mark paid</button>
+              }
+              @if (canDelete()) {
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-danger"
+                  title="Delete"
+                  [disabled]="deletingId() === inv['id']"
+                  (click)="deleteInvoice(inv)"
+                >
+                  <i class="ti ti-trash"></i>
+                </button>
               }
             </td>
           </tr>

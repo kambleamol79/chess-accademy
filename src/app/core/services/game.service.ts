@@ -11,4 +11,8 @@ export class GameService {
   list(): Observable<ApiResponse<Record<string, unknown>[]>> {
     return this.http.get<ApiResponse<Record<string, unknown>[]>>(`${environment.apiUrl}/games`);
   }
+
+  delete(id: number): Observable<ApiResponse<unknown>> {
+    return this.http.delete<ApiResponse<unknown>>(`${environment.apiUrl}/games/${id}`);
+  }
 }

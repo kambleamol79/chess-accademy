@@ -1,0 +1,148 @@
+<app-card [customHeader]="true">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <div>
+      <h5 class="mb-0">Leads</h5>
+      <p class="text-muted small mb-0">Prospective students not yet enrolled</p>
+    </div>
+    @if (canManageLeads()) {
+      <div class="d-flex flex-wrap gap-2">
+        <button type="button" class="btn btn-outline-primary btn-sm" (click)="openBulkUpload()">
+          <i class="ti ti-upload me-1"></i>
+          Bulk upload
+        </button>
+        <button type="button" class="btn btn-primary btn-sm" (click)="openAddLead()">
+          <i class="ti ti-plus me-1"></i>
+          Add lead
+        </button>
+      </div>
+    }
+  </div>
+
+  @if (success()) {
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      {{ success() }}
+      <button type="button" class="btn-close" aria-label="Close" (click)="success.set('')"></button>
+    </div>
+  }
+
+  @if (loading()) {
+    <p class="text-muted mb-0">Loading…</p>
+  } @else if (error()) {
+    <div class="alert alert-warning">{{ error() }}</div>
+  } @else {
+    <div class="table-responsive leads-table-wrap">
+      <table class="table table-bordered table-sm table-hover mb-0 align-middle leads-table">
+        <thead>
+          <tr>
+            <th class="th-date">DATE</th>
+            <th class="th-child">CHILD NA</th>
+            <th class="th-parent">PARENTS</th>
+            <th>NUMBER</th>
+            <th>MAIL</th>
+            <th class="th-age">AGE</th>
+            <th class="th-std">STD</th>
+            <th class="th-city">CITY</th>
+            <th class="th-q">Q1</th>
+            <th class="th-q">Q2</th>
+            <th class="th-q">Q3</th>
+            <th class="th-time">TIME</th>
+            <th class="th-attd">ATTD - NO</th>
+            <th>MODULE</th>
+            <th class="th-int">INT</th>
+            <th class="th-not-int">NOT INT</th>
+            <th class="th-paid">PAID</th>
+            <th class="th-dnp">DNP</th>
+            <th class="th-additional">ADDITIONAL</th>
+            <th>REVIEW</th>
+            <th class="th-actions">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of rows(); track row['id']) {
+            <tr>
+              <td class="text-nowrap">{{ formatDate(row['captured_at']) }}</td>
+              <td><strong>{{ cell(row['child_name']) }}</strong></td>
+              <td>{{ cell(row['parents_name']) }}</td>
+              <td class="text-nowrap">{{ cell(row['phone']) }}</td>
+              <td>{{ cell(row['email']) }}</td>
+              <td>{{ cell(row['age']) }}</td>
+              <td>{{ cell(row['std']) }}</td>
+              <td>{{ cell(row['city']) }}</td>
+              <td>
+                @if (row['q1']) {
+                  <span class="badge rounded-pill" [class]="badgeClass('q', row['q1'])">{{ row['q1'] }}</span>
+                } @else {
+                  —
+                }
+              </td>
+              <td>
+                @if (row['q2']) {
+                  <span class="badge rounded-pill" [class]="badgeClass('q', row['q2'])">{{ row['q2'] }}</span>
+                } @else {
+                  —
+                }
+              </td>
+              <td>
+                @if (row['q3']) {
+                  <span class="badge rounded-pill" [class]="badgeClass('q', row['q3'])">{{ row['q3'] }}</span>
+                } @else {
+                  —
+                }
+              </td>
+              <td class="text-nowrap">{{ cell(row['time_slot']) }}</td>
+              <td>{{ cell(row['attd_no']) }}</td>
+              <td>{{ cell(row['module']) }}</td>
+              <td>
+                @if (row['status_int']) {
+                  <span class="badge rounded-pill" [class]="badgeClass('status_int', row['status_int'])">{{
+                    row['status_int']
+                  }}</span>
+                } @else {
+                  —
+                }
+              </td>
+              <td>{{ cell(row['not_interested']) }}</td>
+              <td>
+                @if (row['paid']) {
+                  <span class="badge rounded-pill" [class]="badgeClass('paid', row['paid'])">{{ row['paid'] }}</span>
+                } @else {
+                  —
+                }
+              </td>
+              <td>{{ cell(row['dnp']) }}</td>
+              <td class="leads-cell-notes">{{ cell(row['additional']) }}</td>
+              <td class="leads-cell-notes">{{ cell(row['review']) }}</td>
+              <td class="text-center text-nowrap">
+                @if (canManageLeads()) {
+                  <button type="button" class="btn btn-outline-secondary btn-sm me-1" title="Edit" (click)="openEditLead(row)">
+                    <i class="ti ti-edit"></i>
+                  </button>
+                  <button type="button" class="btn btn-outline-primary btn-sm me-1" (click)="openFollowup(row)">
+                    Follow-up
+                  </button>
+                }
+                @if (canDelete()) {
+                  <button
+                    type="button"
+                    class="btn btn-outline-danger btn-sm"
+                    title="Delete"
+                    [disabled]="deletingId() === row['id']"
+                    (click)="deleteLead(row)"
+                  >
+                    <i class="ti ti-trash"></i>
+                  </button>
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="21" class="text-center text-muted py-4">
+                No leads yet.@if (canManageLeads()) { Click “Add lead” to capture a prospective student. }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</app-card>

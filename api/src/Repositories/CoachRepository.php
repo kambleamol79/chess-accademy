@@ -36,8 +36,22 @@ final class CoachRepository
     /** @param array<string,mixed> $data */
     public function update(int $id, array $data): ?array
     {
-        if ($this->findById($id) === null) {
+        $coach = $this->findById($id);
+        if ($coach === null) {
             return null;
+        }
+
+        $userFields = ['first_name', 'last_name', 'email', 'phone'];
+        $userSets = [];
+        $userParams = ['id' => $coach['user_id']];
+        foreach ($userFields as $f) {
+            if (array_key_exists($f, $data)) {
+                $userSets[] = "{$f} = :{$f}";
+                $userParams[$f] = $data[$f];
+            }
+        }
+        if ($userSets !== []) {
+            $this->pdo->prepare('UPDATE users SET ' . implode(', ', $userSets) . ' WHERE id = :id')->execute($userParams);
         }
 
         $fields = ['title', 'bio', 'rating'];

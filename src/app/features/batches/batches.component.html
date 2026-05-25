@@ -26,6 +26,9 @@
             <th>COACH</th>
             <th>DAYS</th>
             <th>COACH</th>
+            @if (canEdit() || canDelete()) {
+              <th class="text-end">Actions</th>
+            }
           </tr>
         </thead>
         <tbody>
@@ -65,10 +68,30 @@
                   <i class="ti ti-edit coach-cell__icon"></i>
                 }
               </td>
+              @if (canEdit() || canDelete()) {
+                <td class="text-end text-nowrap align-middle">
+                  @if (canEdit()) {
+                    <button type="button" class="btn btn-outline-secondary btn-sm me-1" title="Edit" (click)="openEditBatch(row)">
+                      <i class="ti ti-edit"></i>
+                    </button>
+                  }
+                  @if (canDelete()) {
+                    <button
+                      type="button"
+                      class="btn btn-outline-danger btn-sm"
+                      title="Delete batch"
+                      [disabled]="deletingId() === row.id"
+                      (click)="deleteBatch(row)"
+                    >
+                      <i class="ti ti-trash"></i>
+                    </button>
+                  }
+                </td>
+              }
             </tr>
           } @empty {
             <tr>
-              <td colspan="10" class="text-center text-muted py-4">No batches yet. Click “Add new batch” to create one.</td>
+              <td [attr.colspan]="canEdit() || canDelete() ? 9 : 8" class="text-center text-muted py-4">No batches yet. Click “Add new batch” to create one.</td>
             </tr>
           }
         </tbody>

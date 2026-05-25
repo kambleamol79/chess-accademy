@@ -49,6 +49,15 @@ export const NavigationItems: NavigationItem[] = [
         role: ['admin', 'coach', 'student', 'accountant']
       },
       {
+        id: 'leads',
+        title: 'Leads',
+        type: 'item',
+        classes: 'nav-item',
+        url: '/leads',
+        icon: 'ti ti-user-search',
+        role: ['admin', 'coach']
+      },
+      {
         id: 'students',
         title: 'Students',
         type: 'item',

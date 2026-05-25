@@ -10,6 +10,9 @@ import {
   BatchAssignCoachModalComponent,
   CoachSlot
 } from './batch-assign-coach-modal.component';
+import { HttpErrorResponse } from '@angular/common/http';
+import { confirmDelete } from 'src/app/core/utils/confirm.util';
+import { getApiErrorMessage } from 'src/app/core/utils/http-error.util';
 
 @Component({
   selector: 'app-batches',
@@ -24,6 +27,7 @@ export class BatchesComponent implements OnInit {
 
   loading = signal(true);
   error = signal('');
+  deletingId = signal<number | null>(null);
   rows = signal<BatchForm[]>([]);
 
   ngOnInit() {
@@ -35,6 +39,10 @@ export class BatchesComponent implements OnInit {
   }
 
   canAssignCoach(): boolean {
+    return this.auth.hasRole(['admin']);
+  }
+
+  canDelete(): boolean {
     return this.auth.hasRole(['admin']);
   }
 
@@ -53,13 +61,28 @@ export class BatchesComponent implements OnInit {
     });
   }
 
+  canEdit(): boolean {
+    return this.canManageBatches();
+  }
+
   openAddBatch() {
+    this.openBatchModal('create');
+  }
+
+  openEditBatch(row: BatchForm) {
+    this.openBatchModal('edit', row);
+  }
+
+  private openBatchModal(mode: 'create' | 'edit', batch?: BatchForm) {
     const ref = this.modal.open(BatchFormModalComponent, {
       size: 'lg',
       centered: true,
       backdrop: 'static'
     });
-
+    ref.componentInstance.mode = mode;
+    if (batch) {
+      ref.componentInstance.batchRecord = batch;
+    }
     ref.closed.subscribe(() => this.load());
   }
 
@@ -81,5 +104,24 @@ export class BatchesComponent implements OnInit {
 
   rowClass(highlight: string): string {
     return highlight === 'blue' ? 'table-primary' : '';
+  }
+
+  deleteBatch(row: BatchForm) {
+    const label = row.batch || `Batch #${row.id}`;
+    if (!confirmDelete(label)) {
+      return;
+    }
+
+    this.deletingId.set(row.id);
+    this.forms.delete(row.id).subscribe({
+      next: () => {
+        this.deletingId.set(null);
+        this.load();
+      },
+      error: (err: HttpErrorResponse) => {
+        this.deletingId.set(null);
+        this.error.set(getApiErrorMessage(err, 'Could not delete batch'));
+      }
+    });
   }
 }

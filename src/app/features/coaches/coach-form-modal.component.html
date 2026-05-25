@@ -1,5 +1,5 @@
 <div class="modal-header">
-  <h5 class="modal-title">Add coach</h5>
+  <h5 class="modal-title">{{ isEdit ? 'Edit coach' : 'Add coach' }}</h5>
   <button type="button" class="btn-close" aria-label="Close" (click)="dismiss()"></button>
 </div>
 
@@ -15,13 +15,15 @@
     </div>
     <div class="col-md-6">
       <label class="form-label" for="email">Email (login)</label>
-      <input id="email" type="email" class="form-control" [(ngModel)]="email" name="email" required />
+      <input id="email" type="email" class="form-control" [(ngModel)]="email" name="email" [required]="!isEdit" />
     </div>
-    <div class="col-md-6">
-      <label class="form-label" for="password">Password</label>
-      <input id="password" type="password" class="form-control" [(ngModel)]="password" name="password" minlength="8" required />
-      <div class="form-text">Minimum 8 characters</div>
-    </div>
+    @if (!isEdit) {
+      <div class="col-md-6">
+        <label class="form-label" for="password">Password</label>
+        <input id="password" type="password" class="form-control" [(ngModel)]="password" name="password" minlength="8" required />
+        <div class="form-text">Minimum 8 characters</div>
+      </div>
+    }
     <div class="col-md-6">
       <label class="form-label" for="phone">Phone</label>
       <input id="phone" class="form-control" [(ngModel)]="phone" name="phone" />
@@ -48,6 +50,6 @@
 <div class="modal-footer">
   <button type="button" class="btn btn-outline-secondary" (click)="dismiss()" [disabled]="saving()">Cancel</button>
   <button type="button" class="btn btn-primary" (click)="save()" [disabled]="saving()">
-    {{ saving() ? 'Saving…' : 'Add coach' }}
+    {{ saving() ? 'Saving…' : isEdit ? 'Save changes' : 'Add coach' }}
   </button>
 </div>

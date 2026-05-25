@@ -12,4 +12,8 @@ export class MaterialService {
     const q = formId ? `?form_id=${formId}` : '';
     return this.http.get<ApiResponse<Record<string, unknown>[]>>(`${environment.apiUrl}/materials${q}`);
   }
+
+  delete(id: number): Observable<ApiResponse<unknown>> {
+    return this.http.delete<ApiResponse<unknown>>(`${environment.apiUrl}/materials/${id}`);
+  }
 }

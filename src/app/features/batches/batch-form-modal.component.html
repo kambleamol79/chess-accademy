@@ -1,5 +1,5 @@
 <div class="modal-header">
-  <h5 class="modal-title">Add new batch</h5>
+  <h5 class="modal-title">{{ isEdit ? 'Edit batch' : 'Add new batch' }}</h5>
   <button type="button" class="btn-close" aria-label="Close" (click)="dismiss()"></button>
 </div>
 
@@ -109,6 +109,6 @@
 <div class="modal-footer">
   <button type="button" class="btn btn-outline-secondary" (click)="dismiss()" [disabled]="saving()">Cancel</button>
   <button type="button" class="btn btn-primary" (click)="save()" [disabled]="saving()">
-    {{ saving() ? 'Saving…' : 'Save batch' }}
+    {{ saving() ? 'Saving…' : isEdit ? 'Save changes' : 'Save batch' }}
   </button>
 </div>

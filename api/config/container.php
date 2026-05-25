@@ -8,6 +8,7 @@ use ChessAcademy\Controllers\CoachController;
 use ChessAcademy\Controllers\DashboardController;
 use ChessAcademy\Controllers\EnrollmentController;
 use ChessAcademy\Controllers\FormController;
+use ChessAcademy\Controllers\LeadController;
 use ChessAcademy\Controllers\GameController;
 use ChessAcademy\Controllers\MaterialController;
 use ChessAcademy\Controllers\PuzzleController;
@@ -19,6 +20,7 @@ use ChessAcademy\Repositories\CoachRepository;
 use ChessAcademy\Repositories\DashboardRepository;
 use ChessAcademy\Repositories\EnrollmentRepository;
 use ChessAcademy\Repositories\FormRepository;
+use ChessAcademy\Repositories\LeadRepository;
 use ChessAcademy\Repositories\GameRepository;
 use ChessAcademy\Repositories\InvoiceRepository;
 use ChessAcademy\Repositories\MaterialRepository;
@@ -28,6 +30,7 @@ use ChessAcademy\Repositories\StudentRepository;
 use ChessAcademy\Repositories\UserRepository;
 use ChessAcademy\Services\AuthService;
 use ChessAcademy\Services\JwtService;
+use ChessAcademy\Services\LeadCsvParser;
 use DI\Container;
 
 /** @param array<string,mixed> $settings */
@@ -44,6 +47,8 @@ return function (array $settings): Container {
 
     $container->set(UserRepository::class, fn (Container $c) => new UserRepository($c->get(PDO::class)));
     $container->set(FormRepository::class, fn (Container $c) => new FormRepository($c->get(PDO::class)));
+    $container->set(LeadRepository::class, fn (Container $c) => new LeadRepository($c->get(PDO::class)));
+    $container->set(LeadCsvParser::class, fn () => new LeadCsvParser());
     $container->set(StudentRepository::class, fn (Container $c) => new StudentRepository($c->get(PDO::class)));
     $container->set(CoachRepository::class, fn (Container $c) => new CoachRepository($c->get(PDO::class)));
     $container->set(EnrollmentRepository::class, fn (Container $c) => new EnrollmentRepository($c->get(PDO::class)));
@@ -68,6 +73,10 @@ return function (array $settings): Container {
         $c->get(UserRepository::class)
     ));
     $container->set(FormController::class, fn (Container $c) => new FormController($c->get(FormRepository::class)));
+    $container->set(LeadController::class, fn (Container $c) => new LeadController(
+        $c->get(LeadRepository::class),
+        $c->get(LeadCsvParser::class),
+    ));
     $container->set(DashboardController::class, fn (Container $c) => new DashboardController($c->get(DashboardRepository::class)));
     $container->set(StudentController::class, fn (Container $c) => new StudentController(
         $c->get(StudentRepository::class),

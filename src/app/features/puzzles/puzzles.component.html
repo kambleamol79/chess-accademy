@@ -10,6 +10,9 @@
           <th>Title</th>
           <th>Difficulty</th>
           <th>FEN</th>
+          @if (canDelete()) {
+            <th class="text-end">Actions</th>
+          }
         </tr>
       </thead>
       <tbody>
@@ -18,10 +21,23 @@
             <td>{{ p['title'] || 'Puzzle #' + p['id'] }}</td>
             <td>{{ p['difficulty'] }}</td>
             <td><code class="small">{{ p['fen'] }}</code></td>
+            @if (canDelete()) {
+              <td class="text-end">
+                <button
+                  type="button"
+                  class="btn btn-outline-danger btn-sm"
+                  title="Delete"
+                  [disabled]="deletingId() === p['id']"
+                  (click)="deletePuzzle(p)"
+                >
+                  <i class="ti ti-trash"></i>
+                </button>
+              </td>
+            }
           </tr>
         } @empty {
           <tr>
-            <td colspan="3" class="text-muted">No puzzles yet. Add via API or admin tools.</td>
+            <td [attr.colspan]="canDelete() ? 4 : 3" class="text-muted">No puzzles yet. Add via API or admin tools.</td>
           </tr>
         }
       </tbody>

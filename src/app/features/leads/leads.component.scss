@@ -1,0 +1,79 @@
+.leads-table-wrap {
+  max-width: 100%;
+}
+
+.leads-table {
+  font-size: 0.8125rem;
+  min-width: 1400px;
+
+  thead th {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    white-space: nowrap;
+    vertical-align: middle;
+  }
+
+  .th-date {
+    background: #fff3cd;
+  }
+  .th-child,
+  .th-parent {
+    background: #cff4fc;
+  }
+  .th-age {
+    background: #d1e7dd;
+  }
+  .th-std {
+    background: #f8d7da;
+  }
+  .th-city {
+    background: #fff3cd;
+  }
+  .th-q {
+    background: #e9ecef;
+  }
+  .th-time {
+    background: #d1e7dd;
+  }
+  .th-attd {
+    background: #ffe5d0;
+  }
+  .th-int {
+    background: #cff4fc;
+  }
+  .th-not-int {
+    background: #f8d7da;
+  }
+  .th-paid {
+    background: #ffe5d0;
+  }
+  .th-dnp {
+    background: #fff3cd;
+  }
+  .th-additional {
+    background: #d1e7dd;
+  }
+  .th-actions {
+    background: #f8f9fa;
+    position: sticky;
+    right: 0;
+    z-index: 1;
+    box-shadow: -4px 0 6px rgba(0, 0, 0, 0.06);
+  }
+
+  tbody td:last-child {
+    position: sticky;
+    right: 0;
+    background: var(--bs-body-bg, #fff);
+    z-index: 1;
+    box-shadow: -4px 0 6px rgba(0, 0, 0, 0.06);
+  }
+}
+
+.leads-cell-notes {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

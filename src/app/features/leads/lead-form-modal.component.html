@@ -1,0 +1,64 @@
+<div class="modal-header">
+  <h5 class="modal-title">{{ isEdit ? 'Edit lead' : 'Add lead' }}</h5>
+  <button type="button" class="btn-close" aria-label="Close" (click)="dismiss()"></button>
+</div>
+
+<div class="modal-body">
+  <p class="text-muted small">Capture a prospective student before they are enrolled.</p>
+  <div class="row g-3">
+    <div class="col-md-6">
+      <label class="form-label" for="capturedAt">Date</label>
+      <input
+        id="capturedAt"
+        type="datetime-local"
+        class="form-control"
+        [(ngModel)]="captured_at"
+        name="captured_at"
+      />
+      <div class="form-text">Leave blank to use current date and time</div>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label" for="childName">Child name <span class="text-danger">*</span></label>
+      <input id="childName" class="form-control" [(ngModel)]="child_name" name="child_name" required />
+    </div>
+    <div class="col-md-6">
+      <label class="form-label" for="parentsName">Parents name</label>
+      <input id="parentsName" class="form-control" [(ngModel)]="parents_name" name="parents_name" />
+    </div>
+    <div class="col-md-6">
+      <label class="form-label" for="phone">Number</label>
+      <input id="phone" class="form-control" [(ngModel)]="phone" name="phone" placeholder="10-digit mobile" />
+    </div>
+    <div class="col-md-6">
+      <label class="form-label" for="email">Mail</label>
+      <input id="email" type="email" class="form-control" [(ngModel)]="email" name="email" />
+    </div>
+    <div class="col-md-3">
+      <label class="form-label" for="age">Age</label>
+      <input id="age" class="form-control" [(ngModel)]="age" name="age" placeholder="e.g. 7, 6.5, 11years" />
+    </div>
+    <div class="col-md-3">
+      <label class="form-label" for="std">Std</label>
+      <input id="std" class="form-control" [(ngModel)]="std" name="std" placeholder="e.g. 6th, Nursery" />
+    </div>
+    <div class="col-md-6">
+      <label class="form-label" for="city">City</label>
+      <input id="city" class="form-control" [(ngModel)]="city" name="city" />
+    </div>
+  </div>
+
+  @if (error()) {
+    <div class="alert alert-danger mt-3 mb-0">{{ error() }}</div>
+  }
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-outline-secondary" (click)="dismiss()">Cancel</button>
+  <button type="button" class="btn btn-primary" [disabled]="saving()" (click)="save()">
+    @if (saving()) {
+      Saving…
+    } @else {
+      {{ isEdit ? 'Save changes' : 'Save lead' }}
+    }
+  </button>
+</div>

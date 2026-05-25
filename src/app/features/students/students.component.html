@@ -23,6 +23,9 @@
             <th>Rating</th>
             <th>Parent</th>
             <th>Phone</th>
+            @if (canEdit() || canDelete()) {
+              <th class="text-end">Actions</th>
+            }
           </tr>
         </thead>
         <tbody>
@@ -33,10 +36,30 @@
               <td>{{ s['chess_rating'] }}</td>
               <td>{{ s['parent_name'] || '—' }}</td>
               <td>{{ s['phone'] || s['parent_phone'] || '—' }}</td>
+              @if (canEdit() || canDelete()) {
+                <td class="text-end text-nowrap">
+                  @if (canEdit()) {
+                    <button type="button" class="btn btn-outline-secondary btn-sm me-1" title="Edit" (click)="openEditStudent(s)">
+                      <i class="ti ti-edit"></i>
+                    </button>
+                  }
+                  @if (canDelete()) {
+                    <button
+                      type="button"
+                      class="btn btn-outline-danger btn-sm"
+                      title="Delete"
+                      [disabled]="deletingId() === s['id']"
+                      (click)="deleteStudent(s)"
+                    >
+                      <i class="ti ti-trash"></i>
+                    </button>
+                  }
+                </td>
+              }
             </tr>
           } @empty {
             <tr>
-              <td colspan="5" class="text-center text-muted py-4">
+              <td [attr.colspan]="canEdit() || canDelete() ? 6 : 5" class="text-center text-muted py-4">
                 No students yet.@if (canAddStudent()) { Click “Add student” to create one. }
               </td>
             </tr>

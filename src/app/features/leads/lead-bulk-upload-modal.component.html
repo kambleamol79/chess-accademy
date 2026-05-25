@@ -1,0 +1,84 @@
+<div class="modal-header">
+  <h5 class="modal-title">Bulk upload leads</h5>
+  <button type="button" class="btn-close" aria-label="Close" (click)="dismiss()"></button>
+</div>
+
+<div class="modal-body">
+  <p class="text-muted small mb-3">
+    Upload a CSV with the same columns as your spreadsheet (DATE, CHILD NA, PARENTS, NUMBER, MAIL, AGE, STD,
+    CITY, and optional follow-up columns).
+  </p>
+
+  <div class="d-flex flex-wrap gap-2 mb-3">
+    <button type="button" class="btn btn-outline-secondary btn-sm" (click)="downloadTemplate()">
+      <i class="ti ti-download me-1"></i>
+      Download template
+    </button>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label" for="leadCsvFile">CSV file</label>
+    <input
+      id="leadCsvFile"
+      type="file"
+      class="form-control"
+      accept=".csv,text/csv"
+      (change)="onFileSelected($event)"
+    />
+    @if (fileName()) {
+      <div class="form-text">{{ fileName() }} — {{ parsedCount() }} row(s) ready to import</div>
+    }
+  </div>
+
+  @if (parseErrors().length > 0) {
+    <div class="alert alert-warning py-2 small mb-3">
+      <strong>Rows skipped during parse:</strong>
+      <ul class="mb-0 mt-1">
+        @for (e of parseErrors(); track e.row) {
+          <li>Row {{ e.row }}: {{ e.message }}</li>
+        }
+      </ul>
+    </div>
+  }
+
+  @if (preview().length > 0) {
+    <p class="small text-muted mb-1">Preview (first {{ preview().length }} rows)</p>
+    <div class="table-responsive">
+      <table class="table table-sm table-bordered mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Child</th>
+            <th>Parents</th>
+            <th>Phone</th>
+            <th>City</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of preview(); track $index) {
+            <tr>
+              <td>{{ row['child_name'] }}</td>
+              <td>{{ row['parents_name'] || '—' }}</td>
+              <td>{{ row['phone'] || '—' }}</td>
+              <td>{{ row['city'] || '—' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  @if (error()) {
+    <div class="alert alert-danger mt-3 mb-0">{{ error() }}</div>
+  }
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-outline-secondary" (click)="dismiss()">Cancel</button>
+  <button type="button" class="btn btn-primary" [disabled]="saving() || parsedCount() === 0" (click)="upload()">
+    @if (saving()) {
+      Importing…
+    } @else {
+      Import {{ parsedCount() }} lead(s)
+    }
+  </button>
+</div>

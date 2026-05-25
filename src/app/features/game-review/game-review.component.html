@@ -10,6 +10,9 @@
           <th>Student</th>
           <th>Title</th>
           <th>Reviewed</th>
+          @if (canDelete()) {
+            <th class="text-end">Actions</th>
+          }
         </tr>
       </thead>
       <tbody>
@@ -18,10 +21,23 @@
             <td>{{ g['first_name'] }} {{ g['last_name'] }}</td>
             <td>{{ g['title'] || 'Game #' + g['id'] }}</td>
             <td>{{ g['reviewed_at'] || 'Pending' }}</td>
+            @if (canDelete()) {
+              <td class="text-end">
+                <button
+                  type="button"
+                  class="btn btn-outline-danger btn-sm"
+                  title="Delete"
+                  [disabled]="deletingId() === g['id']"
+                  (click)="deleteGame(g)"
+                >
+                  <i class="ti ti-trash"></i>
+                </button>
+              </td>
+            }
           </tr>
         } @empty {
           <tr>
-            <td colspan="3" class="text-muted">No games submitted yet</td>
+            <td [attr.colspan]="canDelete() ? 4 : 3" class="text-muted">No games submitted yet</td>
           </tr>
         }
       </tbody>

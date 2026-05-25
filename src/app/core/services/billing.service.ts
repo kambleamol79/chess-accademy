@@ -12,7 +12,15 @@ export class BillingService {
     return this.http.get<ApiResponse<Record<string, unknown>[]>>(`${environment.apiUrl}/billing/invoices`);
   }
 
+  update(id: number, payload: Record<string, unknown>): Observable<ApiResponse<unknown>> {
+    return this.http.patch<ApiResponse<unknown>>(`${environment.apiUrl}/billing/invoices/${id}`, payload);
+  }
+
   markPaid(id: number): Observable<ApiResponse<unknown>> {
     return this.http.patch<ApiResponse<unknown>>(`${environment.apiUrl}/billing/invoices/${id}/pay`, {});
+  }
+
+  delete(id: number): Observable<ApiResponse<unknown>> {
+    return this.http.delete<ApiResponse<unknown>>(`${environment.apiUrl}/billing/invoices/${id}`);
   }
 }

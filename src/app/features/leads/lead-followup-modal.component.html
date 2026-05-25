@@ -1,0 +1,186 @@
+<div class="modal-header">
+  <h5 class="modal-title">Lead follow-up — {{ child_name || 'Lead' }}</h5>
+  <button type="button" class="btn-close" aria-label="Close" (click)="dismiss()"></button>
+</div>
+
+<div class="modal-body">
+  <div class="row g-4">
+    <div class="col-12">
+      <h6 class="text-muted text-uppercase small mb-2">Contact (editable)</h6>
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label" for="fuChild">Child name <span class="text-danger">*</span></label>
+          <input id="fuChild" class="form-control form-control-sm" [(ngModel)]="child_name" name="child_name" />
+        </div>
+        <div class="col-md-4">
+          <label class="form-label" for="fuParents">Parents</label>
+          <input id="fuParents" class="form-control form-control-sm" [(ngModel)]="parents_name" name="parents_name" />
+        </div>
+        <div class="col-md-4">
+          <label class="form-label" for="fuPhone">Number</label>
+          <input id="fuPhone" class="form-control form-control-sm" [(ngModel)]="phone" name="phone" />
+        </div>
+        <div class="col-md-4">
+          <label class="form-label" for="fuEmail">Mail</label>
+          <input id="fuEmail" class="form-control form-control-sm" [(ngModel)]="email" name="email" />
+        </div>
+        <div class="col-md-2">
+          <label class="form-label" for="fuAge">Age</label>
+          <input id="fuAge" class="form-control form-control-sm" [(ngModel)]="age" name="age" />
+        </div>
+        <div class="col-md-2">
+          <label class="form-label" for="fuStd">Std</label>
+          <input id="fuStd" class="form-control form-control-sm" [(ngModel)]="std" name="std" />
+        </div>
+        <div class="col-md-4">
+          <label class="form-label" for="fuCity">City</label>
+          <input id="fuCity" class="form-control form-control-sm" [(ngModel)]="city" name="city" />
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12">
+      <h6 class="text-muted text-uppercase small mb-2">Questions</h6>
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label text-uppercase" for="fuQ1">Q1</label>
+          <select id="fuQ1" class="form-select form-select-sm" [(ngModel)]="q1" name="q1">
+            <option [ngValue]="null">— Not set —</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label text-uppercase" for="fuQ2">Q2</label>
+          <select id="fuQ2" class="form-select form-select-sm" [(ngModel)]="q2" name="q2">
+            <option [ngValue]="null">— Not set —</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label text-uppercase" for="fuQ3">Q3</label>
+          <select id="fuQ3" class="form-select form-select-sm" [(ngModel)]="q3" name="q3">
+            <option [ngValue]="null">— Not set —</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12">
+      <h6 class="text-muted text-uppercase small mb-2">Schedule &amp; module</h6>
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label" for="fuTime">Time</label>
+          <input
+            id="fuTime"
+            class="form-control form-control-sm"
+            [(ngModel)]="time_slot"
+            name="time_slot"
+            list="leadTimeList"
+            placeholder="07:00 PM - 0"
+          />
+          <datalist id="leadTimeList">
+            @for (t of timePresets; track t) {
+              <option [value]="t"></option>
+            }
+          </datalist>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label" for="fuAttd">ATTD - NO</label>
+          <input
+            id="fuAttd"
+            class="form-control form-control-sm"
+            [(ngModel)]="attd_no"
+            name="attd_no"
+            placeholder="ATTD or notes"
+          />
+        </div>
+        <div class="col-md-4">
+          <label class="form-label" for="fuModule">Module</label>
+          <select id="fuModule" class="form-select form-select-sm" [(ngModel)]="module" name="module">
+            <option value="">— Select —</option>
+            @for (level of moduleLevels; track level) {
+              <option [value]="level">{{ level }}</option>
+            }
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12">
+      <h6 class="text-muted text-uppercase small mb-2">Status</h6>
+      <div class="row g-3 align-items-end">
+        <div class="col-md-3">
+          <div class="form-check">
+            <input
+              id="fuInt"
+              type="checkbox"
+              class="form-check-input"
+              [(ngModel)]="interested"
+              name="interested"
+            />
+            <label class="form-check-label" for="fuInt">Interested (INT)</label>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label" for="fuNotInt">Not interested</label>
+          <input
+            id="fuNotInt"
+            class="form-control form-control-sm"
+            [(ngModel)]="not_interested"
+            name="not_interested"
+            placeholder="Reason or note"
+          />
+        </div>
+        <div class="col-md-3">
+          <div class="form-check">
+            <input id="fuPaid" type="checkbox" class="form-check-input" [(ngModel)]="paid" name="paid" />
+            <label class="form-check-label" for="fuPaid">Paid (PAID)</label>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label" for="fuDnp">DNP</label>
+          <input id="fuDnp" class="form-control form-control-sm" [(ngModel)]="dnp" name="dnp" placeholder="Did not pick" />
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12">
+      <h6 class="text-muted text-uppercase small mb-2">Notes</h6>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label" for="fuAdditional">Additional</label>
+          <textarea
+            id="fuAdditional"
+            class="form-control form-control-sm"
+            rows="3"
+            [(ngModel)]="additional"
+            name="additional"
+          ></textarea>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="fuReview">Review</label>
+          <textarea id="fuReview" class="form-control form-control-sm" rows="3" [(ngModel)]="review" name="review"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  @if (error()) {
+    <div class="alert alert-danger mt-3 mb-0">{{ error() }}</div>
+  }
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-outline-secondary" (click)="dismiss()">Cancel</button>
+  <button type="button" class="btn btn-primary" [disabled]="saving()" (click)="save()">
+    @if (saving()) {
+      Saving…
+    } @else {
+      Save follow-up
+    }
+  </button>
+</div>

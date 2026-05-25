@@ -8,6 +8,7 @@ use ChessAcademy\Controllers\CoachController;
 use ChessAcademy\Controllers\DashboardController;
 use ChessAcademy\Controllers\EnrollmentController;
 use ChessAcademy\Controllers\FormController;
+use ChessAcademy\Controllers\LeadController;
 use ChessAcademy\Controllers\GameController;
 use ChessAcademy\Controllers\MaterialController;
 use ChessAcademy\Controllers\PuzzleController;
@@ -64,8 +65,10 @@ return function (App $app, Container $container): void {
         $group->get('/students/{id}', [StudentController::class, 'show']);
         $group->post('/students', [StudentController::class, 'store'])
             ->add(new RoleMiddleware(['admin']));
-        $group->put('/students/{id}', [StudentController::class, 'update']);
-        $group->patch('/students/{id}', [StudentController::class, 'update']);
+        $group->put('/students/{id}', [StudentController::class, 'update'])
+            ->add(new RoleMiddleware(['admin', 'coach']));
+        $group->patch('/students/{id}', [StudentController::class, 'update'])
+            ->add(new RoleMiddleware(['admin', 'coach']));
         $group->delete('/students/{id}', [StudentController::class, 'destroy'])
             ->add(new RoleMiddleware(['admin']));
 
@@ -78,6 +81,19 @@ return function (App $app, Container $container): void {
         $group->patch('/coaches/{id}', [CoachController::class, 'update'])
             ->add(new RoleMiddleware(['admin']));
         $group->delete('/coaches/{id}', [CoachController::class, 'destroy'])
+            ->add(new RoleMiddleware(['admin']));
+
+        $group->get('/leads', [LeadController::class, 'index']);
+        $group->get('/leads/{id}', [LeadController::class, 'show']);
+        $group->post('/leads', [LeadController::class, 'store'])
+            ->add(new RoleMiddleware(['admin', 'coach']));
+        $group->post('/leads/bulk', [LeadController::class, 'bulk'])
+            ->add(new RoleMiddleware(['admin', 'coach']));
+        $group->put('/leads/{id}', [LeadController::class, 'update'])
+            ->add(new RoleMiddleware(['admin', 'coach']));
+        $group->patch('/leads/{id}', [LeadController::class, 'update'])
+            ->add(new RoleMiddleware(['admin', 'coach']));
+        $group->delete('/leads/{id}', [LeadController::class, 'destroy'])
             ->add(new RoleMiddleware(['admin']));
 
         $group->get('/forms', [FormController::class, 'index']);

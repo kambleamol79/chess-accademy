@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { HttpErrorResponse } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
+import { BatchForm } from 'src/app/core/models/form.model';
 import { FormService } from 'src/app/core/services/form.service';
 import { CoachService } from 'src/app/core/services/coach.service';
 import { getApiErrorMessage } from 'src/app/core/utils/http-error.util';
@@ -24,7 +25,9 @@ export class BatchFormModalComponent implements OnInit {
   private readonly coachesApi = inject(CoachService);
 
   @Input() mode: 'create' | 'edit' = 'create';
+  @Input() batchRecord: BatchForm | null = null;
 
+  batchId = 0;
   saving = signal(false);
   error = signal('');
   coaches = signal<CoachOption[]>([]);
@@ -48,7 +51,24 @@ export class BatchFormModalComponent implements OnInit {
   highlight: 'blue' | 'beige' = 'beige';
   notes = '';
 
+  get isEdit(): boolean {
+    return this.mode === 'edit';
+  }
+
   ngOnInit() {
+    if (this.batchRecord) {
+      this.batchId = this.batchRecord.id;
+      this.batch = this.batchRecord.batch;
+      this.module = this.batchRecord.module ?? '';
+      this.time = this.batchRecord.time;
+      this.day1 = this.batchRecord.day_1;
+      this.day2 = this.batchRecord.day_2;
+      this.coach1 = this.batchRecord.coach_1 ?? '';
+      this.coach2 = this.batchRecord.coach_2 ?? '';
+      this.highlight = (this.batchRecord.highlight === 'blue' ? 'blue' : 'beige') as 'blue' | 'beige';
+      this.notes = this.batchRecord.notes ?? '';
+    }
+
     this.coachesApi.list().subscribe({
       next: (res) => {
         const options = (res.data ?? []).map((c) => ({
@@ -99,18 +119,22 @@ export class BatchFormModalComponent implements OnInit {
       notes: this.notes.trim() || null
     };
 
-    this.forms.create(payload).subscribe({
+    const req = this.isEdit
+      ? this.forms.update(this.batchId, payload)
+      : this.forms.create(payload);
+
+    req.subscribe({
       next: (res) => {
         this.saving.set(false);
         if (!res.success) {
-          this.error.set(res.message ?? 'Could not save batch');
+          this.error.set(res.message ?? (this.isEdit ? 'Could not update batch' : 'Could not save batch'));
           return;
         }
         this.activeModal.close(res.data);
       },
       error: (err: HttpErrorResponse) => {
         this.saving.set(false);
-        this.error.set(getApiErrorMessage(err, 'Could not save batch'));
+        this.error.set(getApiErrorMessage(err, this.isEdit ? 'Could not update batch' : 'Could not save batch'));
       }
     });
   }

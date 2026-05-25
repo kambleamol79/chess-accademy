@@ -22,6 +22,9 @@
             <th>Email</th>
             <th>Title</th>
             <th>Rating</th>
+            @if (canEdit() || canDelete()) {
+              <th class="text-end">Actions</th>
+            }
           </tr>
         </thead>
         <tbody>
@@ -31,10 +34,30 @@
               <td>{{ c['email'] }}</td>
               <td>{{ c['title'] || '—' }}</td>
               <td>{{ c['rating'] ?? '—' }}</td>
+              @if (canEdit() || canDelete()) {
+                <td class="text-end text-nowrap">
+                  @if (canEdit()) {
+                    <button type="button" class="btn btn-outline-secondary btn-sm me-1" title="Edit" (click)="openEditCoach(c)">
+                      <i class="ti ti-edit"></i>
+                    </button>
+                  }
+                  @if (canDelete()) {
+                    <button
+                      type="button"
+                      class="btn btn-outline-danger btn-sm"
+                      title="Delete"
+                      [disabled]="deletingId() === c['id']"
+                      (click)="deleteCoach(c)"
+                    >
+                      <i class="ti ti-trash"></i>
+                    </button>
+                  }
+                </td>
+              }
             </tr>
           } @empty {
             <tr>
-              <td colspan="4" class="text-center text-muted py-4">
+              <td [attr.colspan]="canEdit() || canDelete() ? 5 : 4" class="text-center text-muted py-4">
                 No coaches yet. Click “Add coach” to create one.
               </td>
             </tr>
