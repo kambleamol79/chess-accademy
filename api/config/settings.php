@@ -20,10 +20,15 @@ return [
         'port' => $_ENV['DB_PORT'] ?? '3306',
         'name' => $_ENV['DB_NAME'] ?? 'chess_academy',
         'user' => $_ENV['DB_USER'] ?? 'root',
-        'pass' => $_ENV['DB_PASS'] ?? '',
+        'pass' => $_ENV['DB_PASS'] ?? $_ENV['DB_PASSWORD'] ?? getenv('DB_PASS') ?: getenv('DB_PASSWORD') ?: '',
     ],
     'cors' => [
-        'origin' => $_ENV['CORS_ORIGIN'] ?? 'http://localhost:4200',
+        'origins' => array_values(array_filter(array_map(
+            'trim',
+            explode(',', $_ENV['CORS_ORIGIN'] ?? 'http://localhost:4200,http://127.0.0.1:4200')
+        ))),
+        // Allow any localhost / 127.0.0.1 port (e.g. ng serve on 4201)
+        'allow_local_dev' => filter_var($_ENV['CORS_ALLOW_LOCAL_DEV'] ?? 'true', FILTER_VALIDATE_BOOLEAN),
     ],
     'jwt' => [
         'secret' => $_ENV['JWT_SECRET'] ?? 'change-me-in-production-use-long-random-string',

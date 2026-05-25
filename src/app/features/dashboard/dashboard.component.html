@@ -1,0 +1,87 @@
+@if (loading()) {
+  <p class="text-muted">Loading dashboard…</p>
+} @else if (error()) {
+  <div class="alert alert-warning">{{ error() }}</div>
+} @else if (metrics(); as m) {
+  <div class="row">
+    <div class="col-md-3 col-sm-6 mb-3">
+      <app-card cardTitle="Students">
+        <h3 class="mb-0">{{ m.total_students }}</h3>
+      </app-card>
+    </div>
+    <div class="col-md-3 col-sm-6 mb-3">
+      <app-card cardTitle="Coaches">
+        <h3 class="mb-0">{{ m.coaches_count }}</h3>
+      </app-card>
+    </div>
+    <div class="col-md-3 col-sm-6 mb-3">
+      <app-card cardTitle="Active batches">
+        <h3 class="mb-0">{{ m.active_batches }}</h3>
+      </app-card>
+    </div>
+    <div class="col-md-3 col-sm-6 mb-3">
+      <app-card cardTitle="Enrollments">
+        <h3 class="mb-0">{{ m.active_enrollments }}</h3>
+      </app-card>
+    </div>
+    <div class="col-md-4 mb-3">
+      <app-card cardTitle="Revenue this month">
+        <h4 class="mb-0">₹{{ m.revenue_this_month | number: '1.0-0' }}</h4>
+      </app-card>
+    </div>
+    <div class="col-md-4 mb-3">
+      <app-card cardTitle="Pending invoices">
+        <h4 class="mb-0">{{ m.pending_invoices }}</h4>
+      </app-card>
+    </div>
+    <div class="col-md-4 mb-3">
+      <app-card cardTitle="Puzzles solved (7 days)">
+        <h4 class="mb-0">{{ m.puzzles_solved_week }}</h4>
+      </app-card>
+    </div>
+  </div>
+  <div class="row mt-2">
+    <div class="col-lg-6">
+      <app-card cardTitle="Enrollment by batch">
+        <table class="table table-sm mb-0">
+          <thead>
+            <tr>
+              <th>Batch</th>
+              <th>Enrolled</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of m.enrollment_by_batch; track row.batch) {
+              <tr>
+                <td>{{ row.batch }}</td>
+                <td>{{ row.enrolled }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </app-card>
+    </div>
+    <div class="col-lg-6">
+      <app-card cardTitle="Batch schedule preview">
+        <table class="table table-sm mb-0">
+          <thead>
+            <tr>
+              <th>Batch</th>
+              <th>Time</th>
+              <th>Days</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (b of m.upcoming_batches; track b['batch_name']) {
+              <tr>
+                <td>{{ b['batch_name'] }}</td>
+                <td>{{ b['time_slot'] }}</td>
+                <td>{{ b['days_summary'] }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </app-card>
+    </div>
+  </div>
+}

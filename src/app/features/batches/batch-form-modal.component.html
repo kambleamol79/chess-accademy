@@ -1,0 +1,114 @@
+<div class="modal-header">
+  <h5 class="modal-title">Add new batch</h5>
+  <button type="button" class="btn-close" aria-label="Close" (click)="dismiss()"></button>
+</div>
+
+<div class="modal-body">
+  <div class="row g-3">
+    <div class="col-md-6">
+      <label class="form-label" for="batchCode">Batch code</label>
+      <input id="batchCode" class="form-control" [(ngModel)]="batch" name="batch" placeholder="e.g. IB - 9" required />
+    </div>
+    <div class="col-md-6">
+      <label class="form-label" for="moduleLevel">Module (level)</label>
+      <select id="moduleLevel" class="form-select" [(ngModel)]="module" name="module">
+        <option value="">— Select level —</option>
+        @for (level of moduleLevels; track level) {
+          <option [value]="level">{{ level }}</option>
+        }
+      </select>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label" for="timeSlot">Time</label>
+      <input id="timeSlot" class="form-control" [(ngModel)]="time" name="time" placeholder="07.00-08.00" required />
+      <div class="form-text">Use format like 07.00-08.00</div>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label" for="highlight">Row highlight</label>
+      <select id="highlight" class="form-select" [(ngModel)]="highlight" name="highlight">
+        <option value="beige">Default (beige)</option>
+        <option value="blue">Highlighted (blue)</option>
+      </select>
+    </div>
+
+    <div class="col-12">
+      <label class="form-label">Days</label>
+      <div class="d-flex flex-wrap gap-2 mb-2">
+        @for (preset of dayPresets; track preset.label) {
+          <button
+            type="button"
+            class="btn btn-sm"
+            [class.btn-primary]="day1 === preset.day1 && day2 === preset.day2"
+            [class.btn-outline-secondary]="day1 !== preset.day1 || day2 !== preset.day2"
+            (click)="applyDayPreset(preset.day1, preset.day2)"
+          >
+            {{ preset.label }}
+          </button>
+        }
+      </div>
+      <div class="row g-2">
+        <div class="col-md-4">
+          <label class="form-label small" for="day1">Day 1</label>
+          <select id="day1" class="form-select" [(ngModel)]="day1" name="day1">
+            @for (d of weekdays; track d) {
+              <option [value]="d">{{ d }}</option>
+            }
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label small" for="day2">Day 2</label>
+          <select id="day2" class="form-select" [(ngModel)]="day2" name="day2">
+            @for (d of weekdays; track d) {
+              <option [value]="d">{{ d }}</option>
+            }
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label small">Summary</label>
+          <input class="form-control" [value]="daysSummary" readonly />
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12">
+      <label class="form-label">Assign coaches</label>
+      <div class="row g-2">
+        <div class="col-md-6">
+          <label class="form-label small" for="coach1">Coach — {{ day1 }}</label>
+          <select id="coach1" class="form-select" [(ngModel)]="coach1" name="coach1">
+            <option value="">— Unassigned —</option>
+            @for (c of coaches(); track c.id) {
+              <option [value]="c.label">{{ c.label }}</option>
+            }
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label small" for="coach2">Coach — {{ day2 }}</label>
+          <select id="coach2" class="form-select" [(ngModel)]="coach2" name="coach2">
+            <option value="">— Unassigned —</option>
+            @for (c of coaches(); track c.id) {
+              <option [value]="c.label">{{ c.label }}</option>
+            }
+          </select>
+        </div>
+      </div>
+      <div class="form-text">Coaches are assigned per session day (matches your batch schedule sheet).</div>
+    </div>
+
+    <div class="col-12">
+      <label class="form-label" for="notes">Notes (optional)</label>
+      <input id="notes" class="form-control" [(ngModel)]="notes" name="notes" />
+    </div>
+  </div>
+
+  @if (error()) {
+    <div class="alert alert-danger mt-3 mb-0">{{ error() }}</div>
+  }
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-outline-secondary" (click)="dismiss()" [disabled]="saving()">Cancel</button>
+  <button type="button" class="btn btn-primary" (click)="save()" [disabled]="saving()">
+    {{ saving() ? 'Saving…' : 'Save batch' }}
+  </button>
+</div>

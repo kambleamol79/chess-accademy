@@ -2,7 +2,7 @@
 import { Component, output } from '@angular/core';
 
 // project import
-import { BerryConfig } from 'src/app/app-config';
+import { AcademyConfig } from 'src/app/app-config';
 
 import { NavLeftComponent } from './nav-left/nav-left.component';
 import { NavLogoComponent } from './nav-logo/nav-logo.component';
@@ -25,7 +25,7 @@ export class NavBarComponent {
   // Constructor
   constructor() {
     this.windowWidth = window.innerWidth;
-    this.navCollapsed = this.windowWidth >= 1025 ? BerryConfig.isCollapse_menu : false;
+    this.navCollapsed = this.windowWidth >= 1025 ? AcademyConfig.isCollapse_menu : false;
     this.navCollapsedMob = false;
   }
 

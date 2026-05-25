@@ -31,6 +31,23 @@ return function (App $app, Container $container): void {
         return $response->withHeader('Content-Type', 'application/json');
     });
 
+    $app->get('/api/v1/health/db', function ($request, $response) use ($container) {
+        try {
+            $container->get(\PDO::class)->query('SELECT 1');
+            $payload = ['success' => true, 'data' => ['database' => 'connected']];
+            $status = 200;
+        } catch (\Throwable $e) {
+            $payload = [
+                'success' => false,
+                'message' => 'Database connection failed. Set DB_PASS in api/.env and restart the API server.',
+            ];
+            $status = 503;
+        }
+        $response->getBody()->write(json_encode($payload, JSON_THROW_ON_ERROR));
+
+        return $response->withHeader('Content-Type', 'application/json')->withStatus($status);
+    });
+
     $app->group('/api/v1/auth', function (RouteCollectorProxy $group) {
         $group->post('/login', [AuthController::class, 'login']);
         $group->post('/register', [AuthController::class, 'register']);

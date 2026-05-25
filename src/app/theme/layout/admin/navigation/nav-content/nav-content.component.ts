@@ -8,6 +8,8 @@ import { environment } from 'src/environments/environment';
 
 // project import
 import { NavigationItem, NavigationItems } from '../navigation';
+import { AuthService } from 'src/app/core/services/auth.service';
+import { filterNavigationByRole } from 'src/app/core/utils/navigation.util';
 
 import { NavCollapseComponent } from './nav-collapse/nav-collapse.component';
 import { NavGroupComponent } from './nav-group/nav-group.component';
@@ -24,6 +26,7 @@ import { SharedModule } from 'src/app/theme/shared/shared.module';
 })
 export class NavContentComponent implements OnInit {
   private location = inject(Location);
+  private auth = inject(AuthService);
 
   // public props
   NavCollapsedMob = output();
@@ -38,8 +41,8 @@ export class NavContentComponent implements OnInit {
 
   // Constructor
   constructor() {
-    this.navigations = NavigationItems;
     this.windowWidth = window.innerWidth;
+    this.navigations = filterNavigationByRole(NavigationItems, this.auth.role());
   }
 
   // Life cycle events

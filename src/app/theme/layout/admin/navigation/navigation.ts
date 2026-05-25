@@ -17,111 +17,123 @@ export interface NavigationItem {
 
 export const NavigationItems: NavigationItem[] = [
   {
-    id: 'dashboard',
-    title: 'Dashboard',
+    id: 'main',
+    title: 'Main',
     type: 'group',
     icon: 'icon-navigation',
     children: [
       {
-        id: 'default',
+        id: 'dashboard',
         title: 'Dashboard',
         type: 'item',
         classes: 'nav-item',
-        url: '/default',
+        url: '/dashboard',
         icon: 'ti ti-dashboard',
-        breadcrumbs: false
+        role: ['admin', 'coach', 'student', 'accountant']
       }
     ]
   },
   {
-    id: 'page',
-    title: 'Pages',
+    id: 'academy',
+    title: 'Academy',
     type: 'group',
     icon: 'icon-navigation',
     children: [
       {
-        id: 'Authentication',
-        title: 'Authentication',
-        type: 'collapse',
-        icon: 'ti ti-key',
-        children: [
-          {
-            id: 'login',
-            title: 'Login',
-            type: 'item',
-            url: '/login',
-            target: true,
-            breadcrumbs: false
-          },
-          {
-            id: 'register',
-            title: 'Register',
-            type: 'item',
-            url: '/register',
-            target: true,
-            breadcrumbs: false
-          }
-        ]
+        id: 'batches',
+        title: 'Batches',
+        type: 'item',
+        classes: 'nav-item',
+        url: '/batches',
+        icon: 'ti ti-calendar-event',
+        role: ['admin', 'coach', 'student', 'accountant']
+      },
+      {
+        id: 'students',
+        title: 'Students',
+        type: 'item',
+        classes: 'nav-item',
+        url: '/students',
+        icon: 'ti ti-users',
+        role: ['admin', 'coach']
+      },
+      {
+        id: 'coaches',
+        title: 'Coaches',
+        type: 'item',
+        classes: 'nav-item',
+        url: '/coaches',
+        icon: 'ti ti-user-star',
+        role: ['admin']
+      }
+    ]
+  },
+  /*{
+    id: 'training',
+    title: 'Training',
+    type: 'group',
+    icon: 'icon-navigation',
+    children: [
+      {
+        id: 'puzzles',
+        title: 'Puzzles',
+        type: 'item',
+        classes: 'nav-item',
+        url: '/puzzles',
+        icon: 'ti ti-chess',
+        role: ['admin', 'coach', 'student']
+      },
+      {
+        id: 'game-review',
+        title: 'Game Review',
+        type: 'item',
+        classes: 'nav-item',
+        url: '/game-review',
+        icon: 'ti ti-eye',
+        role: ['admin', 'coach', 'student']
+      },
+      {
+        id: 'materials',
+        title: 'Class Materials',
+        type: 'item',
+        classes: 'nav-item',
+        url: '/materials',
+        icon: 'ti ti-book',
+        role: ['admin', 'coach', 'student']
+      }
+    ]
+  },*/
+  {
+    id: 'finance',
+    title: 'Finance',
+    type: 'group',
+    icon: 'icon-navigation',
+    children: [
+      {
+        id: 'billing',
+        title: 'Billing',
+        type: 'item',
+        classes: 'nav-item',
+        url: '/billing',
+        icon: 'ti ti-receipt',
+        role: ['admin', 'accountant']
       }
     ]
   },
   {
-    id: 'elements',
-    title: 'Elements',
+    id: 'system',
+    title: 'System',
     type: 'group',
     icon: 'icon-navigation',
     children: [
       {
-        id: 'typography',
-        title: 'Typography',
+        id: 'settings',
+        title: 'Settings',
         type: 'item',
         classes: 'nav-item',
-        url: '/typography',
-        icon: 'ti ti-typography'
-      },
-      {
-        id: 'color',
-        title: 'Colors',
-        type: 'item',
-        classes: 'nav-item',
-        url: '/color',
-        icon: 'ti ti-brush'
-      },
-      {
-        id: 'tabler',
-        title: 'Tabler',
-        type: 'item',
-        classes: 'nav-item',
-        url: 'https://tabler-icons.io/',
-        icon: 'ti ti-plant-2',
-        target: true,
-        external: true
-      }
-    ]
-  },
-  {
-    id: 'other',
-    title: 'Other',
-    type: 'group',
-    icon: 'icon-navigation',
-    children: [
-      {
-        id: 'sample-page',
-        title: 'Sample Page',
-        type: 'item',
-        url: '/sample-page',
-        classes: 'nav-item',
-        icon: 'ti ti-brand-chrome'
-      },
-      {
-        id: 'document',
-        title: 'Document',
-        type: 'item',
-        classes: 'nav-item',
-        url: 'https://codedthemes.gitbook.io/berry-angular/',
-        icon: 'ti ti-vocabulary',
-        target: true,
-        external: true
+        url: '/settings',
+        icon: 'ti ti-settings',
+        role: ['admin']
       }
     ]
   }

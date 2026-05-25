@@ -1,5 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import { authGuard } from './core/guards/auth.guard';
+import { roleGuard } from './core/guards/role.guard';
 import { AdminComponent } from './theme/layout/admin/admin.component';
 import { GuestComponent } from './theme/layout/guest/guest.component';
 
@@ -7,27 +9,52 @@ const routes: Routes = [
   {
     path: '',
     component: AdminComponent,
+    canActivate: [authGuard],
     children: [
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       {
-        path: '',
-        redirectTo: '/default',
-        pathMatch: 'full'
+        path: 'dashboard',
+        loadComponent: () => import('./features/dashboard/dashboard.component').then((c) => c.DashboardComponent)
       },
       {
-        path: 'default',
-        loadComponent: () => import('./demo/dashboard/default/default.component').then((c) => c.DefaultComponent)
+        path: 'batches',
+        loadComponent: () => import('./features/batches/batches.component').then((c) => c.BatchesComponent)
       },
       {
-        path: 'typography',
-        loadComponent: () => import('./demo/elements/typography/typography.component').then((c) => c.TypographyComponent)
+        path: 'students',
+        loadComponent: () => import('./features/students/students.component').then((c) => c.StudentsComponent),
+        canActivate: [roleGuard],
+        data: { roles: ['admin', 'coach'] }
       },
       {
-        path: 'color',
-        loadComponent: () => import('./demo/elements/element-color/element-color.component').then((c) => c.ElementColorComponent)
+        path: 'coaches',
+        loadComponent: () => import('./features/coaches/coaches.component').then((c) => c.CoachesComponent),
+        canActivate: [roleGuard],
+        data: { roles: ['admin'] }
       },
       {
-        path: 'sample-page',
-        loadComponent: () => import('./demo/other/sample-page/sample-page.component').then((c) => c.SamplePageComponent)
+        path: 'billing',
+        loadComponent: () => import('./features/billing/billing.component').then((c) => c.BillingComponent),
+        canActivate: [roleGuard],
+        data: { roles: ['admin', 'accountant'] }
+      },
+      {
+        path: 'puzzles',
+        loadComponent: () => import('./features/puzzles/puzzles.component').then((c) => c.PuzzlesComponent)
+      },
+      {
+        path: 'game-review',
+        loadComponent: () => import('./features/game-review/game-review.component').then((c) => c.GameReviewComponent)
+      },
+      {
+        path: 'materials',
+        loadComponent: () => import('./features/materials/materials.component').then((c) => c.MaterialsComponent)
+      },
+      {
+        path: 'settings',
+        loadComponent: () => import('./features/settings/settings.component').then((c) => c.SettingsComponent),
+        canActivate: [roleGuard],
+        data: { roles: ['admin'] }
       }
     ]
   },
@@ -37,14 +64,15 @@ const routes: Routes = [
     children: [
       {
         path: 'login',
-        loadComponent: () => import('./demo/pages/authentication/login/login.component').then((c) => c.LoginComponent)
+        loadComponent: () => import('./auth/login/login.component').then((c) => c.LoginComponent)
       },
       {
         path: 'register',
-        loadComponent: () => import('./demo/pages/authentication/register/register.component').then((c) => c.RegisterComponent)
+        loadComponent: () => import('./auth/register/register.component').then((c) => c.RegisterComponent)
       }
     ]
-  }
+  },
+  { path: '**', redirectTo: 'dashboard' }
 ];
 
 @NgModule({

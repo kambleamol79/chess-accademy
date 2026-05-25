@@ -1,0 +1,89 @@
+<app-card [customHeader]="true">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h5 class="mb-0">Batch schedule</h5>
+    @if (canManageBatches()) {
+      <button type="button" class="btn btn-primary btn-sm" (click)="openAddBatch()">
+        <i class="ti ti-plus me-1"></i>
+        Add new batch
+      </button>
+    }
+  </div>
+
+  @if (loading()) {
+    <p class="text-muted mb-0">Loading…</p>
+  } @else if (error()) {
+    <div class="alert alert-warning">{{ error() }}</div>
+  } @else {
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover mb-0 align-middle">
+        <thead class="table-light">
+          <tr>
+            <th></th>
+            <th>BATCH</th>
+            <th>MODULE</th>
+            <th>TIME</th>
+            <th>DAYS</th>
+            <th>DAYS</th>
+            <th>COACH</th>
+            <th>DAYS</th>
+            <th>COACH</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of rows(); track row.id) {
+            <tr [class]="rowClass(row.highlight)">
+              <td>
+                <span
+                  class="badge"
+                  [class.bg-primary]="row.highlight === 'blue'"
+                  [class.bg-secondary]="row.highlight !== 'blue'"
+                  >&nbsp;</span
+                >
+              </td>
+              <td><strong>{{ row.batch }}</strong></td>
+              <td>{{ row.module || '—' }}</td>
+              <td>{{ row.time }}</td>
+              <td>{{ row.days_summary }}</td>
+              <td>{{ row.day_1 }}</td>
+              <td
+                class="coach-cell"
+                [class.coach-cell--editable]="canAssignCoach()"
+                (click)="openAssignCoach(row, 'coach_1')"
+              >
+                @if (row.coach_1) {
+                  <span>{{ row.coach_1 }}</span>
+                } @else {
+                  <span class="text-muted">{{ canAssignCoach() ? 'Assign coach' : '—' }}</span>
+                }
+                @if (canAssignCoach()) {
+                  <i class="ti ti-edit coach-cell__icon"></i>
+                }
+              </td>
+              <td>{{ row.day_2 }}</td>
+              <td
+                class="coach-cell"
+                [class.coach-cell--editable]="canAssignCoach()"
+                (click)="openAssignCoach(row, 'coach_2')"
+              >
+                @if (row.coach_2) {
+                  <span>{{ row.coach_2 }}</span>
+                } @else {
+                  <span class="text-muted">{{ canAssignCoach() ? 'Assign coach' : '—' }}</span>
+                }
+                @if (canAssignCoach()) {
+                  <i class="ti ti-edit coach-cell__icon"></i>
+                }
+              </td>
+              <td>{{ row.notes || '' }}</td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="10" class="text-center text-muted py-4">No batches yet. Click “Add new batch” to create one.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</app-card>

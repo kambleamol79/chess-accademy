@@ -1,0 +1,12 @@
+<app-card cardTitle="Academy settings">
+  @if (loading()) {
+    <p class="text-muted">Loading…</p>
+  } @else {
+    <dl class="row mb-0">
+      @for (entry of settings() | keyvalue; track entry.key) {
+        <dt class="col-sm-4">{{ entry.key }}</dt>
+        <dd class="col-sm-8">{{ entry.value }}</dd>
+      }
+    </dl>
+  }
+</app-card>

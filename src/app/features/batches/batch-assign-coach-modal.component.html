@@ -1,0 +1,36 @@
+<div class="modal-header">
+  <h5 class="modal-title">Assign coach</h5>
+  <button type="button" class="btn-close" aria-label="Close" (click)="dismiss()"></button>
+</div>
+
+<div class="modal-body">
+  <p class="text-muted mb-3">
+    Batch <strong>{{ batch.batch }}</strong>
+    · {{ dayLabel }}
+    · {{ batch.time }}
+  </p>
+
+  <label class="form-label" for="coachSelect">{{ slotLabel }} — {{ dayLabel }}</label>
+  <select id="coachSelect" class="form-select" [(ngModel)]="selectedCoach" name="coach">
+    <option value="">— Unassigned —</option>
+    @for (c of coaches(); track c.id) {
+      <option [value]="c.label">{{ c.label }}</option>
+    }
+  </select>
+
+  @if (coaches().length === 0) {
+    <p class="form-text text-warning mb-0">No coaches found. Add coaches under the Coaches menu first.</p>
+  }
+
+  @if (error()) {
+    <div class="alert alert-danger mt-3 mb-0">{{ error() }}</div>
+  }
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-outline-danger" (click)="clearCoach()" [disabled]="saving()">Remove coach</button>
+  <button type="button" class="btn btn-outline-secondary" (click)="dismiss()" [disabled]="saving()">Cancel</button>
+  <button type="button" class="btn btn-primary" (click)="save()" [disabled]="saving()">
+    {{ saving() ? 'Saving…' : 'Assign' }}
+  </button>
+</div>

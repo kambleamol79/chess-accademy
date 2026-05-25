@@ -1,0 +1,23 @@
+.coach-cell {
+  min-width: 120px;
+
+  &--editable {
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+
+    &:hover {
+      background-color: rgba(var(--bs-primary-rgb), 0.08);
+    }
+  }
+}
+
+.coach-cell__icon {
+  font-size: 0.85rem;
+  margin-left: 0.35rem;
+  opacity: 0.5;
+  vertical-align: middle;
+}
+
+.coach-cell--editable:hover .coach-cell__icon {
+  opacity: 1;
+}
