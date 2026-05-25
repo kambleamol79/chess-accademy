@@ -1,0 +1,57 @@
+<div class="modal-header">
+  <h5 class="modal-title">Add student</h5>
+  <button type="button" class="btn-close" aria-label="Close" (click)="dismiss()"></button>
+</div>
+
+<div class="modal-body">
+  <div class="row g-3">
+    <div class="col-md-6">
+      <label class="form-label" for="firstName">First name</label>
+      <input id="firstName" class="form-control" [(ngModel)]="first_name" name="first_name" required />
+    </div>
+    <div class="col-md-6">
+      <label class="form-label" for="lastName">Last name</label>
+      <input id="lastName" class="form-control" [(ngModel)]="last_name" name="last_name" required />
+    </div>
+    <div class="col-md-6">
+      <label class="form-label" for="email">Email (login)</label>
+      <input id="email" type="email" class="form-control" [(ngModel)]="email" name="email" required />
+    </div>
+    <div class="col-md-6">
+      <label class="form-label" for="password">Password</label>
+      <input id="password" type="password" class="form-control" [(ngModel)]="password" name="password" minlength="8" required />
+      <div class="form-text">Minimum 8 characters</div>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label" for="phone">Phone</label>
+      <input id="phone" class="form-control" [(ngModel)]="phone" name="phone" />
+    </div>
+    <div class="col-md-6">
+      <label class="form-label" for="rating">Chess rating</label>
+      <input id="rating" type="number" class="form-control" [(ngModel)]="chess_rating" name="chess_rating" min="0" />
+    </div>
+    <div class="col-md-6">
+      <label class="form-label" for="parentName">Parent / guardian name</label>
+      <input id="parentName" class="form-control" [(ngModel)]="parent_name" name="parent_name" />
+    </div>
+    <div class="col-md-6">
+      <label class="form-label" for="parentPhone">Parent phone</label>
+      <input id="parentPhone" class="form-control" [(ngModel)]="parent_phone" name="parent_phone" />
+    </div>
+    <div class="col-md-6">
+      <label class="form-label" for="dob">Date of birth</label>
+      <input id="dob" type="date" class="form-control" [(ngModel)]="date_of_birth" name="date_of_birth" />
+    </div>
+  </div>
+
+  @if (error()) {
+    <div class="alert alert-danger mt-3 mb-0">{{ error() }}</div>
+  }
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-outline-secondary" (click)="dismiss()" [disabled]="saving()">Cancel</button>
+  <button type="button" class="btn btn-primary" (click)="save()" [disabled]="saving()">
+    {{ saving() ? 'Saving…' : 'Add student' }}
+  </button>
+</div>

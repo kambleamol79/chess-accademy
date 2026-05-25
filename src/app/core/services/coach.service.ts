@@ -11,4 +11,8 @@ export class CoachService {
   list(): Observable<ApiResponse<Record<string, unknown>[]>> {
     return this.http.get<ApiResponse<Record<string, unknown>[]>>(`${environment.apiUrl}/coaches`);
   }
+
+  create(payload: Record<string, unknown>): Observable<ApiResponse<unknown>> {
+    return this.http.post<ApiResponse<unknown>>(`${environment.apiUrl}/coaches`, payload);
+  }
 }

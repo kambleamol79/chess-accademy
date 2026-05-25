@@ -1,32 +1,46 @@
-<app-card cardTitle="Coaches">
+<app-card [customHeader]="true">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h5 class="mb-0">Coaches</h5>
+    @if (canAddCoach()) {
+      <button type="button" class="btn btn-primary btn-sm" (click)="openAddCoach()">
+        <i class="ti ti-plus me-1"></i>
+        Add coach
+      </button>
+    }
+  </div>
+
   @if (loading()) {
-    <p class="text-muted">Loading…</p>
+    <p class="text-muted mb-0">Loading…</p>
   } @else if (error()) {
     <div class="alert alert-warning">{{ error() }}</div>
   } @else {
-    <table class="table table-hover">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Email</th>
-          <th>Title</th>
-          <th>Rating</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (c of rows(); track c['id']) {
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead>
           <tr>
-            <td>{{ c['first_name'] }} {{ c['last_name'] }}</td>
-            <td>{{ c['email'] }}</td>
-            <td>{{ c['title'] || '—' }}</td>
-            <td>{{ c['rating'] ?? '—' }}</td>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Title</th>
+            <th>Rating</th>
           </tr>
-        } @empty {
-          <tr>
-            <td colspan="4" class="text-muted">No coaches yet</td>
-          </tr>
-        }
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          @for (c of rows(); track c['id']) {
+            <tr>
+              <td>{{ c['first_name'] }} {{ c['last_name'] }}</td>
+              <td>{{ c['email'] }}</td>
+              <td>{{ c['title'] || '—' }}</td>
+              <td>{{ c['rating'] ?? '—' }}</td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="4" class="text-center text-muted py-4">
+                No coaches yet. Click “Add coach” to create one.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
   }
 </app-card>
