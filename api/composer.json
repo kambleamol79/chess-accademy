@@ -1,0 +1,22 @@
+{
+  "name": "chess-academy/api",
+  "description": "Chess Academy REST API (PHP Slim)",
+  "type": "project",
+  "require": {
+    "php": "^8.1",
+    "firebase/php-jwt": "^7.0",
+    "monolog/monolog": "^3.8",
+    "php-di/php-di": "^7.0",
+    "slim/psr7": "^1.7",
+    "slim/slim": "^4.14",
+    "vlucas/phpdotenv": "^5.6"
+  },
+  "autoload": {
+    "psr-4": {
+      "ChessAcademy\\": "src/"
+    }
+  },
+  "config": {
+    "sort-packages": true
+  }
+}
