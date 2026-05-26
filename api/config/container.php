@@ -30,7 +30,9 @@ use ChessAcademy\Repositories\StudentRepository;
 use ChessAcademy\Repositories\UserRepository;
 use ChessAcademy\Services\AuthService;
 use ChessAcademy\Services\JwtService;
+use ChessAcademy\Services\LeadConversionService;
 use ChessAcademy\Services\LeadCsvParser;
+use ChessAcademy\Services\PaymentReceiptUploadService;
 use DI\Container;
 
 /** @param array<string,mixed> $settings */
@@ -49,6 +51,16 @@ return function (array $settings): Container {
     $container->set(FormRepository::class, fn (Container $c) => new FormRepository($c->get(PDO::class)));
     $container->set(LeadRepository::class, fn (Container $c) => new LeadRepository($c->get(PDO::class)));
     $container->set(LeadCsvParser::class, fn () => new LeadCsvParser());
+    $container->set(PaymentReceiptUploadService::class, fn (Container $c) => new PaymentReceiptUploadService(
+        (string) $c->get('settings')['uploads']['payment_receipts_dir'],
+        (int) $c->get('settings')['uploads']['payment_receipt_max_bytes'],
+    ));
+    $container->set(LeadConversionService::class, fn (Container $c) => new LeadConversionService(
+        $c->get(PDO::class),
+        $c->get(LeadRepository::class),
+        $c->get(UserRepository::class),
+        $c->get(StudentRepository::class),
+    ));
     $container->set(StudentRepository::class, fn (Container $c) => new StudentRepository($c->get(PDO::class)));
     $container->set(CoachRepository::class, fn (Container $c) => new CoachRepository($c->get(PDO::class)));
     $container->set(EnrollmentRepository::class, fn (Container $c) => new EnrollmentRepository($c->get(PDO::class)));
@@ -76,6 +88,9 @@ return function (array $settings): Container {
     $container->set(LeadController::class, fn (Container $c) => new LeadController(
         $c->get(LeadRepository::class),
         $c->get(LeadCsvParser::class),
+        $c->get(LeadConversionService::class),
+        $c->get(PaymentReceiptUploadService::class),
+        $c->get(StudentRepository::class),
     ));
     $container->set(DashboardController::class, fn (Container $c) => new DashboardController($c->get(DashboardRepository::class)));
     $container->set(StudentController::class, fn (Container $c) => new StudentController(

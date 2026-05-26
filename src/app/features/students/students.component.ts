@@ -2,7 +2,12 @@ import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { CardComponent } from 'src/app/theme/shared/components/card/card.component';
+import { ListFilterComponent } from 'src/app/theme/shared/components/list-filter/list-filter.component';
+import { ListDateRangeFilterComponent } from 'src/app/theme/shared/components/list-date-range-filter/list-date-range-filter.component';
 import { StudentService } from 'src/app/core/services/student.service';
+import { STUDENT_FILTER_FIELDS } from './students-filter.fields';
+import { filterByDateRange } from 'src/app/core/utils/date-range-filter.util';
+import { filterRecords } from 'src/app/core/utils/record-filter.util';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { StudentFormModalComponent } from './student-form-modal.component';
@@ -18,7 +23,7 @@ import { BulkAssignResult } from 'src/app/core/services/enrollment.service';
 
 @Component({
   selector: 'app-students',
-  imports: [CommonModule, CardComponent],
+  imports: [CommonModule, CardComponent, ListFilterComponent, ListDateRangeFilterComponent],
   templateUrl: './students.component.html',
   styleUrl: './students.component.scss'
 })
@@ -34,12 +39,38 @@ export class StudentsComponent implements OnInit {
   error = signal('');
   success = signal('');
   deletingId = signal<number | null>(null);
-  rows = signal<Record<string, unknown>[]>([]);
+  allRows = signal<Record<string, unknown>[]>([]);
+  filterField = signal(STUDENT_FILTER_FIELDS[0].key);
+  filterValue = signal('');
+  dateFrom = signal('');
+  dateTo = signal('');
   selectedIds = signal<Set<number>>(new Set());
+
+  readonly filterFields = STUDENT_FILTER_FIELDS;
+
+  /** Same source as the PAYMENT D column in the roster table. */
+  studentFilterDate(row: Record<string, unknown>): unknown {
+    return row['payment_date'] ?? row['enrollment_date'] ?? row['created_at'];
+  }
+
+  private readonly studentDateGetter = (row: Record<string, unknown>) => this.studentFilterDate(row);
+
+  private readonly dateFilteredRows = computed(() =>
+    filterByDateRange(this.allRows(), this.studentDateGetter, this.dateFrom(), this.dateTo())
+  );
+
+  filteredRows = computed(() =>
+    filterRecords(
+      this.dateFilteredRows(),
+      this.filterField(),
+      this.filterValue(),
+      STUDENT_FILTER_FIELDS
+    )
+  );
 
   selectedCount = computed(() => this.selectedIds().size);
   allSelected = computed(() => {
-    const rows = this.rows();
+    const rows = this.filteredRows();
     return rows.length > 0 && rows.every((r) => this.selectedIds().has(Number(r['id'])));
   });
 
@@ -63,7 +94,7 @@ export class StudentsComponent implements OnInit {
     this.loading.set(true);
     this.students.list().subscribe({
       next: (res) => {
-        this.rows.set(res.data);
+        this.allRows.set(res.data ?? []);
         this.selectedIds.set(new Set());
         this.loading.set(false);
         this.error.set('');
@@ -138,7 +169,20 @@ export class StudentsComponent implements OnInit {
       this.selectedIds.set(new Set());
       return;
     }
-    this.selectedIds.set(new Set(this.rows().map((r) => Number(r['id']))));
+    this.selectedIds.set(new Set(this.filteredRows().map((r) => Number(r['id']))));
+  }
+
+  clearFilter() {
+    this.filterValue.set('');
+  }
+
+  clearDateRange() {
+    this.dateFrom.set('');
+    this.dateTo.set('');
+  }
+
+  hasActiveFilters(): boolean {
+    return Boolean(this.filterValue().trim() || this.dateFrom() || this.dateTo());
   }
 
   openAssignBatch() {
@@ -147,7 +191,7 @@ export class StudentsComponent implements OnInit {
       return;
     }
 
-    const names = this.rows()
+    const names = this.allRows()
       .filter((r) => ids.includes(Number(r['id'])))
       .map((r) => this.studentName(r));
 

@@ -1,0 +1,35 @@
+<div class="list-date-range-filter">
+  @if (heading) {
+    <div class="text-muted small mb-1 text-end">{{ heading }}</div>
+  }
+  <div class="d-flex flex-wrap align-items-end justify-content-end gap-2">
+  <div>
+    <label class="form-label small text-muted mb-1" for="listDateFrom">From</label>
+    <input
+      id="listDateFrom"
+      type="date"
+      class="form-control form-control-sm"
+      [ngModel]="dateFrom"
+      (ngModelChange)="dateFromChange.emit($event)"
+      name="dateFrom"
+    />
+  </div>
+  <div>
+    <label class="form-label small text-muted mb-1" for="listDateTo">To</label>
+    <input
+      id="listDateTo"
+      type="date"
+      class="form-control form-control-sm"
+      [ngModel]="dateTo"
+      (ngModelChange)="dateToChange.emit($event)"
+      name="dateTo"
+      [min]="dateFrom || null"
+    />
+  </div>
+  @if (hasRange) {
+    <div>
+      <button type="button" class="btn btn-outline-secondary btn-sm" (click)="onClear()">Clear dates</button>
+    </div>
+  }
+  </div>
+</div>

@@ -2,3 +2,5 @@
 .env
 /logs/*.log
 !logs/.gitkeep
+/storage/payment-receipts/*
+!storage/payment-receipts/.gitkeep

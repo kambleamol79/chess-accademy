@@ -46,6 +46,9 @@ export class LeadFollowupModalComponent implements OnInit {
   interested = false;
   not_interested = '';
   paid = false;
+  wasPaid = false;
+  receiptFile: File | null = null;
+  receiptFileName = '';
   dnp = '';
   additionalReview = '';
 
@@ -81,7 +84,8 @@ export class LeadFollowupModalComponent implements OnInit {
     this.module = String(this.lead['module'] ?? '');
     this.interested = String(this.lead['status_int'] ?? '').toUpperCase() === 'INT';
     this.not_interested = String(this.lead['not_interested'] ?? '');
-    this.paid = String(this.lead['paid'] ?? '').toUpperCase() === 'PAID';
+    this.wasPaid = String(this.lead['paid'] ?? '').toUpperCase() === 'PAID';
+    this.paid = this.wasPaid;
     this.dnp = String(this.lead['dnp'] ?? '');
     this.additionalReview = mergeAdditionalReview(this.lead['additional'], this.lead['review']);
   }
@@ -94,21 +98,16 @@ export class LeadFollowupModalComponent implements OnInit {
     this.activeModal.dismiss();
   }
 
-  save() {
-    this.error.set('');
-    if (!this.child_name.trim()) {
-      this.error.set('Child name is required');
-      return;
-    }
+  onReceiptSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0] ?? null;
+    this.receiptFile = file;
+    this.receiptFileName = file?.name ?? '';
+  }
 
-    if (!isValidTimeSlotRange(this.timeStart, this.timeEnd)) {
-      this.error.set('End time must be after start time');
-      return;
-    }
-
-    const id = Number(this.lead['id']);
+  private buildPayload(): Record<string, unknown> {
     const reviewText = this.additionalReview.trim();
-    const payload: Record<string, unknown> = {
+    return {
       child_name: this.child_name.trim(),
       parents_name: this.parents_name.trim() || null,
       phone: this.phone.trim() || null,
@@ -124,14 +123,59 @@ export class LeadFollowupModalComponent implements OnInit {
       module: this.module.trim() || null,
       status_int: this.interested ? 'INT' : null,
       not_interested: this.not_interested.trim() || null,
-      paid: this.paid ? 'PAID' : null,
       dnp: this.dnp.trim() || null,
       additional: null,
       review: reviewText || null
     };
+  }
+
+  save() {
+    this.error.set('');
+    if (!this.child_name.trim()) {
+      this.error.set('Child name is required');
+      return;
+    }
+
+    if (!isValidTimeSlotRange(this.timeStart, this.timeEnd)) {
+      this.error.set('End time must be after start time');
+      return;
+    }
+
+    const id = Number(this.lead['id']);
+    const payload = this.buildPayload();
+
+    if (this.paid) {
+      if (!this.receiptFile) {
+        this.error.set('Attach a payment receipt before marking as paid');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('payment_receipt', this.receiptFile);
+      formData.append('data', JSON.stringify(payload));
+
+      this.saving.set(true);
+      this.leads.markPaid(id, formData).subscribe({
+        next: (res) => {
+          this.saving.set(false);
+          if (!res.success) {
+            this.error.set(res.message ?? 'Could not convert lead');
+            return;
+          }
+          this.activeModal.close(res.data);
+        },
+        error: (err: HttpErrorResponse) => {
+          this.saving.set(false);
+          this.error.set(getApiErrorMessage(err, 'Could not convert lead'));
+        }
+      });
+      return;
+    }
+
+    const updatePayload = { ...payload, paid: null };
 
     this.saving.set(true);
-    this.leads.update(id, payload).subscribe({
+    this.leads.update(id, updatePayload).subscribe({
       next: (res) => {
         this.saving.set(false);
         if (!res.success) {

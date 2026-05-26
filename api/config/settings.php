@@ -35,4 +35,8 @@ return [
         'ttl' => (int) ($_ENV['JWT_TTL'] ?? 3600),
         'refresh_ttl_days' => (int) ($_ENV['JWT_REFRESH_TTL_DAYS'] ?? 30),
     ],
+    'uploads' => [
+        'payment_receipts_dir' => $root . '/storage/payment-receipts',
+        'payment_receipt_max_bytes' => (int) ($_ENV['PAYMENT_RECEIPT_MAX_BYTES'] ?? 5 * 1024 * 1024),
+    ],
 ];

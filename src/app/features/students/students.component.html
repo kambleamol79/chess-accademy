@@ -1,9 +1,6 @@
 <app-card [customHeader]="true">
-  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-    <div>
-      <h5 class="mb-0">Students</h5>
-      <p class="text-muted small mb-0">Roster — select students and assign to a batch</p>
-    </div>
+  <div class="d-flex flex-wrap justify-content-end align-items-end gap-2 mb-3">
+
     <div class="d-flex flex-wrap gap-2">
       @if (canAssignBatch() && selectedCount() > 0) {
         <button type="button" class="btn btn-success btn-sm" (click)="openAssignBatch()">
@@ -17,6 +14,39 @@
           Add student
         </button>
       }
+    </div>
+  </div>
+
+    <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
+    <div>
+      <h5 class="mb-0">Students</h5>
+      <p class="text-muted small mb-0">Roster — select students and assign to a batch</p>
+    </div>
+    <div class="d-flex flex-wrap align-items-end gap-2 ms-auto">
+      @if (!loading() && !error()) {
+        <div class="d-flex align-items-end gap-2">
+          <app-list-date-range-filter
+            heading="Payment date (PAYMENT D)"
+            [dateFrom]="dateFrom()"
+            [dateTo]="dateTo()"
+            (dateFromChange)="dateFrom.set($event)"
+            (dateToChange)="dateTo.set($event)"
+            (clear)="clearDateRange()"
+          />
+          <app-list-filter
+            [inline]="true"
+            [fields]="filterFields"
+            [fieldKey]="filterField()"
+            [value]="filterValue()"
+            [resultCount]="filteredRows().length"
+            [totalCount]="allRows().length"
+            (fieldKeyChange)="filterField.set($event)"
+            (valueChange)="filterValue.set($event)"
+            (clear)="clearFilter()"
+          />
+        </div>
+      }
+      
     </div>
   </div>
 
@@ -64,7 +94,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (row of rows(); track row['id']) {
+          @for (row of filteredRows(); track row['id']) {
             <tr>
               @if (canAssignBatch()) {
                 <td class="th-select-col text-center">
@@ -118,7 +148,11 @@
           } @empty {
             <tr>
               <td [attr.colspan]="canAssignBatch() ? 21 : 20" class="text-center text-muted py-4">
-                No students yet.@if (canAddStudent()) { Click “Add student” to create one. }
+                @if (hasActiveFilters() && allRows().length > 0) {
+                  No students match the current filters.
+                } @else {
+                  No students yet.@if (canAddStudent()) { Click “Add student” to create one. }
+                }
               </td>
             </tr>
           }

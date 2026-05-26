@@ -1,21 +1,26 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { CardComponent } from 'src/app/theme/shared/components/card/card.component';
+import { ListFilterComponent } from 'src/app/theme/shared/components/list-filter/list-filter.component';
+import { ListDateRangeFilterComponent } from 'src/app/theme/shared/components/list-date-range-filter/list-date-range-filter.component';
 import { LeadService } from 'src/app/core/services/lead.service';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { LeadFormModalComponent } from './lead-form-modal.component';
 import { LeadFollowupModalComponent } from './lead-followup-modal.component';
 import { LeadBulkUploadModalComponent } from './lead-bulk-upload-modal.component';
 import { downloadLeadCsvTemplate } from './lead-csv.util';
+import { LEAD_FILTER_FIELDS } from './leads-filter.fields';
 import { HttpErrorResponse } from '@angular/common/http';
 import { confirmDelete } from 'src/app/core/utils/confirm.util';
 import { getApiErrorMessage } from 'src/app/core/utils/http-error.util';
 import { mergeAdditionalReview } from 'src/app/core/utils/lead.util';
+import { filterByDateRange } from 'src/app/core/utils/date-range-filter.util';
+import { filterRecords } from 'src/app/core/utils/record-filter.util';
 
 @Component({
   selector: 'app-leads',
-  imports: [CommonModule, CardComponent],
+  imports: [CommonModule, CardComponent, ListFilterComponent, ListDateRangeFilterComponent],
   templateUrl: './leads.component.html',
   styleUrl: './leads.component.scss'
 })
@@ -28,7 +33,30 @@ export class LeadsComponent implements OnInit {
   error = signal('');
   success = signal('');
   deletingId = signal<number | null>(null);
-  rows = signal<Record<string, unknown>[]>([]);
+  allRows = signal<Record<string, unknown>[]>([]);
+  filterField = signal(LEAD_FILTER_FIELDS[0].key);
+  filterValue = signal('');
+  dateFrom = signal('');
+  dateTo = signal('');
+
+  readonly filterFields = LEAD_FILTER_FIELDS;
+
+  private readonly dateFilteredRows = computed(() =>
+    filterByDateRange(this.allRows(), 'captured_at', this.dateFrom(), this.dateTo())
+  );
+
+  filteredRows = computed(() =>
+    filterRecords(
+      this.dateFilteredRows(),
+      this.filterField(),
+      this.filterValue(),
+      LEAD_FILTER_FIELDS
+    )
+  );
+
+  hasActiveFilters(): boolean {
+    return Boolean(this.filterValue().trim() || this.dateFrom() || this.dateTo());
+  }
 
   ngOnInit() {
     this.load();
@@ -46,7 +74,7 @@ export class LeadsComponent implements OnInit {
     this.loading.set(true);
     this.leads.list().subscribe({
       next: (res) => {
-        this.rows.set(res.data ?? []);
+        this.allRows.set(res.data ?? []);
         this.loading.set(false);
         this.error.set('');
       },
@@ -105,7 +133,18 @@ export class LeadsComponent implements OnInit {
       backdrop: 'static'
     });
     ref.componentInstance.lead = { ...row };
-    ref.closed.subscribe(() => this.load());
+    ref.closed.subscribe((result: Record<string, unknown> | undefined) => {
+      this.load();
+      if (result?.['converted']) {
+        this.error.set('');
+        const pwd = String(result['temporary_password'] ?? '');
+        this.success.set(
+          pwd
+            ? `Lead moved to Students. Share the temporary password with the family: ${pwd}`
+            : 'Lead moved to Students.'
+        );
+      }
+    });
   }
 
   formatDate(value: unknown): string {
@@ -148,6 +187,15 @@ export class LeadsComponent implements OnInit {
       return v === 'YES' ? 'bg-success-subtle text-success-emphasis' : 'bg-secondary-subtle';
     }
     return '';
+  }
+
+  clearFilter() {
+    this.filterValue.set('');
+  }
+
+  clearDateRange() {
+    this.dateFrom.set('');
+    this.dateTo.set('');
   }
 
   deleteLead(row: Record<string, unknown>) {

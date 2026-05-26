@@ -62,6 +62,8 @@ return function (App $app, Container $container): void {
         $group->get('/dashboard/metrics', [DashboardController::class, 'metrics']);
 
         $group->get('/students', [StudentController::class, 'index']);
+        $group->get('/students/{id}/payment-receipt', [LeadController::class, 'paymentReceipt'])
+            ->add(new RoleMiddleware(['admin', 'coach', 'accountant']));
         $group->get('/students/{id}', [StudentController::class, 'show']);
         $group->post('/students', [StudentController::class, 'store'])
             ->add(new RoleMiddleware(['admin']));
@@ -93,6 +95,8 @@ return function (App $app, Container $container): void {
         $group->put('/leads/{id}', [LeadController::class, 'update'])
             ->add(new RoleMiddleware(['admin', 'coach']));
         $group->patch('/leads/{id}', [LeadController::class, 'update'])
+            ->add(new RoleMiddleware(['admin', 'coach']));
+        $group->post('/leads/{id}/mark-paid', [LeadController::class, 'markPaid'])
             ->add(new RoleMiddleware(['admin', 'coach']));
         $group->delete('/leads/{id}', [LeadController::class, 'destroy'])
             ->add(new RoleMiddleware(['admin']));

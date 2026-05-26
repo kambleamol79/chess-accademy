@@ -1,0 +1,39 @@
+<div class="list-filter row g-2 align-items-end justify-content-end" [class.mb-3]="!inline">
+  <div class="col-auto">
+    <label class="form-label small text-muted mb-1" for="listFilterField">Field</label>
+    <select
+      id="listFilterField"
+      class="form-select form-select-sm list-filter__field"
+      [ngModel]="fieldKey"
+      (ngModelChange)="onFieldChange($event)"
+      name="filterField"
+    >
+      @for (field of fields; track field.key) {
+        <option [value]="field.key">{{ field.label }}</option>
+      }
+    </select>
+  </div>
+  <div class="col-sm-4 col-md-3 col-lg-3">
+    <label class="form-label small text-muted mb-1" for="listFilterValue">Filter value</label>
+    <input
+      id="listFilterValue"
+      type="search"
+      class="form-control form-control-sm"
+      [ngModel]="value"
+      (ngModelChange)="onValueChange($event)"
+      name="filterValue"
+      placeholder="Type to filter…"
+      autocomplete="off"
+    />
+  </div>
+  @if (value) {
+    <div class="col-auto">
+      <button type="button" class="btn btn-outline-secondary btn-sm" (click)="onClear()">Clear</button>
+    </div>
+  }
+  @if (resultCount !== null && totalCount !== null && resultCount !== totalCount) {
+    <div class="col-auto">
+      <span class="text-muted small">{{ resultCount }} of {{ totalCount }} shown</span>
+    </div>
+  }
+</div>

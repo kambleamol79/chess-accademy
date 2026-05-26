@@ -20,6 +20,29 @@ export class LeadService {
     return this.http.put<ApiResponse<unknown>>(`${environment.apiUrl}/leads/${id}`, payload);
   }
 
+  markPaid(
+    id: number,
+    formData: FormData
+  ): Observable<
+    ApiResponse<{
+      converted: boolean;
+      student: Record<string, unknown>;
+      temporary_password: string;
+    }>
+  > {
+    return this.http.post<
+      ApiResponse<{
+        converted: boolean;
+        student: Record<string, unknown>;
+        temporary_password: string;
+      }>
+    >(`${environment.apiUrl}/leads/${id}/mark-paid`, formData);
+  }
+
+  paymentReceiptUrl(studentId: number): string {
+    return `${environment.apiUrl}/students/${studentId}/payment-receipt`;
+  }
+
   delete(id: number): Observable<ApiResponse<unknown>> {
     return this.http.delete<ApiResponse<unknown>>(`${environment.apiUrl}/leads/${id}`);
   }

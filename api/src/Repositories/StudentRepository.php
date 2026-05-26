@@ -96,6 +96,8 @@ final class StudentRepository
             'month_jul',
             'month_aug',
             'month_sep',
+            'payment_receipt_path',
+            'source_lead_id',
         ];
         $sets = [];
         $params = ['id' => $id];

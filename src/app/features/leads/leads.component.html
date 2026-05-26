@@ -1,9 +1,5 @@
 <app-card [customHeader]="true">
-  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-    <div>
-      <h5 class="mb-0">Leads</h5>
-      <p class="text-muted small mb-0">Prospective students not yet enrolled</p>
-    </div>
+  <div class="d-flex flex-wrap justify-content-end align-items-end gap-2 mb-3">
     @if (canManageLeads()) {
       <div class="d-flex flex-wrap gap-2">
         <button type="button" class="btn btn-outline-secondary btn-sm" (click)="downloadCsvTemplate()">
@@ -20,6 +16,37 @@
         </button>
       </div>
     }
+  </div>
+  <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
+    <div>
+      <h5 class="mb-0">Leads</h5>
+      <p class="text-muted small mb-0">Prospective students not yet enrolled</p>
+    </div>
+    <div class="d-flex flex-wrap align-items-end gap-2 ms-auto">
+      @if (!loading() && !error()) {
+        <div class="d-flex align-items-end gap-2">
+          <app-list-date-range-filter
+            heading="Captured date (DATE)"
+            [dateFrom]="dateFrom()"
+            [dateTo]="dateTo()"
+            (dateFromChange)="dateFrom.set($event)"
+            (dateToChange)="dateTo.set($event)"
+            (clear)="clearDateRange()"
+          />
+          <app-list-filter
+            [inline]="true"
+            [fields]="filterFields"
+            [fieldKey]="filterField()"
+            [value]="filterValue()"
+            [resultCount]="filteredRows().length"
+            [totalCount]="allRows().length"
+            (fieldKeyChange)="filterField.set($event)"
+            (valueChange)="filterValue.set($event)"
+            (clear)="clearFilter()"
+          />
+        </div>
+      }
+    </div>
   </div>
 
   @if (success()) {
@@ -61,7 +88,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (row of rows(); track row['id']) {
+          @for (row of filteredRows(); track row['id']) {
             <tr>
               <td class="text-nowrap">{{ formatDate(row['captured_at']) }}</td>
               <td><strong>{{ cell(row['child_name']) }}</strong></td>
@@ -139,7 +166,11 @@
           } @empty {
             <tr>
               <td colspan="20" class="text-center text-muted py-4">
-                No leads yet.@if (canManageLeads()) { Click “Add lead” to capture a prospective student. }
+                @if (hasActiveFilters() && allRows().length > 0) {
+                  No leads match the current filters.
+                } @else {
+                  No leads yet.@if (canManageLeads()) { Click “Add lead” to capture a prospective student. }
+                }
               </td>
             </tr>
           }
