@@ -3,6 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { ApiResponse } from '../models/api.model';
+import { CoachSchedulePayload } from './coach.service';
 
 export interface DashboardMetrics {
   total_students: number;
@@ -22,5 +23,9 @@ export class DashboardService {
 
   getMetrics(): Observable<ApiResponse<DashboardMetrics>> {
     return this.http.get<ApiResponse<DashboardMetrics>>(`${environment.apiUrl}/dashboard/metrics`);
+  }
+
+  getCoachSchedule(): Observable<ApiResponse<CoachSchedulePayload>> {
+    return this.http.get<ApiResponse<CoachSchedulePayload>>(`${environment.apiUrl}/dashboard/coach-schedule`);
   }
 }

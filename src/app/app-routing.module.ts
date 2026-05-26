@@ -18,19 +18,21 @@ const routes: Routes = [
       },
       {
         path: 'batches',
-        loadComponent: () => import('./features/batches/batches.component').then((c) => c.BatchesComponent)
+        loadComponent: () => import('./features/batches/batches.component').then((c) => c.BatchesComponent),
+        canActivate: [roleGuard],
+        data: { roles: ['admin', 'student', 'accountant'] }
       },
       {
         path: 'leads',
         loadComponent: () => import('./features/leads/leads.component').then((c) => c.LeadsComponent),
         canActivate: [roleGuard],
-        data: { roles: ['admin', 'coach'] }
+        data: { roles: ['admin'] }
       },
       {
         path: 'students',
         loadComponent: () => import('./features/students/students.component').then((c) => c.StudentsComponent),
         canActivate: [roleGuard],
-        data: { roles: ['admin', 'coach'] }
+        data: { roles: ['admin'] }
       },
       {
         path: 'coaches',
@@ -46,15 +48,21 @@ const routes: Routes = [
       },
       {
         path: 'puzzles',
-        loadComponent: () => import('./features/puzzles/puzzles.component').then((c) => c.PuzzlesComponent)
+        loadComponent: () => import('./features/puzzles/puzzles.component').then((c) => c.PuzzlesComponent),
+        canActivate: [roleGuard],
+        data: { roles: ['admin', 'student'] }
       },
       {
         path: 'game-review',
-        loadComponent: () => import('./features/game-review/game-review.component').then((c) => c.GameReviewComponent)
+        loadComponent: () => import('./features/game-review/game-review.component').then((c) => c.GameReviewComponent),
+        canActivate: [roleGuard],
+        data: { roles: ['admin', 'student'] }
       },
       {
         path: 'materials',
-        loadComponent: () => import('./features/materials/materials.component').then((c) => c.MaterialsComponent)
+        loadComponent: () => import('./features/materials/materials.component').then((c) => c.MaterialsComponent),
+        canActivate: [roleGuard],
+        data: { roles: ['admin', 'student'] }
       },
       {
         path: 'settings',

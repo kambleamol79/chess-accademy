@@ -56,6 +56,46 @@ final class CoachController
         return $this->success($response, $created, 'Coach created', 201);
     }
 
+    public function me(Request $request, Response $response): Response
+    {
+        $authUser = $request->getAttribute('user');
+        if (!is_array($authUser)) {
+            return $this->error($response, 'Unauthorized', 401);
+        }
+
+        $coach = $this->coaches->findByUserId((int) $authUser['id']);
+        if ($coach === null) {
+            return $this->error($response, 'Coach not found', 404);
+        }
+
+        return $this->success($response, $coach);
+    }
+
+    public function updateMe(Request $request, Response $response): Response
+    {
+        $authUser = $request->getAttribute('user');
+        if (!is_array($authUser)) {
+            return $this->error($response, 'Unauthorized', 401);
+        }
+
+        $coach = $this->coaches->findByUserId((int) $authUser['id']);
+        if ($coach === null) {
+            return $this->error($response, 'Coach not found', 404);
+        }
+
+        $body = $this->filterSelfProfileUpdate((array) ($request->getParsedBody() ?? []));
+        if ($body === []) {
+            return $this->error($response, 'No valid fields to update', 422);
+        }
+
+        $updated = $this->coaches->update((int) $coach['id'], $body);
+        if ($updated === null) {
+            return $this->error($response, 'Coach not found', 404);
+        }
+
+        return $this->success($response, $updated, 'Profile updated');
+    }
+
     public function update(Request $request, Response $response, array $args): Response
     {
         $body = (array) ($request->getParsedBody() ?? []);
@@ -65,6 +105,20 @@ final class CoachController
         }
 
         return $this->success($response, $updated, 'Coach updated');
+    }
+
+    /** @return array<string, mixed> */
+    private function filterSelfProfileUpdate(array $body): array
+    {
+        $allowed = ['first_name', 'last_name', 'phone', 'title', 'bio', 'rating'];
+        $filtered = [];
+        foreach ($allowed as $field) {
+            if (array_key_exists($field, $body)) {
+                $filtered[$field] = $body[$field];
+            }
+        }
+
+        return $filtered;
     }
 
     public function destroy(Request $request, Response $response, array $args): Response

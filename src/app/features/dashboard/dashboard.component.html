@@ -2,6 +2,50 @@
   <p class="text-muted">Loading dashboard…</p>
 } @else if (error()) {
   <div class="alert alert-warning">{{ error() }}</div>
+} @else if (coachSchedule(); as s) {
+  <div class="row">
+    <div class="col-12">
+      <app-card cardTitle="Assigned batches">
+        @if (timeSlots().length === 0) {
+          <p class="text-muted mb-0">No batches assigned to you yet.</p>
+        } @else {
+          <div class="table-responsive">
+            <table class="coach-schedule mb-0">
+              <thead>
+                <tr>
+                  <th colspan="7" class="coach-schedule__coach-name">{{ headerName() }}</th>
+                </tr>
+                <tr>
+                  <th class="coach-schedule__time-col">TIME</th>
+                  @for (day of days(); track day) {
+                    <th class="coach-schedule__day-col">{{ day }}</th>
+                  }
+                </tr>
+              </thead>
+              <tbody>
+                @for (slot of timeSlots(); track slot) {
+                  <tr>
+                    <th class="coach-schedule__time-col">{{ slot }}</th>
+                    @for (day of days(); track day) {
+                      @let c = cell(slot, day);
+                      <td [class]="cellClass(c)">
+                        @if (c.label) {
+                          <strong>{{ c.label }}</strong>
+                        }
+                      </td>
+                    }
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          <p class="form-text mt-2 mb-0">
+            Orange and yellow cells are assigned batches. White cells with text are practice sessions (from batch notes).
+          </p>
+        }
+      </app-card>
+    </div>
+  </div>
 } @else if (metrics(); as m) {
   <div class="row">
     <div class="col-md-3 col-sm-6 mb-3">

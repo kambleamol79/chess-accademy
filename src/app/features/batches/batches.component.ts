@@ -45,7 +45,7 @@ export class BatchesComponent implements OnInit {
   }
 
   canManageBatches(): boolean {
-    return this.auth.hasRole(['admin', 'coach']);
+    return this.auth.hasRole(['admin']);
   }
 
   canAssignCoach(): boolean {

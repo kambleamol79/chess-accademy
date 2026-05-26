@@ -92,7 +92,10 @@ return function (array $settings): Container {
         $c->get(PaymentReceiptUploadService::class),
         $c->get(StudentRepository::class),
     ));
-    $container->set(DashboardController::class, fn (Container $c) => new DashboardController($c->get(DashboardRepository::class)));
+    $container->set(DashboardController::class, fn (Container $c) => new DashboardController(
+        $c->get(DashboardRepository::class),
+        $c->get(CoachRepository::class)
+    ));
     $container->set(StudentController::class, fn (Container $c) => new StudentController(
         $c->get(StudentRepository::class),
         $c->get(UserRepository::class),

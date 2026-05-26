@@ -54,6 +54,17 @@ export class AuthService {
     return !!r && roles.includes(r);
   }
 
+  refreshUser(): Observable<ApiResponse<User>> {
+    return this.http.get<ApiResponse<User>>(`${environment.apiUrl}/auth/me`).pipe(
+      tap((res) => {
+        if (res.success && res.data) {
+          localStorage.setItem('ca_user', JSON.stringify(res.data));
+          this.userSignal.set(res.data);
+        }
+      })
+    );
+  }
+
   private persistSession(data: AuthTokens): void {
     localStorage.setItem(environment.tokenKey, data.access_token);
     localStorage.setItem(environment.refreshKey, data.refresh_token);

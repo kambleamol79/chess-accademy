@@ -1,0 +1,53 @@
+<div class="modal-header">
+  <h5 class="modal-title">My profile</h5>
+  <button type="button" class="btn-close" aria-label="Close" (click)="dismiss()"></button>
+</div>
+
+<div class="modal-body">
+  @if (loading()) {
+    <p class="text-muted mb-0">Loading profile…</p>
+  } @else {
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label" for="profileFirstName">First name</label>
+        <input id="profileFirstName" class="form-control" [(ngModel)]="first_name" name="first_name" required />
+      </div>
+      <div class="col-md-6">
+        <label class="form-label" for="profileLastName">Last name</label>
+        <input id="profileLastName" class="form-control" [(ngModel)]="last_name" name="last_name" required />
+      </div>
+      <div class="col-md-6">
+        <label class="form-label" for="profileEmail">Email (login)</label>
+        <input id="profileEmail" type="email" class="form-control" [ngModel]="email" name="email" readonly />
+        <div class="form-text">Contact an admin to change your login email.</div>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label" for="profilePhone">Phone</label>
+        <input id="profilePhone" class="form-control" [(ngModel)]="phone" name="phone" />
+      </div>
+      <div class="col-md-6">
+        <label class="form-label" for="profileTitle">Title</label>
+        <input id="profileTitle" class="form-control" [(ngModel)]="title" name="title" placeholder="e.g. FIDE Instructor" />
+      </div>
+      <div class="col-md-6">
+        <label class="form-label" for="profileRating">FIDE / coach rating</label>
+        <input id="profileRating" type="number" class="form-control" [(ngModel)]="rating" name="rating" min="0" />
+      </div>
+      <div class="col-12">
+        <label class="form-label" for="profileBio">Bio</label>
+        <textarea id="profileBio" class="form-control" rows="3" [(ngModel)]="bio" name="bio"></textarea>
+      </div>
+    </div>
+  }
+
+  @if (error()) {
+    <div class="alert alert-danger mt-3 mb-0">{{ error() }}</div>
+  }
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-outline-secondary" (click)="dismiss()" [disabled]="saving()">Cancel</button>
+  <button type="button" class="btn btn-primary" (click)="save()" [disabled]="saving() || loading()">
+    {{ saving() ? 'Saving…' : 'Save profile' }}
+  </button>
+</div>

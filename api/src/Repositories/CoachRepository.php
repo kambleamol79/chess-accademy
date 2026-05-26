@@ -33,6 +33,19 @@ final class CoachRepository
         return $row === false ? null : $row;
     }
 
+    /** @return array<string,mixed>|null */
+    public function findByUserId(int $userId): ?array
+    {
+        $stmt = $this->pdo->prepare(
+            'SELECT c.*, u.email, u.first_name, u.last_name, u.phone, u.is_active
+             FROM coaches c INNER JOIN users u ON u.id = c.user_id WHERE c.user_id = :user_id LIMIT 1'
+        );
+        $stmt->execute(['user_id' => $userId]);
+        $row = $stmt->fetch();
+
+        return $row === false ? null : $row;
+    }
+
     /** @param array<string,mixed> $data */
     public function update(int $id, array $data): ?array
     {
@@ -52,6 +65,17 @@ final class CoachRepository
         }
         if ($userSets !== []) {
             $this->pdo->prepare('UPDATE users SET ' . implode(', ', $userSets) . ' WHERE id = :id')->execute($userParams);
+        }
+
+        if (array_key_exists('password', $data)) {
+            $pwd = is_string($data['password']) ? trim($data['password']) : '';
+            if ($pwd !== '') {
+                $this->pdo->prepare('UPDATE users SET password_hash = :password_hash WHERE id = :id')
+                    ->execute([
+                        'password_hash' => password_hash($pwd, PASSWORD_BCRYPT),
+                        'id' => (int) $coach['user_id'],
+                    ]);
+            }
         }
 
         $fields = ['title', 'bio', 'rating'];

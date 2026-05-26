@@ -27,6 +27,14 @@ export class CoachService {
   schedule(id: number): Observable<ApiResponse<CoachSchedulePayload>> {
     return this.http.get<ApiResponse<CoachSchedulePayload>>(`${environment.apiUrl}/coaches/${id}/schedule`);
   }
+
+  me(): Observable<ApiResponse<Record<string, unknown>>> {
+    return this.http.get<ApiResponse<Record<string, unknown>>>(`${environment.apiUrl}/coaches/me`);
+  }
+
+  updateMe(payload: Record<string, unknown>): Observable<ApiResponse<Record<string, unknown>>> {
+    return this.http.patch<ApiResponse<Record<string, unknown>>>(`${environment.apiUrl}/coaches/me`, payload);
+  }
 }
 
 export interface CoachScheduleAssignment {

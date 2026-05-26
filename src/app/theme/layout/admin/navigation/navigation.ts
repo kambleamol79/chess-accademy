@@ -46,7 +46,7 @@ export const NavigationItems: NavigationItem[] = [
         classes: 'nav-item',
         url: '/batches',
         icon: 'ti ti-calendar-event',
-        role: ['admin', 'coach', 'student', 'accountant']
+        role: ['admin', 'student', 'accountant']
       },
       {
         id: 'leads',
@@ -55,7 +55,7 @@ export const NavigationItems: NavigationItem[] = [
         classes: 'nav-item',
         url: '/leads',
         icon: 'ti ti-user-search',
-        role: ['admin', 'coach']
+        role: ['admin']
       },
       {
         id: 'students',
@@ -64,7 +64,7 @@ export const NavigationItems: NavigationItem[] = [
         classes: 'nav-item',
         url: '/students',
         icon: 'ti ti-users',
-        role: ['admin', 'coach']
+        role: ['admin']
       },
       {
         id: 'coaches',
