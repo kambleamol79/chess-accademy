@@ -97,6 +97,29 @@ final class FormRepository
         return $stmt->rowCount() > 0;
     }
 
+    public function nextBatchCode(): string
+    {
+        $stmt = $this->pdo->query('SELECT batch FROM forms ORDER BY id ASC');
+        $batches = $stmt->fetchAll(\PDO::FETCH_COLUMN);
+
+        $maxNum = 0;
+        $prefix = 'IB - ';
+
+        foreach ($batches as $batch) {
+            $batch = trim((string) $batch);
+            if (!preg_match('/^(.+?)\s*-\s*(\d+)$/u', $batch, $m)) {
+                continue;
+            }
+            $num = (int) $m[2];
+            if ($num >= $maxNum) {
+                $maxNum = $num;
+                $prefix = trim($m[1]) . ' - ';
+            }
+        }
+
+        return $prefix . ($maxNum + 1);
+    }
+
     /** @param array<string, mixed> $data */
     private function bindParams(array $data): array
     {

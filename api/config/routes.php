@@ -73,6 +73,7 @@ return function (App $app, Container $container): void {
             ->add(new RoleMiddleware(['admin']));
 
         $group->get('/coaches', [CoachController::class, 'index']);
+        $group->get('/coaches/{id}/schedule', [CoachController::class, 'schedule']);
         $group->get('/coaches/{id}', [CoachController::class, 'show']);
         $group->post('/coaches', [CoachController::class, 'store'])
             ->add(new RoleMiddleware(['admin']));
@@ -97,6 +98,7 @@ return function (App $app, Container $container): void {
             ->add(new RoleMiddleware(['admin']));
 
         $group->get('/forms', [FormController::class, 'index']);
+        $group->get('/forms/next-batch', [FormController::class, 'nextBatch']);
         $group->get('/forms/{id}', [FormController::class, 'show']);
         $group->post('/forms', [FormController::class, 'store'])
             ->add(new RoleMiddleware(['admin', 'coach']));
@@ -109,6 +111,8 @@ return function (App $app, Container $container): void {
 
         $group->get('/enrollments', [EnrollmentController::class, 'index']);
         $group->post('/enrollments', [EnrollmentController::class, 'store'])
+            ->add(new RoleMiddleware(['admin', 'coach']));
+        $group->post('/enrollments/bulk-assign', [EnrollmentController::class, 'bulkAssign'])
             ->add(new RoleMiddleware(['admin', 'coach']));
         $group->delete('/enrollments/{id}', [EnrollmentController::class, 'destroy'])
             ->add(new RoleMiddleware(['admin', 'coach']));

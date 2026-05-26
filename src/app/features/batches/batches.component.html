@@ -13,89 +13,96 @@
     <p class="text-muted mb-0">Loading…</p>
   } @else if (error()) {
     <div class="alert alert-warning">{{ error() }}</div>
+  } @else if (timeSlotGroups().length === 0) {
+    <p class="text-center text-muted py-4 mb-0">No batches yet. Click “Add new batch” to create one.</p>
   } @else {
-    <div class="table-responsive">
-      <table class="table table-bordered table-hover mb-0 align-middle">
-        <thead class="table-light">
-          <tr>
-            <th>BATCH</th>
-            <th>MODULE</th>
-            <th>TIME</th>
-            <th>DAYS</th>
-            <th>DAYS</th>
-            <th>COACH</th>
-            <th>DAYS</th>
-            <th>COACH</th>
-            @if (canEdit() || canDelete()) {
-              <th class="text-end">Actions</th>
-            }
-          </tr>
-        </thead>
-        <tbody>
-          @for (row of rows(); track row.id) {
-            <tr [class]="rowClass(row.highlight)">
-              <td><strong>{{ row.batch }}</strong></td>
-              <td>{{ row.module || '—' }}</td>
-              <td>{{ row.time }}</td>
-              <td>{{ row.days_summary }}</td>
-              <td>{{ row.day_1 }}</td>
-              <td
-                class="coach-cell"
-                [class.coach-cell--editable]="canAssignCoach()"
-                (click)="openAssignCoach(row, 'coach_1')"
-              >
-                @if (row.coach_1) {
-                  <span>{{ row.coach_1 }}</span>
-                } @else {
-                  <span class="text-muted">{{ canAssignCoach() ? 'Assign coach' : '—' }}</span>
+    @for (group of timeSlotGroups(); track group.time) {
+      <section class="batch-time-section">
+        <div class="batch-time-section__header d-flex flex-wrap justify-content-between align-items-center gap-2">
+          <h6 class="batch-time-section__title mb-0">
+            <i class="ti ti-clock me-1"></i>
+            {{ group.time }}
+          </h6>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-bordered table-hover mb-0 align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>BATCH</th>
+                <th>MODULE</th>
+                <th>DAYS</th>
+                <th>DAYS</th>
+                <th>COACH</th>
+                <th>DAYS</th>
+                <th>COACH</th>
+                @if (canEdit() || canDelete()) {
+                  <th class="text-end">Actions</th>
                 }
-                @if (canAssignCoach()) {
-                  <i class="ti ti-edit coach-cell__icon"></i>
-                }
-              </td>
-              <td>{{ row.day_2 }}</td>
-              <td
-                class="coach-cell"
-                [class.coach-cell--editable]="canAssignCoach()"
-                (click)="openAssignCoach(row, 'coach_2')"
-              >
-                @if (row.coach_2) {
-                  <span>{{ row.coach_2 }}</span>
-                } @else {
-                  <span class="text-muted">{{ canAssignCoach() ? 'Assign coach' : '—' }}</span>
-                }
-                @if (canAssignCoach()) {
-                  <i class="ti ti-edit coach-cell__icon"></i>
-                }
-              </td>
-              @if (canEdit() || canDelete()) {
-                <td class="text-end text-nowrap align-middle">
-                  @if (canEdit()) {
-                    <button type="button" class="btn btn-outline-secondary btn-sm me-1" title="Edit" (click)="openEditBatch(row)">
-                      <i class="ti ti-edit"></i>
-                    </button>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of group.batches; track row.id) {
+                <tr [class]="rowClass(row.highlight)">
+                  <td><strong>{{ row.batch }}</strong></td>
+                  <td>{{ row.module || '—' }}</td>
+                  <td>{{ row.days_summary }}</td>
+                  <td>{{ row.day_1 }}</td>
+                  <td
+                    class="coach-cell"
+                    [class.coach-cell--editable]="canAssignCoach()"
+                    (click)="openAssignCoach(row, 'coach_1')"
+                  >
+                    @if (row.coach_1) {
+                      <span>{{ row.coach_1 }}</span>
+                    } @else {
+                      <span class="text-muted">{{ canAssignCoach() ? 'Assign coach' : '—' }}</span>
+                    }
+                    @if (canAssignCoach()) {
+                      <i class="ti ti-edit coach-cell__icon"></i>
+                    }
+                  </td>
+                  <td>{{ row.day_2 }}</td>
+                  <td
+                    class="coach-cell"
+                    [class.coach-cell--editable]="canAssignCoach()"
+                    (click)="openAssignCoach(row, 'coach_2')"
+                  >
+                    @if (row.coach_2) {
+                      <span>{{ row.coach_2 }}</span>
+                    } @else {
+                      <span class="text-muted">{{ canAssignCoach() ? 'Assign coach' : '—' }}</span>
+                    }
+                    @if (canAssignCoach()) {
+                      <i class="ti ti-edit coach-cell__icon"></i>
+                    }
+                  </td>
+                  @if (canEdit() || canDelete()) {
+                    <td class="text-end text-nowrap align-middle">
+                      @if (canEdit()) {
+                        <button type="button" class="btn btn-outline-secondary btn-sm me-1" title="Edit" (click)="openEditBatch(row)">
+                          <i class="ti ti-edit"></i>
+                        </button>
+                      }
+                      @if (canDelete()) {
+                        <button
+                          type="button"
+                          class="btn btn-outline-danger btn-sm"
+                          title="Delete batch"
+                          [disabled]="deletingId() === row.id"
+                          (click)="deleteBatch(row)"
+                        >
+                          <i class="ti ti-trash"></i>
+                        </button>
+                      }
+                    </td>
                   }
-                  @if (canDelete()) {
-                    <button
-                      type="button"
-                      class="btn btn-outline-danger btn-sm"
-                      title="Delete batch"
-                      [disabled]="deletingId() === row.id"
-                      (click)="deleteBatch(row)"
-                    >
-                      <i class="ti ti-trash"></i>
-                    </button>
-                  }
-                </td>
+                </tr>
               }
-            </tr>
-          } @empty {
-            <tr>
-              <td [attr.colspan]="canEdit() || canDelete() ? 9 : 8" class="text-center text-muted py-4">No batches yet. Click “Add new batch” to create one.</td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    }
   }
 </app-card>

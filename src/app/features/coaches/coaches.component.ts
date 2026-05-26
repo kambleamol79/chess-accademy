@@ -6,6 +6,7 @@ import { CoachService } from 'src/app/core/services/coach.service';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { CoachFormModalComponent } from './coach-form-modal.component';
+import { CoachScheduleModalComponent } from './coach-schedule-modal.component';
 import { confirmDelete } from 'src/app/core/utils/confirm.util';
 import { getApiErrorMessage } from 'src/app/core/utils/http-error.util';
 
@@ -62,6 +63,18 @@ export class CoachesComponent implements OnInit {
 
   openEditCoach(row: Record<string, unknown>) {
     this.openCoachModal('edit', row);
+  }
+
+  openCoachSchedule(row: Record<string, unknown>) {
+    const id = Number(row['id']);
+    const name = `${row['first_name'] ?? ''} ${row['last_name'] ?? ''}`.trim();
+    const ref = this.modal.open(CoachScheduleModalComponent, {
+      size: 'xl',
+      centered: true,
+      scrollable: true
+    });
+    ref.componentInstance.coachId = id;
+    ref.componentInstance.coachName = name;
   }
 
   private openCoachModal(mode: 'create' | 'edit', coach?: Record<string, unknown>) {

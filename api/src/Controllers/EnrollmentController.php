@@ -48,4 +48,26 @@ final class EnrollmentController
 
         return $this->success($response, null, 'Enrollment removed');
     }
+
+    public function bulkAssign(Request $request, Response $response): Response
+    {
+        $body = (array) ($request->getParsedBody() ?? []);
+        $formId = (int) ($body['form_id'] ?? 0);
+        $studentIds = $body['student_ids'] ?? [];
+
+        if ($formId <= 0) {
+            return $this->error($response, 'form_id is required', 422);
+        }
+        if (!is_array($studentIds) || $studentIds === []) {
+            return $this->error($response, 'student_ids must be a non-empty array', 422);
+        }
+
+        $result = $this->enrollments->assignBatch($formId, $studentIds);
+        $message = sprintf(
+            '%d student(s) assigned to batch',
+            $result['created']
+        );
+
+        return $this->success($response, $result, $message, 201);
+    }
 }

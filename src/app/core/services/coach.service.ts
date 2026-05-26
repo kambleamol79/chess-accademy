@@ -23,4 +23,33 @@ export class CoachService {
   delete(id: number): Observable<ApiResponse<unknown>> {
     return this.http.delete<ApiResponse<unknown>>(`${environment.apiUrl}/coaches/${id}`);
   }
+
+  schedule(id: number): Observable<ApiResponse<CoachSchedulePayload>> {
+    return this.http.get<ApiResponse<CoachSchedulePayload>>(`${environment.apiUrl}/coaches/${id}/schedule`);
+  }
+}
+
+export interface CoachScheduleAssignment {
+  form_id: number;
+  batch: string;
+  module: string | null;
+  time: string;
+  day: string;
+  highlight: 'blue' | 'beige';
+  label: string;
+  is_practice: boolean;
+  slot: 'coach_1' | 'coach_2';
+  days_summary: string;
+}
+
+export interface CoachSchedulePayload {
+  coach: {
+    id: number;
+    first_name: string;
+    last_name: string;
+    display_name: string;
+  };
+  days: string[];
+  time_slots: string[];
+  assignments: CoachScheduleAssignment[];
 }

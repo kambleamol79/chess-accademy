@@ -21,6 +21,14 @@ final class FormController
         ]);
     }
 
+    public function nextBatch(Request $request, Response $response): Response
+    {
+        return $this->json($response, [
+            'success' => true,
+            'data' => ['batch' => $this->forms->nextBatchCode()],
+        ]);
+    }
+
     public function show(Request $request, Response $response, array $args): Response
     {
         $id = (int) $args['id'];

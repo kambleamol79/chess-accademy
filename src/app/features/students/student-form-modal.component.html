@@ -44,6 +44,77 @@
       <label class="form-label" for="dob">Date of birth</label>
       <input id="dob" type="date" class="form-control" [(ngModel)]="date_of_birth" name="date_of_birth" />
     </div>
+
+    <div class="col-12">
+      <h6 class="text-muted text-uppercase small mb-2 mt-1">Roster &amp; payment</h6>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label" for="city">City</label>
+      <input id="city" class="form-control" [(ngModel)]="city" name="city" />
+    </div>
+    <div class="col-md-4">
+      <label class="form-label" for="level">Level</label>
+      <input id="level" class="form-control" [(ngModel)]="level" name="level" placeholder="e.g. M5, IB 15" />
+    </div>
+    <div class="col-md-4">
+      <label class="form-label" for="paymentDate">Payment date</label>
+      <input id="paymentDate" type="date" class="form-control" [(ngModel)]="payment_date" name="payment_date" />
+    </div>
+    <div class="col-md-4">
+      <label class="form-label" for="wApp">W App</label>
+      <input id="wApp" class="form-control" [(ngModel)]="w_app" name="w_app" placeholder="e.g. DONE" />
+    </div>
+    <div class="col-md-4">
+      <label class="form-label" for="totalPay">Total pay</label>
+      <input id="totalPay" class="form-control" [(ngModel)]="total_pay" name="total_pay" placeholder="8000/-" />
+    </div>
+    <div class="col-md-4">
+      <label class="form-label" for="paymentR">Payment received</label>
+      <input id="paymentR" class="form-control" [(ngModel)]="payment_received" name="payment_received" />
+    </div>
+
+    <div class="col-12">
+      <label class="form-label">Monthly tracking</label>
+      <div class="row g-2">
+        <div class="col-6 col-md-3 col-lg-2">
+          <label class="form-label small" for="monthJan">Jan</label>
+          <input id="monthJan" class="form-control form-control-sm" [(ngModel)]="month_jan" name="month_jan" />
+        </div>
+        <div class="col-6 col-md-3 col-lg-2">
+          <label class="form-label small" for="monthFeb">Feb</label>
+          <input id="monthFeb" class="form-control form-control-sm" [(ngModel)]="month_feb" name="month_feb" />
+        </div>
+        <div class="col-6 col-md-3 col-lg-2">
+          <label class="form-label small" for="monthMar">Mar</label>
+          <input id="monthMar" class="form-control form-control-sm" [(ngModel)]="month_mar" name="month_mar" />
+        </div>
+        <div class="col-6 col-md-3 col-lg-2">
+          <label class="form-label small" for="monthApr">Apr</label>
+          <input id="monthApr" class="form-control form-control-sm" [(ngModel)]="month_apr" name="month_apr" />
+        </div>
+        <div class="col-6 col-md-3 col-lg-2">
+          <label class="form-label small" for="monthMay">May</label>
+          <input id="monthMay" class="form-control form-control-sm" [(ngModel)]="month_may" name="month_may" />
+        </div>
+        <div class="col-6 col-md-3 col-lg-2">
+          <label class="form-label small" for="monthJun">Jun</label>
+          <input id="monthJun" class="form-control form-control-sm" [(ngModel)]="month_jun" name="month_jun" />
+        </div>
+        <div class="col-6 col-md-3 col-lg-2">
+          <label class="form-label small" for="monthJul">Jul</label>
+          <input id="monthJul" class="form-control form-control-sm" [(ngModel)]="month_jul" name="month_jul" />
+        </div>
+        <div class="col-6 col-md-3 col-lg-2">
+          <label class="form-label small" for="monthAug">Aug</label>
+          <input id="monthAug" class="form-control form-control-sm" [(ngModel)]="month_aug" name="month_aug" />
+        </div>
+        <div class="col-6 col-md-3 col-lg-2">
+          <label class="form-label small" for="monthSep">Sep</label>
+          <input id="monthSep" class="form-control form-control-sm" [(ngModel)]="month_sep" name="month_sep" />
+        </div>
+      </div>
+      <div class="form-text">Batch assignment is done from the student list using checkboxes.</div>
+    </div>
   </div>
 
   @if (error()) {

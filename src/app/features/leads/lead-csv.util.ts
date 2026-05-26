@@ -17,8 +17,7 @@ export const LEAD_CSV_TEMPLATE_HEADERS = [
   'NOT INT',
   'PAID',
   'DNP',
-  'ADDITIONAL',
-  'REVIEW'
+  'ADDITIONAL REVIEW'
 ] as const;
 
 /** Example rows for the downloadable template (matches spreadsheet layout). */
@@ -35,14 +34,14 @@ export const LEAD_CSV_TEMPLATE_SAMPLE_ROWS: string[][] = [
     'Yes',
     'No',
     'Yes',
-    '07:00 PM - 0',
+    '19.00-20.00',
     '',
     'IB - 1',
     'INT',
     '',
     '',
     '',
-    ''
+    'Follow-up note'
   ],
   [
     '6/9/2025 10:30',
@@ -56,7 +55,7 @@ export const LEAD_CSV_TEMPLATE_SAMPLE_ROWS: string[][] = [
     'No',
     'Yes',
     'No',
-    '08:00 PM - 0',
+    '20.00-21.00',
     '',
     'IB - 2',
     '',
@@ -109,6 +108,7 @@ const HEADER_MAP: Record<string, string> = {
   'NOT INT': 'not_interested',
   PAID: 'paid',
   DNP: 'dnp',
+  'ADDITIONAL REVIEW': 'review',
   ADDITIONAL: 'additional',
   REVIEW: 'review'
 };
@@ -266,6 +266,13 @@ export function parseLeadCsv(text: string): LeadCsvParseResult {
       row['captured_at'] =
         `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ` +
         `${pad(now.getHours())}:${pad(now.getMinutes())}:00`;
+    }
+
+    if (row['additional'] || row['review']) {
+      const extra = String(row['additional'] ?? '').trim();
+      const rev = String(row['review'] ?? '').trim();
+      row['review'] = [extra, rev].filter(Boolean).join('\n\n');
+      row['additional'] = null;
     }
 
     leads.push(row);

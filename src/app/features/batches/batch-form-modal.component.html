@@ -6,8 +6,19 @@
 <div class="modal-body">
   <div class="row g-3">
     <div class="col-md-6">
-      <label class="form-label" for="batchCode">Batch code</label>
-      <input id="batchCode" class="form-control" [(ngModel)]="batch" name="batch" placeholder="e.g. IB - 9" required />
+      <label class="form-label" for="batchCode">Batch number</label>
+      <input
+        id="batchCode"
+        class="form-control"
+        [(ngModel)]="batch"
+        name="batch"
+        placeholder="e.g. IB - 9"
+        [readonly]="!isEdit"
+        required
+      />
+      @if (!isEdit) {
+        <div class="form-text">Auto-generated from the last batch (e.g. IB - 8 → IB - 9).</div>
+      }
     </div>
     <div class="col-md-6">
       <label class="form-label" for="moduleLevel">Module (level)</label>
@@ -19,9 +30,35 @@
       </select>
     </div>
     <div class="col-md-6">
-      <label class="form-label" for="timeSlot">Time</label>
-      <input id="timeSlot" class="form-control" [(ngModel)]="time" name="time" placeholder="07.00-08.00" required />
-      <div class="form-text">Use format like 07.00-08.00</div>
+      <label class="form-label">Time slot</label>
+      <div class="batch-time-picker">
+        <div>
+          <label class="form-label small text-muted mb-1" for="timeStart">Start</label>
+          <input
+            id="timeStart"
+            type="time"
+            class="form-control"
+            [(ngModel)]="timeStart"
+            name="timeStart"
+            required
+          />
+        </div>
+        <span class="batch-time-picker__sep" aria-hidden="true">–</span>
+        <div>
+          <label class="form-label small text-muted mb-1" for="timeEnd">End</label>
+          <input
+            id="timeEnd"
+            type="time"
+            class="form-control"
+            [(ngModel)]="timeEnd"
+            name="timeEnd"
+            required
+          />
+        </div>
+      </div>
+      <div class="form-text">
+        Saved as <strong>{{ formattedTimeSlot }}</strong> · grouped by this slot on the schedule page.
+      </div>
     </div>
     <div class="col-md-6">
       <label class="form-label" for="highlight">Row highlight</label>

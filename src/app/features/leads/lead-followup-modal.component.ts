@@ -5,11 +5,18 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { HttpErrorResponse } from '@angular/common/http';
 import { LeadService } from 'src/app/core/services/lead.service';
 import { getApiErrorMessage } from 'src/app/core/utils/http-error.util';
+import {
+  formatLeadTimeSlot,
+  mergeAdditionalReview,
+  parseLeadTimeSlot
+} from 'src/app/core/utils/lead.util';
+import { isValidTimeSlotRange } from 'src/app/core/utils/batch.util';
 
 @Component({
   selector: 'app-lead-followup-modal',
   imports: [CommonModule, FormsModule],
-  templateUrl: './lead-followup-modal.component.html'
+  templateUrl: './lead-followup-modal.component.html',
+  styleUrl: './lead-followup-modal.component.scss'
 })
 export class LeadFollowupModalComponent implements OnInit {
   private readonly activeModal = inject(NgbActiveModal);
@@ -32,26 +39,15 @@ export class LeadFollowupModalComponent implements OnInit {
   q2: string | null = null;
   q3: string | null = null;
 
-  time_slot = '';
+  timeStart = '07:00';
+  timeEnd = '08:00';
   attd_no = '';
   module = '';
   interested = false;
   not_interested = '';
   paid = false;
   dnp = '';
-  additional = '';
-  review = '';
-
-  readonly timePresets = [
-    '07:00 PM - 0',
-    '08:00 PM - 0',
-    '09:00 AM - 0',
-    '10:00 AM - 0',
-    '11:00 AM - 0',
-    '04:00 PM - 0',
-    '05:00 PM - 0',
-    '06:00 PM - 0'
-  ];
+  additionalReview = '';
 
   readonly moduleLevels = [
     'IB - 0',
@@ -78,15 +74,20 @@ export class LeadFollowupModalComponent implements OnInit {
     this.q2 = (this.lead['q2'] as string | null) ?? null;
     this.q3 = (this.lead['q3'] as string | null) ?? null;
 
-    this.time_slot = String(this.lead['time_slot'] ?? '');
+    const { start, end } = parseLeadTimeSlot(String(this.lead['time_slot'] ?? ''));
+    this.timeStart = start;
+    this.timeEnd = end;
     this.attd_no = String(this.lead['attd_no'] ?? '');
     this.module = String(this.lead['module'] ?? '');
     this.interested = String(this.lead['status_int'] ?? '').toUpperCase() === 'INT';
     this.not_interested = String(this.lead['not_interested'] ?? '');
     this.paid = String(this.lead['paid'] ?? '').toUpperCase() === 'PAID';
     this.dnp = String(this.lead['dnp'] ?? '');
-    this.additional = String(this.lead['additional'] ?? '');
-    this.review = String(this.lead['review'] ?? '');
+    this.additionalReview = mergeAdditionalReview(this.lead['additional'], this.lead['review']);
+  }
+
+  get formattedTimeSlot(): string {
+    return formatLeadTimeSlot(this.timeStart, this.timeEnd);
   }
 
   dismiss() {
@@ -100,7 +101,13 @@ export class LeadFollowupModalComponent implements OnInit {
       return;
     }
 
+    if (!isValidTimeSlotRange(this.timeStart, this.timeEnd)) {
+      this.error.set('End time must be after start time');
+      return;
+    }
+
     const id = Number(this.lead['id']);
+    const reviewText = this.additionalReview.trim();
     const payload: Record<string, unknown> = {
       child_name: this.child_name.trim(),
       parents_name: this.parents_name.trim() || null,
@@ -112,15 +119,15 @@ export class LeadFollowupModalComponent implements OnInit {
       q1: this.q1 || null,
       q2: this.q2 || null,
       q3: this.q3 || null,
-      time_slot: this.time_slot.trim() || null,
+      time_slot: this.formattedTimeSlot,
       attd_no: this.attd_no.trim() || null,
       module: this.module.trim() || null,
       status_int: this.interested ? 'INT' : null,
       not_interested: this.not_interested.trim() || null,
       paid: this.paid ? 'PAID' : null,
       dnp: this.dnp.trim() || null,
-      additional: this.additional.trim() || null,
-      review: this.review.trim() || null
+      additional: null,
+      review: reviewText || null
     };
 
     this.saving.set(true);

@@ -1,65 +1,123 @@
 <app-card [customHeader]="true">
   <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-    <h5 class="mb-0">Students</h5>
-    @if (canAddStudent()) {
-      <button type="button" class="btn btn-primary btn-sm" (click)="openAddStudent()">
-        <i class="ti ti-plus me-1"></i>
-        Add student
-      </button>
-    }
+    <div>
+      <h5 class="mb-0">Students</h5>
+      <p class="text-muted small mb-0">Roster — select students and assign to a batch</p>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+      @if (canAssignBatch() && selectedCount() > 0) {
+        <button type="button" class="btn btn-success btn-sm" (click)="openAssignBatch()">
+          <i class="ti ti-users-group me-1"></i>
+          Assign to batch ({{ selectedCount() }})
+        </button>
+      }
+      @if (canAddStudent()) {
+        <button type="button" class="btn btn-primary btn-sm" (click)="openAddStudent()">
+          <i class="ti ti-plus me-1"></i>
+          Add student
+        </button>
+      }
+    </div>
   </div>
+
+  @if (success()) {
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      {{ success() }}
+      <button type="button" class="btn-close" aria-label="Close" (click)="success.set('')"></button>
+    </div>
+  }
 
   @if (loading()) {
     <p class="text-muted mb-0">Loading…</p>
   } @else if (error()) {
     <div class="alert alert-warning">{{ error() }}</div>
   } @else {
-    <div class="table-responsive">
-      <table class="table table-hover mb-0">
+    <div class="table-responsive students-table-wrap">
+      <table class="table table-bordered table-sm table-hover mb-0 align-middle students-table">
         <thead>
           <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Rating</th>
-            <th>Parent</th>
-            <th>Phone</th>
-            @if (canEdit() || canDelete()) {
-              <th class="text-end">Actions</th>
+            @if (canAssignBatch()) {
+              <th class="th-select">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  [checked]="allSelected()"
+                  (change)="toggleSelectAll($any($event.target).checked)"
+                  aria-label="Select all students"
+                />
+              </th>
             }
+            <th class="th-payment-d">PAYMENT D</th>
+            <th class="th-city">CITY</th>
+            <th class="th-name">STUDENT NAME</th>
+            <th class="th-contact">CONTACT NO.</th>
+            <th class="th-level">LEVEL</th>
+            <th class="th-batch-day">BATCH/DAY</th>
+            <th class="th-batch">BATCH</th>
+            <th class="th-wapp">W APP</th>
+            <th class="th-pay">TOTAL PAY</th>
+            <th class="th-pay">PAYMENT R</th>
+            @for (label of monthLabels; track label) {
+              <th class="th-month">{{ label }}</th>
+            }
+            <th class="th-actions">Actions</th>
           </tr>
         </thead>
         <tbody>
-          @for (s of rows(); track s['id']) {
+          @for (row of rows(); track row['id']) {
             <tr>
-              <td>{{ s['first_name'] }} {{ s['last_name'] }}</td>
-              <td>{{ s['email'] }}</td>
-              <td>{{ s['chess_rating'] }}</td>
-              <td>{{ s['parent_name'] || '—' }}</td>
-              <td>{{ s['phone'] || s['parent_phone'] || '—' }}</td>
-              @if (canEdit() || canDelete()) {
-                <td class="text-end text-nowrap">
-                  @if (canEdit()) {
-                    <button type="button" class="btn btn-outline-secondary btn-sm me-1" title="Edit" (click)="openEditStudent(s)">
-                      <i class="ti ti-edit"></i>
-                    </button>
-                  }
-                  @if (canDelete()) {
-                    <button
-                      type="button"
-                      class="btn btn-outline-danger btn-sm"
-                      title="Delete"
-                      [disabled]="deletingId() === s['id']"
-                      (click)="deleteStudent(s)"
-                    >
-                      <i class="ti ti-trash"></i>
-                    </button>
-                  }
+              @if (canAssignBatch()) {
+                <td class="th-select-col text-center">
+                  <input
+                    type="checkbox"
+                    class="form-check-input"
+                    [checked]="isSelected(row)"
+                    (change)="toggleRow(row, $any($event.target).checked)"
+                    [attr.aria-label]="'Select ' + studentName(row)"
+                  />
                 </td>
               }
+              <td class="text-nowrap">{{ paymentDate(row) }}</td>
+              <td>{{ cell(row['city']) }}</td>
+              <td><strong>{{ studentName(row) }}</strong></td>
+              <td class="text-nowrap">{{ contactNo(row) }}</td>
+              <td>{{ cell(row['level']) }}</td>
+              <td class="students-cell-notes">{{ batchDay(row) }}</td>
+              <td>
+                @if (row['batch']) {
+                  <span class="batch-assigned">{{ row['batch'] }}</span>
+                } @else {
+                  <span class="text-muted">—</span>
+                }
+              </td>
+              <td>{{ cell(row['w_app']) }}</td>
+              <td>{{ cell(row['total_pay']) }}</td>
+              <td>{{ cell(row['payment_received']) }}</td>
+              @for (field of monthFields; track field) {
+                <td class="students-cell-notes">{{ monthValue(row, field) }}</td>
+              }
+              <td class="text-center text-nowrap">
+                @if (canEdit()) {
+                  <button type="button" class="btn btn-outline-secondary btn-sm me-1" title="Edit" (click)="openEditStudent(row)">
+                    <i class="ti ti-edit"></i>
+                  </button>
+                }
+                @if (canDelete()) {
+                  <button
+                    type="button"
+                    class="btn btn-outline-danger btn-sm"
+                    title="Delete"
+                    [disabled]="deletingId() === row['id']"
+                    (click)="deleteStudent(row)"
+                  >
+                    <i class="ti ti-trash"></i>
+                  </button>
+                }
+              </td>
             </tr>
           } @empty {
             <tr>
-              <td [attr.colspan]="canEdit() || canDelete() ? 6 : 5" class="text-center text-muted py-4">
+              <td [attr.colspan]="canAssignBatch() ? 21 : 20" class="text-center text-muted py-4">
                 No students yet.@if (canAddStudent()) { Click “Add student” to create one. }
               </td>
             </tr>

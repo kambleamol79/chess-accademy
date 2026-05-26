@@ -7,6 +7,12 @@ import { BatchForm } from 'src/app/core/models/form.model';
 import { FormService } from 'src/app/core/services/form.service';
 import { CoachService } from 'src/app/core/services/coach.service';
 import { getApiErrorMessage } from 'src/app/core/utils/http-error.util';
+import {
+  formatTimeSlot,
+  isValidTimeSlotRange,
+  nextBatchCode,
+  parseTimeSlot
+} from 'src/app/core/utils/batch.util';
 
 export interface CoachOption {
   id: number;
@@ -26,6 +32,8 @@ export class BatchFormModalComponent implements OnInit {
 
   @Input() mode: 'create' | 'edit' = 'create';
   @Input() batchRecord: BatchForm | null = null;
+  @Input() existingBatches: BatchForm[] = [];
+  @Input() defaultTime = '';
 
   batchId = 0;
   saving = signal(false);
@@ -43,7 +51,8 @@ export class BatchFormModalComponent implements OnInit {
 
   batch = '';
   module = '';
-  time = '07.00-08.00';
+  timeStart = '07:00';
+  timeEnd = '08:00';
   day1 = 'MON';
   day2 = 'TUE';
   coach1 = '';
@@ -55,18 +64,27 @@ export class BatchFormModalComponent implements OnInit {
     return this.mode === 'edit';
   }
 
+  get formattedTimeSlot(): string {
+    return formatTimeSlot(this.timeStart, this.timeEnd);
+  }
+
   ngOnInit() {
     if (this.batchRecord) {
       this.batchId = this.batchRecord.id;
       this.batch = this.batchRecord.batch;
       this.module = this.batchRecord.module ?? '';
-      this.time = this.batchRecord.time;
+      this.applyTimeSlot(this.batchRecord.time);
       this.day1 = this.batchRecord.day_1;
       this.day2 = this.batchRecord.day_2;
       this.coach1 = this.batchRecord.coach_1 ?? '';
       this.coach2 = this.batchRecord.coach_2 ?? '';
       this.highlight = (this.batchRecord.highlight === 'blue' ? 'blue' : 'beige') as 'blue' | 'beige';
       this.notes = this.batchRecord.notes ?? '';
+    } else {
+      if (this.defaultTime) {
+        this.applyTimeSlot(this.defaultTime);
+      }
+      this.loadNextBatchCode();
     }
 
     this.coachesApi.list().subscribe({
@@ -78,6 +96,26 @@ export class BatchFormModalComponent implements OnInit {
         this.coaches.set(options);
       }
     });
+  }
+
+  private loadNextBatchCode() {
+    this.forms.nextBatch().subscribe({
+      next: (res) => {
+        if (res.data?.batch) {
+          this.batch = res.data.batch;
+        }
+      },
+      error: () => {
+        const codes = this.existingBatches.map((b) => b.batch);
+        this.batch = nextBatchCode(codes);
+      }
+    });
+  }
+
+  applyTimeSlot(slot: string) {
+    const { start, end } = parseTimeSlot(slot);
+    this.timeStart = start;
+    this.timeEnd = end;
   }
 
   applyDayPreset(day1: string, day2: string) {
@@ -100,8 +138,12 @@ export class BatchFormModalComponent implements OnInit {
       this.error.set('Batch code is required');
       return;
     }
-    if (!this.time.trim()) {
-      this.error.set('Time is required');
+    if (!this.timeStart || !this.timeEnd) {
+      this.error.set('Start and end time are required');
+      return;
+    }
+    if (!isValidTimeSlotRange(this.timeStart, this.timeEnd)) {
+      this.error.set('End time must be after start time');
       return;
     }
 
@@ -110,7 +152,7 @@ export class BatchFormModalComponent implements OnInit {
       highlight: this.highlight,
       batch,
       module: this.module.trim() || null,
-      time: this.time.trim(),
+      time: this.formattedTimeSlot,
       days_summary: this.daysSummary,
       day_1: this.day1,
       day_2: this.day2,

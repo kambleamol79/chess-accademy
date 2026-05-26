@@ -1,0 +1,74 @@
+<div class="modal-header">
+  <h5 class="modal-title">Assign to batch</h5>
+  <button type="button" class="btn-close" aria-label="Close" (click)="dismiss()"></button>
+</div>
+
+<div class="modal-body">
+  <p class="mb-3">
+    Assigning <strong>{{ studentIds.length }}</strong> student(s):
+    <span class="text-muted">{{ studentNames.join(', ') }}</span>
+  </p>
+
+  @if (loading()) {
+    <p class="text-muted mb-0">Loading batches…</p>
+  } @else if (batches().length === 0) {
+    <p class="text-muted mb-0">No batches defined yet. Create batches under the Batches menu first.</p>
+  } @else {
+    <p class="small text-muted mb-2">Select a batch — details are shown for each option.</p>
+
+    @for (group of timeSlotGroups(); track group.time) {
+      <div class="assign-batch-slot mb-3">
+        <div class="assign-batch-slot__label">{{ group.time }}</div>
+        <div class="row g-2">
+          @for (batch of group.batches; track batch.id) {
+            <div class="col-md-6">
+              <button
+                type="button"
+                class="assign-batch-card w-100 text-start"
+                [class.assign-batch-card--selected]="isSelected(batch)"
+                (click)="selectBatch(batch)"
+              >
+                <div class="d-flex justify-content-between align-items-start gap-2">
+                  <strong class="assign-batch-card__code">{{ batch.batch }}</strong>
+                  @if (isSelected(batch)) {
+                    <i class="ti ti-circle-check-filled text-primary"></i>
+                  }
+                </div>
+                <div class="assign-batch-card__meta">
+                  <span><i class="ti ti-calendar me-1"></i>{{ batch.days_summary }}</span>
+                  <span class="mx-1">·</span>
+                  <span>{{ batch.day_1 }} / {{ batch.day_2 }}</span>
+                </div>
+                <div class="assign-batch-card__meta">
+                  <span><i class="ti ti-clock me-1"></i>{{ batch.time }}</span>
+                  @if (batch.module) {
+                    <span class="mx-1">·</span>
+                    <span>{{ batch.module }}</span>
+                  }
+                </div>
+                <div class="assign-batch-card__coaches small text-muted">
+                  @if (batch.coach_1 || batch.coach_2) {
+                    Coach: {{ batch.coach_1 || '—' }} · {{ batch.coach_2 || '—' }}
+                  } @else {
+                    No coaches assigned yet
+                  }
+                </div>
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  }
+
+  @if (error()) {
+    <div class="alert alert-danger mt-3 mb-0">{{ error() }}</div>
+  }
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-outline-secondary" (click)="dismiss()" [disabled]="saving()">Cancel</button>
+  <button type="button" class="btn btn-primary" (click)="assign()" [disabled]="saving() || loading()">
+    {{ saving() ? 'Assigning…' : 'Assign to batch' }}
+  </button>
+</div>

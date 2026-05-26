@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { CardComponent } from 'src/app/theme/shared/components/card/card.component';
@@ -6,8 +6,15 @@ import { StudentService } from 'src/app/core/services/student.service';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { StudentFormModalComponent } from './student-form-modal.component';
+import { StudentAssignBatchModalComponent } from './student-assign-batch-modal.component';
 import { confirmDelete } from 'src/app/core/utils/confirm.util';
 import { getApiErrorMessage } from 'src/app/core/utils/http-error.util';
+import {
+  STUDENT_MONTH_FIELDS,
+  STUDENT_MONTH_LABELS,
+  StudentMonthField
+} from 'src/app/core/models/student-roster.model';
+import { BulkAssignResult } from 'src/app/core/services/enrollment.service';
 
 @Component({
   selector: 'app-students',
@@ -20,10 +27,21 @@ export class StudentsComponent implements OnInit {
   private readonly modal = inject(NgbModal);
   readonly auth = inject(AuthService);
 
+  readonly monthFields = STUDENT_MONTH_FIELDS;
+  readonly monthLabels = STUDENT_MONTH_LABELS;
+
   loading = signal(true);
   error = signal('');
+  success = signal('');
   deletingId = signal<number | null>(null);
   rows = signal<Record<string, unknown>[]>([]);
+  selectedIds = signal<Set<number>>(new Set());
+
+  selectedCount = computed(() => this.selectedIds().size);
+  allSelected = computed(() => {
+    const rows = this.rows();
+    return rows.length > 0 && rows.every((r) => this.selectedIds().has(Number(r['id'])));
+  });
 
   ngOnInit() {
     this.load();
@@ -31,6 +49,10 @@ export class StudentsComponent implements OnInit {
 
   canAddStudent(): boolean {
     return this.auth.hasRole(['admin']);
+  }
+
+  canAssignBatch(): boolean {
+    return this.auth.hasRole(['admin', 'coach']);
   }
 
   canDelete(): boolean {
@@ -42,6 +64,7 @@ export class StudentsComponent implements OnInit {
     this.students.list().subscribe({
       next: (res) => {
         this.rows.set(res.data);
+        this.selectedIds.set(new Set());
         this.loading.set(false);
         this.error.set('');
       },
@@ -54,6 +77,101 @@ export class StudentsComponent implements OnInit {
 
   canEdit(): boolean {
     return this.auth.hasRole(['admin']);
+  }
+
+  cell(value: unknown): string {
+    if (value === null || value === undefined || value === '') {
+      return '—';
+    }
+    return String(value);
+  }
+
+  studentName(row: Record<string, unknown>): string {
+    return `${row['first_name'] ?? ''} ${row['last_name'] ?? ''}`.trim();
+  }
+
+  contactNo(row: Record<string, unknown>): string {
+    return this.cell(row['phone'] || row['parent_phone']);
+  }
+
+  paymentDate(row: Record<string, unknown>): string {
+    const d = row['payment_date'] ?? row['enrollment_date'];
+    if (!d) {
+      return '—';
+    }
+    const parsed = new Date(String(d));
+    if (Number.isNaN(parsed.getTime())) {
+      return String(d);
+    }
+    return parsed.toLocaleDateString();
+  }
+
+  batchDay(row: Record<string, unknown>): string {
+    if (row['batch_day']) {
+      const time = row['batch_time'] ? ` · ${row['batch_time']}` : '';
+      return `${row['batch_day']}${time}`;
+    }
+    return '—';
+  }
+
+  monthValue(row: Record<string, unknown>, field: StudentMonthField): string {
+    return this.cell(row[field]);
+  }
+
+  isSelected(row: Record<string, unknown>): boolean {
+    return this.selectedIds().has(Number(row['id']));
+  }
+
+  toggleRow(row: Record<string, unknown>, checked: boolean) {
+    const id = Number(row['id']);
+    const next = new Set(this.selectedIds());
+    if (checked) {
+      next.add(id);
+    } else {
+      next.delete(id);
+    }
+    this.selectedIds.set(next);
+  }
+
+  toggleSelectAll(checked: boolean) {
+    if (!checked) {
+      this.selectedIds.set(new Set());
+      return;
+    }
+    this.selectedIds.set(new Set(this.rows().map((r) => Number(r['id']))));
+  }
+
+  openAssignBatch() {
+    const ids = Array.from(this.selectedIds());
+    if (ids.length === 0) {
+      return;
+    }
+
+    const names = this.rows()
+      .filter((r) => ids.includes(Number(r['id'])))
+      .map((r) => this.studentName(r));
+
+    const ref = this.modal.open(StudentAssignBatchModalComponent, {
+      size: 'lg',
+      centered: true,
+      scrollable: true,
+      backdrop: 'static'
+    });
+    ref.componentInstance.studentIds = ids;
+    ref.componentInstance.studentNames = names;
+
+    ref.closed.subscribe((result: BulkAssignResult | undefined) => {
+      if (!result) {
+        return;
+      }
+      const skipped = result.skipped?.length ?? 0;
+      let msg = `${result.created} student(s) assigned to batch.`;
+      if (skipped > 0) {
+        msg += ` ${skipped} skipped (already enrolled).`;
+      }
+      this.success.set(msg);
+      this.load();
+    });
   }
 
   openAddStudent() {
@@ -79,7 +197,7 @@ export class StudentsComponent implements OnInit {
 
   deleteStudent(row: Record<string, unknown>) {
     const id = Number(row['id']);
-    const label = `${row['first_name']} ${row['last_name']}`.trim();
+    const label = this.studentName(row);
     if (!confirmDelete(label || `Student #${id}`)) {
       return;
     }

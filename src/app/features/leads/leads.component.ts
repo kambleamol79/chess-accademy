@@ -11,6 +11,7 @@ import { downloadLeadCsvTemplate } from './lead-csv.util';
 import { HttpErrorResponse } from '@angular/common/http';
 import { confirmDelete } from 'src/app/core/utils/confirm.util';
 import { getApiErrorMessage } from 'src/app/core/utils/http-error.util';
+import { mergeAdditionalReview } from 'src/app/core/utils/lead.util';
 
 @Component({
   selector: 'app-leads',
@@ -122,6 +123,10 @@ export class LeadsComponent implements OnInit {
       hour: '2-digit',
       minute: '2-digit'
     });
+  }
+
+  additionalReview(row: Record<string, unknown>): string {
+    return mergeAdditionalReview(row['additional'], row['review']);
   }
 
   cell(value: unknown): string {

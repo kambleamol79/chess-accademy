@@ -13,10 +13,22 @@ final class StudentRepository
     /** @return list<array<string,mixed>> */
     public function findAll(): array
     {
-        $sql = 'SELECT s.*, u.email, u.first_name, u.last_name, u.phone, u.is_active
+        return $this->findRoster();
+    }
+
+    /** @return list<array<string,mixed>> */
+    public function findRoster(): array
+    {
+        $sql = 'SELECT s.*, u.email, u.first_name, u.last_name, u.phone, u.is_active,
+                       e.id AS enrollment_id, e.form_id, e.enrolled_at AS enrollment_date,
+                       f.batch, f.days_summary AS batch_day, f.time AS batch_time, f.module AS batch_module,
+                       f.day_1, f.day_2, f.coach_1, f.coach_2, f.highlight AS batch_highlight
                 FROM students s
                 INNER JOIN users u ON u.id = s.user_id
+                LEFT JOIN form_enrollments e ON e.student_id = s.id AND e.status = \'active\'
+                LEFT JOIN forms f ON f.id = e.form_id
                 ORDER BY s.id ASC';
+
         return $this->pdo->query($sql)->fetchAll();
     }
 
@@ -64,7 +76,27 @@ final class StudentRepository
             $this->pdo->prepare('UPDATE users SET ' . implode(', ', $userSets) . ' WHERE id = :id')->execute($userParams);
         }
 
-        $fields = ['parent_name', 'parent_phone', 'date_of_birth', 'chess_rating'];
+        $fields = [
+            'parent_name',
+            'parent_phone',
+            'date_of_birth',
+            'chess_rating',
+            'city',
+            'level',
+            'payment_date',
+            'w_app',
+            'total_pay',
+            'payment_received',
+            'month_jan',
+            'month_feb',
+            'month_mar',
+            'month_apr',
+            'month_may',
+            'month_jun',
+            'month_jul',
+            'month_aug',
+            'month_sep',
+        ];
         $sets = [];
         $params = ['id' => $id];
         foreach ($fields as $f) {

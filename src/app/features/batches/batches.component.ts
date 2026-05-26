@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { CardComponent } from 'src/app/theme/shared/components/card/card.component';
@@ -13,6 +13,7 @@ import {
 import { HttpErrorResponse } from '@angular/common/http';
 import { confirmDelete } from 'src/app/core/utils/confirm.util';
 import { getApiErrorMessage } from 'src/app/core/utils/http-error.util';
+import { groupBatchesByTimeSlot } from 'src/app/core/utils/batch.util';
 
 @Component({
   selector: 'app-batches',
@@ -29,6 +30,7 @@ export class BatchesComponent implements OnInit {
   error = signal('');
   deletingId = signal<number | null>(null);
   rows = signal<BatchForm[]>([]);
+  timeSlotGroups = computed(() => groupBatchesByTimeSlot(this.rows()));
 
   ngOnInit() {
     this.load();
@@ -65,23 +67,27 @@ export class BatchesComponent implements OnInit {
     return this.canManageBatches();
   }
 
-  openAddBatch() {
-    this.openBatchModal('create');
+  openAddBatch(timeSlot?: string) {
+    this.openBatchModal('create', undefined, timeSlot);
   }
 
   openEditBatch(row: BatchForm) {
     this.openBatchModal('edit', row);
   }
 
-  private openBatchModal(mode: 'create' | 'edit', batch?: BatchForm) {
+  private openBatchModal(mode: 'create' | 'edit', batch?: BatchForm, defaultTime?: string) {
     const ref = this.modal.open(BatchFormModalComponent, {
       size: 'lg',
       centered: true,
       backdrop: 'static'
     });
     ref.componentInstance.mode = mode;
+    ref.componentInstance.existingBatches = this.rows();
     if (batch) {
       ref.componentInstance.batchRecord = batch;
+    }
+    if (defaultTime) {
+      ref.componentInstance.defaultTime = defaultTime;
     }
     ref.closed.subscribe(() => this.load());
   }

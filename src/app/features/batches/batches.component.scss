@@ -1,3 +1,24 @@
+.batch-time-section {
+  margin-bottom: 1.75rem;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.batch-time-section__header {
+  margin-bottom: 0.65rem;
+  padding: 0.5rem 0.75rem;
+  background: linear-gradient(90deg, rgba(var(--bs-primary-rgb), 0.12), rgba(var(--bs-primary-rgb), 0.04));
+  border-left: 4px solid var(--bs-primary);
+  border-radius: 0.25rem;
+}
+
+.batch-time-section__title {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
 .coach-cell {
   min-width: 120px;
 

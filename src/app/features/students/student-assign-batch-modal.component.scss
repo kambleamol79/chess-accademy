@@ -1,0 +1,42 @@
+.assign-batch-slot__label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--bs-secondary-color);
+  margin-bottom: 0.5rem;
+  padding-left: 0.25rem;
+}
+
+.assign-batch-card {
+  border: 2px solid var(--bs-border-color);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  background: var(--bs-body-bg);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+
+  &:hover {
+    border-color: rgba(var(--bs-primary-rgb), 0.5);
+  }
+
+  &--selected {
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 3px rgba(var(--bs-primary-rgb), 0.15);
+    background: rgba(var(--bs-primary-rgb), 0.04);
+  }
+}
+
+.assign-batch-card__code {
+  font-size: 1rem;
+}
+
+.assign-batch-card__meta {
+  font-size: 0.8125rem;
+  margin-top: 0.35rem;
+}
+
+.assign-batch-card__coaches {
+  margin-top: 0.35rem;
+}

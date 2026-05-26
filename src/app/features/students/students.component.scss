@@ -1,0 +1,94 @@
+.students-table-wrap {
+  max-width: 100%;
+}
+
+.students-table {
+  font-size: 0.8125rem;
+  min-width: 1600px;
+
+  thead th {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    white-space: nowrap;
+    vertical-align: middle;
+  }
+
+  tbody tr:nth-child(even) {
+    background-color: rgba(25, 135, 84, 0.06);
+  }
+
+  .th-select {
+    width: 2.5rem;
+    background: #f8f9fa;
+    position: sticky;
+    left: 0;
+    z-index: 2;
+  }
+
+  tbody td.th-select-col {
+    position: sticky;
+    left: 0;
+    background: inherit;
+    z-index: 1;
+  }
+
+  .th-payment-d {
+    background: #fff3cd;
+  }
+  .th-city {
+    background: #fff3cd;
+  }
+  .th-name {
+    background: #cff4fc;
+  }
+  .th-contact {
+    background: #cff4fc;
+  }
+  .th-level {
+    background: #e9ecef;
+  }
+  .th-batch-day {
+    background: #d1e7dd;
+  }
+  .th-batch {
+    background: #f8d7da;
+  }
+  .th-wapp {
+    background: #e9ecef;
+  }
+  .th-pay {
+    background: #ffe5d0;
+  }
+  .th-month {
+    background: #fff9c4;
+    min-width: 4rem;
+  }
+  .th-actions {
+    background: #f8f9fa;
+    position: sticky;
+    right: 0;
+    z-index: 2;
+    box-shadow: -4px 0 6px rgba(0, 0, 0, 0.06);
+  }
+
+  tbody td:last-child {
+    position: sticky;
+    right: 0;
+    background: inherit;
+    z-index: 1;
+    box-shadow: -4px 0 6px rgba(0, 0, 0, 0.06);
+  }
+
+  .batch-assigned {
+    font-weight: 600;
+    color: var(--bs-primary);
+  }
+}
+
+.students-cell-notes {
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

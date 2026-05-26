@@ -32,6 +32,21 @@ export class StudentFormModalComponent implements OnInit {
   parent_phone = '';
   date_of_birth = '';
   chess_rating = 0;
+  city = '';
+  level = '';
+  payment_date = '';
+  w_app = '';
+  total_pay = '';
+  payment_received = '';
+  month_jan = '';
+  month_feb = '';
+  month_mar = '';
+  month_apr = '';
+  month_may = '';
+  month_jun = '';
+  month_jul = '';
+  month_aug = '';
+  month_sep = '';
 
   get isEdit(): boolean {
     return this.mode === 'edit';
@@ -52,6 +67,43 @@ export class StudentFormModalComponent implements OnInit {
       ? String(this.student['date_of_birth']).slice(0, 10)
       : '';
     this.chess_rating = Number(this.student['chess_rating']) || 0;
+    this.city = String(this.student['city'] ?? '');
+    this.level = String(this.student['level'] ?? '');
+    this.payment_date = this.student['payment_date']
+      ? String(this.student['payment_date']).slice(0, 10)
+      : '';
+    this.w_app = String(this.student['w_app'] ?? '');
+    this.total_pay = String(this.student['total_pay'] ?? '');
+    this.payment_received = String(this.student['payment_received'] ?? '');
+    this.month_jan = String(this.student['month_jan'] ?? '');
+    this.month_feb = String(this.student['month_feb'] ?? '');
+    this.month_mar = String(this.student['month_mar'] ?? '');
+    this.month_apr = String(this.student['month_apr'] ?? '');
+    this.month_may = String(this.student['month_may'] ?? '');
+    this.month_jun = String(this.student['month_jun'] ?? '');
+    this.month_jul = String(this.student['month_jul'] ?? '');
+    this.month_aug = String(this.student['month_aug'] ?? '');
+    this.month_sep = String(this.student['month_sep'] ?? '');
+  }
+
+  private rosterPayload(): Record<string, unknown> {
+    return {
+      city: this.city.trim() || null,
+      level: this.level.trim() || null,
+      payment_date: this.payment_date || null,
+      w_app: this.w_app.trim() || null,
+      total_pay: this.total_pay.trim() || null,
+      payment_received: this.payment_received.trim() || null,
+      month_jan: this.month_jan.trim() || null,
+      month_feb: this.month_feb.trim() || null,
+      month_mar: this.month_mar.trim() || null,
+      month_apr: this.month_apr.trim() || null,
+      month_may: this.month_may.trim() || null,
+      month_jun: this.month_jun.trim() || null,
+      month_jul: this.month_jul.trim() || null,
+      month_aug: this.month_aug.trim() || null,
+      month_sep: this.month_sep.trim() || null
+    };
   }
 
   dismiss() {
@@ -77,7 +129,8 @@ export class StudentFormModalComponent implements OnInit {
           parent_name: this.parent_name.trim() || null,
           parent_phone: this.parent_phone.trim() || null,
           date_of_birth: this.date_of_birth || null,
-          chess_rating: Number(this.chess_rating) || 0
+          chess_rating: Number(this.chess_rating) || 0,
+          ...this.rosterPayload()
         })
         .subscribe({
           next: (res) => this.finishSave(res, 'Could not update student'),
@@ -106,7 +159,8 @@ export class StudentFormModalComponent implements OnInit {
         parent_name: this.parent_name.trim() || null,
         parent_phone: this.parent_phone.trim() || null,
         date_of_birth: this.date_of_birth || null,
-        chess_rating: Number(this.chess_rating) || 0
+        chess_rating: Number(this.chess_rating) || 0,
+        ...this.rosterPayload()
       })
       .subscribe({
         next: (res) => this.finishSave(res, 'Could not create student'),

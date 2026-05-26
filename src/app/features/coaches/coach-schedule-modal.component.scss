@@ -1,0 +1,49 @@
+.coach-schedule {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 0.875rem;
+
+  th,
+  td {
+    border: 2px solid #000;
+    text-align: center;
+    vertical-align: middle;
+    padding: 0.5rem 0.35rem;
+  }
+}
+
+.coach-schedule__coach-name {
+  background-color: #f5d5b8;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  font-size: 1rem;
+  padding: 0.65rem;
+}
+
+.coach-schedule__time-col {
+  background-color: #f8c8dc;
+  font-weight: 700;
+  width: 7.5rem;
+}
+
+.coach-schedule__day-col {
+  background-color: #fff9c4;
+  font-weight: 700;
+}
+
+.coach-schedule__cell--blue {
+  background-color: #ff9800;
+}
+
+.coach-schedule__cell--beige {
+  background-color: #ffeb3b;
+}
+
+.coach-schedule__cell--practice {
+  background-color: #fff;
+}
+
+.coach-schedule__cell--empty {
+  background-color: #fff;
+}

@@ -75,4 +75,32 @@ final class CoachController
 
         return $this->success($response, null, 'Coach deleted');
     }
+
+    public function schedule(Request $request, Response $response, array $args): Response
+    {
+        $coach = $this->coaches->findById((int) $args['id']);
+        if ($coach === null) {
+            return $this->error($response, 'Coach not found', 404);
+        }
+
+        $assignments = $this->coaches->findAssignedBatches((int) $args['id']);
+        $timeSlots = [];
+        foreach ($assignments as $row) {
+            $timeSlots[$row['time']] = true;
+        }
+        $timeSlots = array_keys($timeSlots);
+        sort($timeSlots);
+
+        return $this->success($response, [
+            'coach' => [
+                'id' => (int) $coach['id'],
+                'first_name' => $coach['first_name'],
+                'last_name' => $coach['last_name'],
+                'display_name' => strtoupper(trim("{$coach['first_name']} {$coach['last_name']}")),
+            ],
+            'days' => ['MON', 'TUE', 'WED', 'THUR', 'FRI', 'SAT'],
+            'time_slots' => $timeSlots,
+            'assignments' => $assignments,
+        ]);
+    }
 }

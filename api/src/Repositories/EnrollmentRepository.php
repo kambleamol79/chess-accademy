@@ -72,4 +72,70 @@ final class EnrollmentRepository
 
         return $stmt->rowCount() > 0;
     }
+
+    /** @return array<string,mixed>|null */
+    public function findActiveByStudent(int $studentId): ?array
+    {
+        $stmt = $this->pdo->prepare(
+            'SELECT e.*, f.batch, f.days_summary, f.time, f.module
+             FROM form_enrollments e
+             INNER JOIN forms f ON f.id = e.form_id
+             WHERE e.student_id = :student_id AND e.status = \'active\'
+             LIMIT 1'
+        );
+        $stmt->execute(['student_id' => $studentId]);
+        $row = $stmt->fetch();
+
+        return $row === false ? null : $row;
+    }
+
+    /**
+     * @param list<int> $studentIds
+     * @return array{created: int, skipped: list<array{student_id: int, reason: string}>}
+     */
+    public function assignBatch(int $formId, array $studentIds): array
+    {
+        $created = 0;
+        $skipped = [];
+
+        foreach ($studentIds as $studentId) {
+            $studentId = (int) $studentId;
+            if ($studentId <= 0) {
+                continue;
+            }
+
+            $existing = $this->findActiveByStudent($studentId);
+            if ($existing !== null) {
+                if ((int) $existing['form_id'] === $formId) {
+                    $skipped[] = [
+                        'student_id' => $studentId,
+                        'reason' => 'Already assigned to this batch',
+                    ];
+                } else {
+                    $skipped[] = [
+                        'student_id' => $studentId,
+                        'reason' => 'Already in batch ' . ($existing['batch'] ?? ''),
+                    ];
+                }
+                continue;
+            }
+
+            try {
+                $this->create([
+                    'form_id' => $formId,
+                    'student_id' => $studentId,
+                    'enrolled_at' => date('Y-m-d'),
+                    'status' => 'active',
+                ]);
+                $created++;
+            } catch (\PDOException) {
+                $skipped[] = [
+                    'student_id' => $studentId,
+                    'reason' => 'Could not enroll student',
+                ];
+            }
+        }
+
+        return ['created' => $created, 'skipped' => $skipped];
+    }
 }

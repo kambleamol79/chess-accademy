@@ -72,23 +72,36 @@
     <div class="col-12">
       <h6 class="text-muted text-uppercase small mb-2">Schedule &amp; module</h6>
       <div class="row g-3">
-        <div class="col-md-4">
-          <label class="form-label" for="fuTime">Time</label>
-          <input
-            id="fuTime"
-            class="form-control form-control-sm"
-            [(ngModel)]="time_slot"
-            name="time_slot"
-            list="leadTimeList"
-            placeholder="07:00 PM - 0"
-          />
-          <datalist id="leadTimeList">
-            @for (t of timePresets; track t) {
-              <option [value]="t"></option>
-            }
-          </datalist>
+        <div class="col-md-6">
+          <label class="form-label">Time</label>
+          <div class="lead-time-picker">
+            <div>
+              <label class="form-label small text-muted mb-1" for="fuTimeStart">Start</label>
+              <input
+                id="fuTimeStart"
+                type="time"
+                class="form-control form-control-sm"
+                [(ngModel)]="timeStart"
+                name="timeStart"
+                required
+              />
+            </div>
+            <span class="lead-time-picker__sep" aria-hidden="true">–</span>
+            <div>
+              <label class="form-label small text-muted mb-1" for="fuTimeEnd">End</label>
+              <input
+                id="fuTimeEnd"
+                type="time"
+                class="form-control form-control-sm"
+                [(ngModel)]="timeEnd"
+                name="timeEnd"
+                required
+              />
+            </div>
+          </div>
+          <div class="form-text">Saved as {{ formattedTimeSlot }}</div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
           <label class="form-label" for="fuAttd">ATTD - NO</label>
           <input
             id="fuAttd"
@@ -98,7 +111,7 @@
             placeholder="ATTD or notes"
           />
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
           <label class="form-label" for="fuModule">Module</label>
           <select id="fuModule" class="form-select form-select-sm" [(ngModel)]="module" name="module">
             <option value="">— Select —</option>
@@ -150,22 +163,15 @@
 
     <div class="col-12">
       <h6 class="text-muted text-uppercase small mb-2">Notes</h6>
-      <div class="row g-3">
-        <div class="col-md-6">
-          <label class="form-label" for="fuAdditional">Additional</label>
-          <textarea
-            id="fuAdditional"
-            class="form-control form-control-sm"
-            rows="3"
-            [(ngModel)]="additional"
-            name="additional"
-          ></textarea>
-        </div>
-        <div class="col-md-6">
-          <label class="form-label" for="fuReview">Review</label>
-          <textarea id="fuReview" class="form-control form-control-sm" rows="3" [(ngModel)]="review" name="review"></textarea>
-        </div>
-      </div>
+      <label class="form-label" for="fuAdditionalReview">Additional review</label>
+      <textarea
+        id="fuAdditionalReview"
+        class="form-control form-control-sm"
+        rows="4"
+        [(ngModel)]="additionalReview"
+        name="additionalReview"
+        placeholder="Follow-up notes and review in one place"
+      ></textarea>
     </div>
   </div>
 

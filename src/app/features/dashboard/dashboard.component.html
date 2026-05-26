@@ -24,21 +24,23 @@
         <h3 class="mb-0">{{ m.active_enrollments }}</h3>
       </app-card>
     </div>
-    <div class="col-md-4 mb-3">
+  </div>
+  <div class="row">
+    <div class="col-md-6 mb-3">
       <app-card cardTitle="Revenue this month">
         <h4 class="mb-0">₹{{ m.revenue_this_month | number: '1.0-0' }}</h4>
       </app-card>
     </div>
-    <div class="col-md-4 mb-3">
+    <div class="col-md-6 mb-3">
       <app-card cardTitle="Pending invoices">
         <h4 class="mb-0">{{ m.pending_invoices }}</h4>
       </app-card>
     </div>
-    <div class="col-md-4 mb-3">
+    <!--<div class="col-md-4 mb-3">
       <app-card cardTitle="Puzzles solved (7 days)">
         <h4 class="mb-0">{{ m.puzzles_solved_week }}</h4>
       </app-card>
-    </div>
+    </div>-->
   </div>
   <div class="row mt-2">
     <div class="col-lg-6">

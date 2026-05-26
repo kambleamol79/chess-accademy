@@ -37,6 +37,7 @@ final class LeadCsvParser
         'NOT INT.' => 'not_interested',
         'PAID' => 'paid',
         'DNP' => 'dnp',
+        'ADDITIONAL REVIEW' => 'review',
         'ADDITIONAL' => 'additional',
         'REVIEW' => 'review',
     ];
@@ -136,6 +137,8 @@ final class LeadCsvParser
             $data['captured_at'] = date('Y-m-d H:i:s');
         }
 
+        $data = $this->mergeAdditionalReviewFields($data);
+
         return ['row' => $data, 'error' => null];
     }
 
@@ -155,6 +158,23 @@ final class LeadCsvParser
         $ts = strtotime($value);
 
         return $ts !== false ? date('Y-m-d H:i:s', $ts) : date('Y-m-d H:i:s');
+    }
+
+    /** @param array<string, mixed> $data @return array<string, mixed> */
+    private function mergeAdditionalReviewFields(array $data): array
+    {
+        $additional = trim((string) ($data['additional'] ?? ''));
+        $review = trim((string) ($data['review'] ?? ''));
+
+        if ($additional === '' && $review === '') {
+            return $data;
+        }
+
+        $parts = array_values(array_filter([$additional, $review], static fn (string $s) => $s !== ''));
+        $data['review'] = implode("\n\n", $parts);
+        $data['additional'] = null;
+
+        return $data;
     }
 
     private function normalizeYesNo(string $value): ?string

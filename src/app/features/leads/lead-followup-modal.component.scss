@@ -1,8 +1,4 @@
-.modal-body .form-label {
-  font-weight: 500;
-}
-
-.batch-time-picker {
+.lead-time-picker {
   display: flex;
   align-items: flex-end;
   gap: 0.5rem;
@@ -13,14 +9,14 @@
   }
 }
 
-.batch-time-picker__sep {
+.lead-time-picker__sep {
   font-weight: 600;
   color: var(--bs-secondary-color);
-  padding-bottom: 0.5rem;
+  padding-bottom: 0.35rem;
   flex-shrink: 0;
 }
 
-input[type='time'].form-control {
+input[type='time'].form-control-sm {
   &::-webkit-calendar-picker-indicator {
     cursor: pointer;
   }

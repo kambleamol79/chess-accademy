@@ -58,6 +58,12 @@ final class StudentController
         }
 
         $profile = $this->students->findByUserId((int) $result['user']['id']);
+        if ($profile !== null) {
+            $updated = $this->students->update((int) $profile['id'], $body);
+            if ($updated !== null) {
+                $profile = $updated;
+            }
+        }
 
         return $this->success($response, $profile, 'Student created', 201);
     }

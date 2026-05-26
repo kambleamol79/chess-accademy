@@ -80,4 +80,106 @@ final class CoachRepository
 
         return true;
     }
+
+    /**
+     * Batch rows where coach_1 or coach_2 matches this coach (flexible name match).
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function findAssignedBatches(int $id): array
+    {
+        $coach = $this->findById($id);
+        if ($coach === null) {
+            return [];
+        }
+
+        $forms = $this->pdo->query(
+            'SELECT id, highlight, batch, module, `time`, days_summary, day_1, coach_1, day_2, coach_2, notes
+             FROM forms
+             ORDER BY `time` ASC, id ASC'
+        )->fetchAll();
+
+        $assignments = [];
+        foreach ($forms as $form) {
+            if ($this->coachNameMatches((string) ($form['coach_1'] ?? ''), $coach)) {
+                $assignments[] = $this->assignmentRow($form, 'day_1', 'coach_1');
+            }
+            if ($this->coachNameMatches((string) ($form['coach_2'] ?? ''), $coach)) {
+                $assignments[] = $this->assignmentRow($form, 'day_2', 'coach_2');
+            }
+        }
+
+        return $assignments;
+    }
+
+    /** @param array<string, mixed> $form */
+    private function assignmentRow(array $form, string $dayField, string $coachField): array
+    {
+        $notes = trim((string) ($form['notes'] ?? ''));
+        $isPractice = $notes !== '' && stripos($notes, 'practice') !== false;
+        $label = $isPractice ? $notes : (string) $form['batch'];
+
+        return [
+            'form_id' => (int) $form['id'],
+            'batch' => $form['batch'],
+            'module' => $form['module'],
+            'time' => $form['time'],
+            'day' => $this->normalizeDay((string) $form[$dayField]),
+            'highlight' => $form['highlight'],
+            'label' => $label,
+            'is_practice' => $isPractice,
+            'slot' => $coachField,
+            'days_summary' => $form['days_summary'],
+        ];
+    }
+
+    /** @param array<string, mixed> $coach */
+    private function coachNameMatches(string $stored, array $coach): bool
+    {
+        $stored = $this->normalizeCoachKey($stored);
+        if ($stored === '') {
+            return false;
+        }
+
+        $first = (string) $coach['first_name'];
+        $last = (string) $coach['last_name'];
+        $full = $this->normalizeCoachKey(trim("{$first} {$last}"));
+        $firstKey = $this->normalizeCoachKey($first);
+
+        return $stored === $full
+            || $stored === $firstKey
+            || ($full !== '' && str_starts_with($full, $stored))
+            || ($firstKey !== '' && str_starts_with($firstKey, $stored))
+            || str_starts_with($stored, $firstKey);
+    }
+
+    private function normalizeCoachKey(string $name): string
+    {
+        return strtoupper(preg_replace('/\s+/', '', trim($name)) ?? '');
+    }
+
+    private function normalizeDay(string $day): string
+    {
+        $day = strtoupper(trim($day));
+        if ($day === 'THU' || $day === 'THURS' || $day === 'THURSDAY') {
+            return 'THUR';
+        }
+        if ($day === 'TUESDAY') {
+            return 'TUE';
+        }
+        if ($day === 'MONDAY') {
+            return 'MON';
+        }
+        if ($day === 'WEDNESDAY') {
+            return 'WED';
+        }
+        if ($day === 'FRIDAY') {
+            return 'FRI';
+        }
+        if ($day === 'SATURDAY') {
+            return 'SAT';
+        }
+
+        return $day;
+    }
 }

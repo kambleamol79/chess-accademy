@@ -13,6 +13,10 @@ export class FormService {
     return this.http.get<ApiResponse<BatchForm[]>>(`${environment.apiUrl}/forms`);
   }
 
+  nextBatch(): Observable<ApiResponse<{ batch: string }>> {
+    return this.http.get<ApiResponse<{ batch: string }>>(`${environment.apiUrl}/forms/next-batch`);
+  }
+
   create(payload: Partial<BatchForm>): Observable<ApiResponse<BatchForm>> {
     return this.http.post<ApiResponse<BatchForm>>(`${environment.apiUrl}/forms`, payload);
   }
