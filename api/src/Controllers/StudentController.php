@@ -71,6 +71,29 @@ final class StudentController
     public function update(Request $request, Response $response, array $args): Response
     {
         $body = (array) ($request->getParsedBody() ?? []);
+
+        if (isset($body['password']) && (string) $body['password'] !== '') {
+            if (strlen((string) $body['password']) < 8) {
+                return $this->error($response, 'Password must be at least 8 characters', 422, [
+                    'password' => 'Password must be at least 8 characters',
+                ]);
+            }
+        } else {
+            unset($body['password']);
+        }
+
+        if (isset($body['email']) && $body['email'] !== '') {
+            $student = $this->students->findById((int) $args['id']);
+            if ($student !== null) {
+                $existing = $this->users->findByEmail((string) $body['email']);
+                if ($existing !== null && (int) $existing['id'] !== (int) $student['user_id']) {
+                    return $this->error($response, 'Email already in use', 422, [
+                        'email' => 'Email already in use',
+                    ]);
+                }
+            }
+        }
+
         $updated = $this->students->update((int) $args['id'], $body);
         if ($updated === null) {
             return $this->error($response, 'Student not found', 404);

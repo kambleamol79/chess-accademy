@@ -119,19 +119,30 @@ export class StudentFormModalComponent implements OnInit {
     }
 
     if (this.isEdit) {
+      const newPassword = this.password.trim();
+      if (newPassword.length > 0 && newPassword.length < 8) {
+        this.error.set('Password must be at least 8 characters');
+        return;
+      }
+
+      const updatePayload: Record<string, unknown> = {
+        first_name: this.first_name.trim(),
+        last_name: this.last_name.trim(),
+        email: this.email.trim() || undefined,
+        phone: this.phone.trim() || null,
+        parent_name: this.parent_name.trim() || null,
+        parent_phone: this.parent_phone.trim() || null,
+        date_of_birth: this.date_of_birth || null,
+        chess_rating: Number(this.chess_rating) || 0,
+        ...this.rosterPayload()
+      };
+      if (newPassword.length > 0) {
+        updatePayload['password'] = newPassword;
+      }
+
       this.saving.set(true);
       this.students
-        .update(this.studentId, {
-          first_name: this.first_name.trim(),
-          last_name: this.last_name.trim(),
-          email: this.email.trim() || undefined,
-          phone: this.phone.trim() || null,
-          parent_name: this.parent_name.trim() || null,
-          parent_phone: this.parent_phone.trim() || null,
-          date_of_birth: this.date_of_birth || null,
-          chess_rating: Number(this.chess_rating) || 0,
-          ...this.rosterPayload()
-        })
+        .update(this.studentId, updatePayload)
         .subscribe({
           next: (res) => this.finishSave(res, 'Could not update student'),
           error: (err: HttpErrorResponse) => this.failSave(err, 'Could not update student')

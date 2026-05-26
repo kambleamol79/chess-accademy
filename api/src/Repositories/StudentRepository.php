@@ -72,6 +72,12 @@ final class StudentRepository
                 $userParams[$f] = $data[$f];
             }
         }
+
+        if (isset($data['password']) && (string) $data['password'] !== '') {
+            $userSets[] = 'password_hash = :password_hash';
+            $userParams['password_hash'] = password_hash((string) $data['password'], PASSWORD_BCRYPT);
+        }
+
         if ($userSets !== []) {
             $this->pdo->prepare('UPDATE users SET ' . implode(', ', $userSets) . ' WHERE id = :id')->execute($userParams);
         }
