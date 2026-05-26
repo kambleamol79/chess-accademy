@@ -1,5 +1,85 @@
-// Copied from `coach-schedule-modal.component.scss` so the coach dashboard can
-// render the same "assigned batches" table outside of a modal.
+// Admin dashboard — colorful stat widgets & chart layout
+.dashboard-stat-card {
+  overflow: hidden;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    top: -70px;
+    right: -40px;
+    opacity: 0.2;
+    background: #fff;
+  }
+
+  &__label {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    opacity: 0.9;
+    margin: 0;
+  }
+
+  &__value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+}
+
+.dashboard-stat--primary {
+  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+  color: #fff;
+}
+
+.dashboard-stat--secondary {
+  background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%);
+  color: #fff;
+}
+
+.dashboard-stat--success {
+  background: linear-gradient(135deg, #059669 0%, #22c55e 100%);
+  color: #fff;
+}
+
+.dashboard-stat--info {
+  background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%);
+  color: #fff;
+}
+
+.dashboard-stat--warning {
+  background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
+  color: #fff;
+}
+
+.dashboard-stat--danger {
+  background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+  color: #fff;
+}
+
+.dashboard-stat__icon {
+  flex-shrink: 0;
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.dashboard-chart {
+  min-height: 280px;
+
+  &--compact {
+    min-height: 260px;
+  }
+}
+
+// Coach schedule table (from coach-schedule-modal)
 .coach-schedule {
   width: 100%;
   border-collapse: collapse;

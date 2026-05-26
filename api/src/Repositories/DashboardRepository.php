@@ -47,6 +47,14 @@ final class DashboardRepository
              ORDER BY f.id ASC'
         )->fetchAll();
 
+        $revenueByMonth = $this->revenueByMonth();
+        $invoiceByStatus = $this->pdo->query(
+            "SELECT status, COUNT(*) AS count
+             FROM invoices
+             WHERE status != 'cancelled'
+             GROUP BY status"
+        )->fetchAll();
+
         return [
             'total_students' => $students,
             'coaches_count' => $coaches,
@@ -57,6 +65,38 @@ final class DashboardRepository
             'puzzles_solved_week' => $puzzlesWeek,
             'upcoming_batches' => $upcoming,
             'enrollment_by_batch' => $enrollmentByBatch,
+            'revenue_by_month' => $revenueByMonth,
+            'invoice_by_status' => $invoiceByStatus,
         ];
+    }
+
+    /** @return list<array{month:string,amount:float}> */
+    private function revenueByMonth(): array
+    {
+        $stmt = $this->pdo->query(
+            "SELECT DATE_FORMAT(paid_at, '%Y-%m') AS ym,
+                    COALESCE(SUM(amount), 0) AS amount
+             FROM invoices
+             WHERE status = 'paid'
+               AND paid_at >= DATE_SUB(CURDATE(), INTERVAL 5 MONTH)
+             GROUP BY ym
+             ORDER BY ym ASC"
+        );
+        $byMonth = [];
+        foreach ($stmt->fetchAll() as $row) {
+            $byMonth[(string) $row['ym']] = (float) $row['amount'];
+        }
+
+        $result = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $ym = date('Y-m', strtotime("-{$i} months"));
+            $label = date('M Y', strtotime($ym . '-01'));
+            $result[] = [
+                'month' => $label,
+                'amount' => $byMonth[$ym] ?? 0.0,
+            ];
+        }
+
+        return $result;
     }
 }

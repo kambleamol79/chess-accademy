@@ -15,6 +15,16 @@ export interface DashboardMetrics {
   puzzles_solved_week: number;
   upcoming_batches: Array<Record<string, unknown>>;
   enrollment_by_batch: Array<{ batch: string; enrolled: number }>;
+  revenue_by_month: Array<{ month: string; amount: number }>;
+  invoice_by_status: Array<{ status: string; count: number }>;
+}
+
+export interface DashboardStatCard {
+  label: string;
+  value: string;
+  icon: string;
+  cardClass: string;
+  iconClass: string;
 }
 
 @Injectable({ providedIn: 'root' })
