@@ -14,10 +14,13 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { confirmDelete } from 'src/app/core/utils/confirm.util';
 import { getApiErrorMessage } from 'src/app/core/utils/http-error.util';
 import { groupBatchesByTimeSlot } from 'src/app/core/utils/batch.util';
+import { BatchCalendarComponent } from './batch-calendar.component';
+
+export type BatchesPageView = 'calendar' | 'list';
 
 @Component({
   selector: 'app-batches',
-  imports: [CommonModule, CardComponent],
+  imports: [CommonModule, CardComponent, BatchCalendarComponent],
   templateUrl: './batches.component.html',
   styleUrl: './batches.component.scss'
 })
@@ -30,7 +33,12 @@ export class BatchesComponent implements OnInit {
   error = signal('');
   deletingId = signal<number | null>(null);
   rows = signal<BatchForm[]>([]);
+  pageView = signal<BatchesPageView>('calendar');
   timeSlotGroups = computed(() => groupBatchesByTimeSlot(this.rows()));
+
+  setPageView(view: BatchesPageView) {
+    this.pageView.set(view);
+  }
 
   ngOnInit() {
     this.load();

@@ -1,22 +1,4 @@
 <app-card [customHeader]="true">
-  <div class="d-flex flex-wrap justify-content-end align-items-end gap-2 mb-3">
-    @if (canManageLeads()) {
-      <div class="d-flex flex-wrap gap-2">
-        <button type="button" class="btn btn-outline-secondary btn-sm" (click)="downloadCsvTemplate()">
-          <i class="ti ti-download me-1"></i>
-          CSV template
-        </button>
-        <button type="button" class="btn btn-outline-primary btn-sm" (click)="openBulkUpload()">
-          <i class="ti ti-upload me-1"></i>
-          Bulk upload
-        </button>
-        <button type="button" class="btn btn-primary btn-sm" (click)="openAddLead()">
-          <i class="ti ti-plus me-1"></i>
-          Add lead
-        </button>
-      </div>
-    }
-  </div>
   <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
     <div>
       <h5 class="mb-0">Leads</h5>
@@ -24,9 +6,8 @@
     </div>
     <div class="d-flex flex-wrap align-items-end gap-2 ms-auto">
       @if (!loading() && !error()) {
-        <div class="d-flex align-items-end gap-2">
+        <div class="d-flex flex-column align-items-end gap-2">
           <app-list-date-range-filter
-            heading="Captured date (DATE)"
             [dateFrom]="dateFrom()"
             [dateTo]="dateTo()"
             (dateFromChange)="dateFrom.set($event)"
@@ -44,6 +25,22 @@
             (valueChange)="filterValue.set($event)"
             (clear)="clearFilter()"
           />
+        </div>
+      }
+      @if (canManageLeads()) {
+        <div class="d-flex flex-wrap gap-2">
+          <button type="button" class="btn btn-outline-secondary btn-sm" (click)="downloadCsvTemplate()">
+            <i class="ti ti-download me-1"></i>
+            CSV template
+          </button>
+          <button type="button" class="btn btn-outline-primary btn-sm" (click)="openBulkUpload()">
+            <i class="ti ti-upload me-1"></i>
+            Bulk upload
+          </button>
+          <button type="button" class="btn btn-primary btn-sm" (click)="openAddLead()">
+            <i class="ti ti-plus me-1"></i>
+            Add lead
+          </button>
         </div>
       }
     </div>

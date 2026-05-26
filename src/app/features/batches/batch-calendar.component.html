@@ -1,0 +1,138 @@
+<div class="batch-cal">
+  <div class="batch-cal__toolbar d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+    <div class="btn-group btn-group-sm" role="group" aria-label="Calendar view">
+      <button
+        type="button"
+        class="btn"
+        [class.btn-primary]="view() === 'month'"
+        [class.btn-outline-primary]="view() !== 'month'"
+        (click)="setView('month')"
+      >
+        Month
+      </button>
+      <button
+        type="button"
+        class="btn"
+        [class.btn-primary]="view() === 'week'"
+        [class.btn-outline-primary]="view() !== 'week'"
+        (click)="setView('week')"
+      >
+        Week
+      </button>
+    </div>
+
+    <div class="d-flex flex-wrap align-items-center gap-2">
+      <button type="button" class="btn btn-outline-secondary btn-sm" (click)="goPrev()" aria-label="Previous">
+        <i class="ti ti-chevron-left"></i>
+      </button>
+      <button type="button" class="btn btn-outline-secondary btn-sm" (click)="goToday()">Today</button>
+      <button type="button" class="btn btn-outline-secondary btn-sm" (click)="goNext()" aria-label="Next">
+        <i class="ti ti-chevron-right"></i>
+      </button>
+      <h6 class="batch-cal__period mb-0">
+        @if (view() === 'month') {
+          {{ monthLabel() }}
+        } @else {
+          {{ weekLabel() }}
+        }
+      </h6>
+    </div>
+  </div>
+
+  @if (view() === 'month') {
+    <div class="batch-cal__month">
+      <div class="batch-cal__month-head">
+        @for (h of headers; track h) {
+          <div class="batch-cal__month-head-cell">{{ h }}</div>
+        }
+      </div>
+      @for (week of monthWeeks(); track trackWeek($index, week)) {
+        <div class="batch-cal__month-row">
+          @for (day of week; track day.date.getTime()) {
+            <div
+              class="batch-cal__day"
+              [class.batch-cal__day--muted]="!day.inCurrentMonth"
+              [class.batch-cal__day--today]="day.isToday"
+              [attr.aria-label]="dayAriaLabel(day)"
+            >
+              <div class="batch-cal__day-num">{{ day.dayOfMonth }}</div>
+              <div class="batch-cal__day-events">
+                @for (o of day.occurrences; track trackOccurrence(o)) {
+                  <button
+                    type="button"
+                    [ngClass]="eventClasses(o)"
+                    [title]="o.batch.time + ' · ' + eventTitle(o)"
+                    (click)="onEventClick(o, $event)"
+                  >
+                    <span class="batch-cal__event-time">{{ o.batch.time }}</span>
+                    <span class="batch-cal__event-name">{{ eventTitle(o) }}</span>
+                    @if (o.coach) {
+                      <span class="batch-cal__event-coach" (click)="onCoachClick(o, $event)">{{ o.coach }}</span>
+                    } @else if (canAssignCoach()) {
+                      <span class="batch-cal__event-coach batch-cal__event-coach--link" (click)="onCoachClick(o, $event)">
+                        + coach
+                      </span>
+                    }
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+    <p class="form-text mt-2 mb-0">
+      Monthly calendar — batches repeat on their session weekdays (e.g. Mon/Tue). Orange and yellow events match
+      batch highlights.
+    </p>
+  } @else {
+    <div class="table-responsive batch-cal__week-wrap">
+      <table class="batch-cal__week-table mb-0">
+        <thead>
+          <tr>
+            <th class="batch-cal__time-col">Time</th>
+            @for (day of weekDays(); track day.date.getTime()) {
+              <th class="batch-cal__week-day-head">
+                <span class="batch-cal__week-day-name">{{ weekdayLabel(day.weekday) }}</span>
+                <span class="batch-cal__week-day-date" [class.batch-cal__week-day-date--today]="day.isToday">
+                  {{ day.dayOfMonth }}
+                </span>
+              </th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (time of weekGrid().timeSlots; track time) {
+            <tr>
+              <th class="batch-cal__time-col">{{ time }}</th>
+              @for (day of weekDays(); track day.date.getTime()) {
+                <td class="batch-cal__week-cell">
+                  @for (o of weekGridEntries(time, day.weekday); track trackOccurrence(o)) {
+                    <button
+                      type="button"
+                      [ngClass]="eventClasses(o, true)"
+                      (click)="onEventClick(o, $event)"
+                    >
+                      <span class="batch-cal__event-name">{{ eventTitle(o) }}</span>
+                      @if (o.batch.module) {
+                        <span class="batch-cal__event-meta">{{ o.batch.module }}</span>
+                      }
+                      <span
+                        class="batch-cal__event-coach"
+                        [class.batch-cal__event-coach--link]="canAssignCoach() && !o.coach"
+                        (click)="onCoachClick(o, $event)"
+                      >
+                        {{ o.coach || (canAssignCoach() ? 'Assign coach' : '—') }}
+                      </span>
+                    </button>
+                  }
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <p class="form-text mt-2 mb-0">Week view — time slots vs days for the selected week.</p>
+  }
+</div>
