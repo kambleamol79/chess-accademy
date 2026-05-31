@@ -89,6 +89,25 @@ final class EnrollmentRepository
         return $row === false ? null : $row;
     }
 
+    /** @return array<string,mixed>|null */
+    public function findActiveWithFormByStudent(int $studentId): ?array
+    {
+        $stmt = $this->pdo->prepare(
+            'SELECT e.id AS enrollment_id, e.enrolled_at, e.status,
+                    f.id AS form_id, f.highlight, f.batch, f.module, f.time, f.days_summary,
+                    f.day_1, f.coach_1, f.day_2, f.coach_2, f.notes,
+                    f.zoom_meeting_id, f.zoom_join_url
+             FROM form_enrollments e
+             INNER JOIN forms f ON f.id = e.form_id
+             WHERE e.student_id = :student_id AND e.status = \'active\'
+             LIMIT 1'
+        );
+        $stmt->execute(['student_id' => $studentId]);
+        $row = $stmt->fetch();
+
+        return $row === false ? null : $row;
+    }
+
     /**
      * @param list<int> $studentIds
      * @return array{created: int, skipped: list<array{student_id: int, reason: string}>}

@@ -136,6 +136,24 @@
       <label class="form-label" for="notes">Notes (optional)</label>
       <input id="notes" class="form-control" [(ngModel)]="notes" name="notes" />
     </div>
+
+    @if (isEdit && canJoinZoom()) {
+      <div class="col-12">
+        <label class="form-label">Live class</label>
+        <button type="button" class="btn btn-primary btn-sm" (click)="openJoinZoom()">
+          <i class="ti ti-brand-zoom me-1"></i>
+          Join class in app
+        </button>
+        <div class="form-text">Opens the batch Zoom meeting inside Brainstorm.</div>
+      </div>
+    } @else if (!isEdit) {
+      <div class="col-12">
+        <div class="alert alert-info mb-0 py-2">
+          <i class="ti ti-brand-zoom me-1"></i>
+          A recurring Zoom meeting will be created automatically when Zoom is enabled on the server.
+        </div>
+      </div>
+    }
   </div>
 
   @if (error()) {

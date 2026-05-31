@@ -73,6 +73,11 @@
                         + coach
                       </span>
                     }
+                    @if (hasBatchZoom(o.batch)) {
+                      <span class="batch-cal__event-zoom" (click)="onJoinClick(o.batch, $event)">
+                        <i class="ti ti-brand-zoom"></i> Join
+                      </span>
+                    }
                   </button>
                 }
               </div>
@@ -124,6 +129,11 @@
                       >
                         {{ o.coach || (canAssignCoach() ? 'Assign coach' : '—') }}
                       </span>
+                      @if (hasBatchZoom(o.batch)) {
+                        <span class="batch-cal__event-zoom" (click)="onJoinClick(o.batch, $event)">
+                          <i class="ti ti-brand-zoom"></i> Join
+                        </span>
+                      }
                     </button>
                   }
                 </td>

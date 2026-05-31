@@ -1,0 +1,11 @@
+# Auto-resign live chess matches when a student does not move for
+# (time_control_minutes + 10) minutes. Install with:
+#
+#   crontab -e
+#   # paste the line below (edit /path/to/chess-accademy)
+#
+# Every minute:
+* * * * * cd /path/to/chess-accademy/api && /usr/bin/php scripts/auto_resign_inactive_matches.php >> var/log/live_match_auto_resign.log 2>&1
+
+# Optional: only every 5 minutes (slightly slower detection)
+# */5 * * * * cd /path/to/chess-accademy/api && /usr/bin/php scripts/auto_resign_inactive_matches.php >> var/log/live_match_auto_resign.log 2>&1

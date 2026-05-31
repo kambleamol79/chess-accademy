@@ -46,7 +46,16 @@ export const NavigationItems: NavigationItem[] = [
         classes: 'nav-item',
         url: '/batches',
         icon: 'ti ti-calendar-event',
-        role: ['admin', 'student', 'accountant']
+        role: ['admin', 'accountant']
+      },
+      {
+        id: 'my-batch',
+        title: 'My batch',
+        type: 'item',
+        classes: 'nav-item',
+        url: '/batches',
+        icon: 'ti ti-calendar-event',
+        role: ['student']
       },
       {
         id: 'leads',
@@ -77,41 +86,61 @@ export const NavigationItems: NavigationItem[] = [
       }
     ]
   },
-  /*{
+  {
     id: 'training',
     title: 'Training',
     type: 'group',
     icon: 'icon-navigation',
     children: [
       {
+        id: 'practice',
+        title: 'Chess board',
+        type: 'item',
+        classes: 'nav-item',
+        url: '/practice',
+        icon: 'ti ti-chess',
+        role: ['admin', 'student']
+      },
+      {
         id: 'puzzles',
         title: 'Puzzles',
         type: 'item',
         classes: 'nav-item',
         url: '/puzzles',
-        icon: 'ti ti-chess',
-        role: ['admin', 'coach', 'student']
+        icon: 'ti ti-puzzle',
+        role: ['admin', 'student']
       },
-      {
-        id: 'game-review',
-        title: 'Game Review',
-        type: 'item',
-        classes: 'nav-item',
-        url: '/game-review',
-        icon: 'ti ti-eye',
-        role: ['admin', 'coach', 'student']
-      },
-      {
-        id: 'materials',
-        title: 'Class Materials',
-        type: 'item',
-        classes: 'nav-item',
-        url: '/materials',
-        icon: 'ti ti-book',
-        role: ['admin', 'coach', 'student']
-      }
+      // FEATURE: game review — enable when ready
+      // {
+      //   id: 'game-review',
+      //   title: 'Game Review',
+      //   type: 'item',
+      //   classes: 'nav-item',
+      //   url: '/game-review',
+      //   icon: 'ti ti-eye',
+      //   role: ['admin', 'student']
+      // },
+      // FEATURE: live arena — enable when ready
+      // {
+      //   id: 'chess-arena',
+      //   title: 'Chess arena',
+      //   type: 'item',
+      //   classes: 'nav-item',
+      //   url: '/chess-arena',
+      //   icon: 'ti ti-trophy',
+      //   role: ['student']
+      // },
+      // {
+      //   id: 'chess-tournaments',
+      //   title: 'Competitions',
+      //   type: 'item',
+      //   classes: 'nav-item',
+      //   url: '/chess-tournaments',
+      //   icon: 'ti ti-calendar-event',
+      //   role: ['admin']
+      // }
     ]
-  },*/
+  },
   {
     id: 'finance',
     title: 'Finance',

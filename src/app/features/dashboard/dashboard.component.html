@@ -46,6 +46,115 @@
       </app-card>
     </div>
   </div>
+} @else if (isStudent()) {
+  <div class="student-dashboard">
+    <div class="student-dashboard__welcome mb-4">
+      <h4 class="mb-1">Welcome, {{ studentDisplayName() }}</h4>
+      <p class="text-muted mb-0">Your batch schedule, live class, and reminders.</p>
+    </div>
+
+    @for (reminder of paymentReminders(); track reminder.id) {
+      <div class="alert mb-3 d-flex align-items-start gap-2" [ngClass]="reminderAlertClass(reminder.priority)">
+        <i class="ti ti-receipt fs-4 flex-shrink-0"></i>
+        <div>
+          <strong class="d-block">{{ reminder.title }}</strong>
+          <span>{{ reminder.message }}</span>
+          @if (reminder.due_at) {
+            <div class="small mt-1 opacity-75">Due: {{ reminder.due_at }}</div>
+          }
+        </div>
+      </div>
+    }
+
+    <div class="row g-3">
+      <div class="col-lg-7">
+        <app-card cardTitle="My batch">
+          @if (studentBatch(); as b) {
+            <div class="student-dashboard__batch">
+              <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                <span class="badge bg-primary fs-6">{{ b.batch }}</span>
+                @if (b.module) {
+                  <span class="badge bg-secondary">{{ b.module }}</span>
+                }
+              </div>
+              <ul class="list-unstyled student-dashboard__meta mb-3">
+                <li><i class="ti ti-calendar me-2 text-muted"></i>{{ b.days_summary }} ({{ b.day_1 }} / {{ b.day_2 }})</li>
+                <li><i class="ti ti-clock me-2 text-muted"></i>{{ b.time }}</li>
+                <li><i class="ti ti-user me-2 text-muted"></i>{{ studentCoaches(b) }}</li>
+              </ul>
+              <div class="d-flex flex-wrap gap-2">
+                @if (canJoinClass(b)) {
+                  <button type="button" class="btn btn-success" (click)="openJoinClass()">
+                    <i class="ti ti-brand-zoom me-1"></i>
+                    Join live class
+                  </button>
+                  @if (b.zoom_join_url) {
+                    <button type="button" class="btn btn-outline-success" (click)="openZoomLink()">
+                      Open in Zoom app
+                    </button>
+                  }
+                } @else {
+                  <p class="text-muted small mb-0">Live class link is not set up yet. Contact the academy.</p>
+                }
+              </div>
+            </div>
+          } @else {
+            <p class="text-muted mb-0">You are not assigned to a batch yet. Contact Brainstorm.</p>
+          }
+        </app-card>
+      </div>
+
+      <div class="col-lg-5">
+        <app-card cardTitle="Quick links">
+          <div class="d-grid gap-2">
+            <a routerLink="/practice" class="btn btn-outline-primary text-start">
+              <i class="ti ti-chess me-2"></i>
+              Practice board
+            </a>
+            <a routerLink="/puzzles" class="btn btn-outline-primary text-start">
+              <i class="ti ti-puzzle me-2"></i>
+              Puzzles
+            </a>
+            <a routerLink="/batches" class="btn btn-outline-secondary text-start">
+              <i class="ti ti-calendar-event me-2"></i>
+              My batch
+            </a>
+          </div>
+        </app-card>
+      </div>
+    </div>
+
+    <div class="row g-3 mt-1">
+      <div class="col-12">
+        <app-card cardTitle="Reminders">
+          @if (otherReminders().length === 0 && paymentReminders().length === 0) {
+            <p class="text-muted mb-0">All clear — no reminders right now.</p>
+          } @else if (otherReminders().length === 0) {
+            <p class="text-muted mb-0">No other reminders. Payment notices appear above when due.</p>
+          } @else {
+            <ul class="list-group list-group-flush student-dashboard__reminders">
+              @for (r of otherReminders(); track r.id) {
+                <li class="list-group-item px-0">
+                  <div class="d-flex gap-3">
+                    <span class="student-dashboard__reminder-icon">
+                      <i [class]="reminderIcon(r.type)"></i>
+                    </span>
+                    <div>
+                      <strong class="d-block">{{ r.title }}</strong>
+                      <span class="text-muted">{{ r.message }}</span>
+                      @if (r.due_at) {
+                        <div class="small text-muted mt-1">{{ r.due_at }}</div>
+                      }
+                    </div>
+                  </div>
+                </li>
+              }
+            </ul>
+          }
+        </app-card>
+      </div>
+    </div>
+  </div>
 } @else if (metrics(); as m) {
   <div class="row g-3 mb-1">
     @for (stat of statCards(); track stat.label) {

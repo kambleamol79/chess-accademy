@@ -39,4 +39,22 @@ return [
         'payment_receipts_dir' => $root . '/storage/payment-receipts',
         'payment_receipt_max_bytes' => (int) ($_ENV['PAYMENT_RECEIPT_MAX_BYTES'] ?? 5 * 1024 * 1024),
     ],
+    'live' => [
+        'ws_enabled' => filter_var($_ENV['LIVE_WS_ENABLED'] ?? 'false', FILTER_VALIDATE_BOOLEAN),
+        'ws_broadcast_url' => $_ENV['LIVE_WS_BROADCAST_URL'] ?? 'http://127.0.0.1:8091/broadcast',
+        'ws_internal_secret' => $_ENV['LIVE_WS_INTERNAL_SECRET'] ?? 'change-me-live-ws-secret',
+        'var_dir' => $root . '/var',
+        /** Extra minutes after match time control before idle auto-resign (cron). */
+        'idle_grace_minutes' => max(0, (int) ($_ENV['LIVE_MATCH_IDLE_GRACE_MINUTES'] ?? 10)),
+    ],
+    'zoom' => [
+        'enabled' => filter_var($_ENV['ZOOM_ENABLED'] ?? 'false', FILTER_VALIDATE_BOOLEAN),
+        'account_id' => $_ENV['ZOOM_ACCOUNT_ID'] ?? '',
+        'client_id' => $_ENV['ZOOM_CLIENT_ID'] ?? '',
+        'client_secret' => $_ENV['ZOOM_CLIENT_SECRET'] ?? '',
+        'user_id' => $_ENV['ZOOM_USER_ID'] ?? '',
+        'timezone' => $_ENV['ZOOM_TIMEZONE'] ?? 'Asia/Kolkata',
+        'sdk_client_id' => $_ENV['ZOOM_SDK_CLIENT_ID'] ?? $_ENV['ZOOM_CLIENT_ID'] ?? '',
+        'sdk_client_secret' => $_ENV['ZOOM_SDK_CLIENT_SECRET'] ?? $_ENV['ZOOM_CLIENT_SECRET'] ?? '',
+    ],
 ];

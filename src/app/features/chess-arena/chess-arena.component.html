@@ -1,0 +1,79 @@
+<app-card cardTitle="Chess arena">
+  @if (loading()) {
+    <p class="text-muted">Loading…</p>
+  } @else {
+    @if (error()) {
+      <div class="alert alert-warning">{{ error() }}</div>
+    }
+    @if (queueMessage()) {
+      <div class="alert alert-info">{{ queueMessage() }}</div>
+    }
+
+    <div class="mb-4">
+      <h6 class="fw-semibold">Quick play</h6>
+      <p class="small text-muted">Find another online student for a live game (10 min per side).</p>
+      @if (finding()) {
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+          <span class="spinner-border spinner-border-sm text-primary"></span>
+          <span class="small">Waiting for opponent…</span>
+          <button type="button" class="btn btn-outline-secondary btn-sm" (click)="cancelFind()">Cancel</button>
+        </div>
+      } @else {
+        <button type="button" class="btn btn-primary" (click)="findGame()">
+          <i class="ti ti-users me-1"></i>
+          Find opponent
+        </button>
+      }
+    </div>
+
+    <div class="mb-4">
+      <h6 class="fw-semibold">Tournaments</h6>
+      @if (tournaments().length === 0) {
+        <p class="small text-muted mb-0">No scheduled tournaments right now.</p>
+      } @else {
+        @for (t of tournaments(); track t.id) {
+          <div class="arena-tournament border rounded p-3 mb-2">
+            <div class="fw-semibold">{{ t.title }}</div>
+            <div class="small text-muted">
+              {{ t.starts_at | date: 'medium' }} · {{ t.time_control_minutes }} min · {{ t.status }}
+              @if (t.entry_count != null) {
+                · {{ t.entry_count }} players
+              }
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-2">
+              @if (t.status === 'registration' || t.status === 'scheduled') {
+                <button type="button" class="btn btn-outline-primary btn-sm" (click)="register(t)">Register</button>
+              }
+              @if (t.status === 'active' || t.status === 'registration') {
+                <button
+                  type="button"
+                  class="btn btn-primary btn-sm"
+                  [disabled]="finding()"
+                  (click)="findGame(t.id, t.time_control_minutes)"
+                >
+                  Play in tournament
+                </button>
+              }
+            </div>
+          </div>
+        }
+      }
+    </div>
+
+    <div>
+      <h6 class="fw-semibold">Your matches</h6>
+      @if (matches().length === 0) {
+        <p class="small text-muted">No live games yet.</p>
+      } @else {
+        <ul class="list-group">
+          @for (m of matches(); track m.id) {
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <span class="small">{{ m.white_name }} vs {{ m.black_name }} — {{ m.status }}</span>
+              <a class="btn btn-sm btn-outline-primary" [routerLink]="['/chess-arena/match', m.id]">Open</a>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+  }
+</app-card>

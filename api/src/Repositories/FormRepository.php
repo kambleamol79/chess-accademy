@@ -27,7 +27,8 @@ final class FormRepository
     public function findAll(): array
     {
         $stmt = $this->pdo->query(
-            'SELECT id, highlight, batch, module, `time`, days_summary, day_1, coach_1, day_2, coach_2, notes, created_at, updated_at
+            'SELECT id, highlight, batch, module, `time`, days_summary, day_1, coach_1, day_2, coach_2, notes,
+                    zoom_meeting_id, zoom_join_url, zoom_start_url, zoom_password, created_at, updated_at
              FROM forms
              ORDER BY id ASC'
         );
@@ -39,7 +40,8 @@ final class FormRepository
     public function findById(int $id): ?array
     {
         $stmt = $this->pdo->prepare(
-            'SELECT id, highlight, batch, module, `time`, days_summary, day_1, coach_1, day_2, coach_2, notes, created_at, updated_at
+            'SELECT id, highlight, batch, module, `time`, days_summary, day_1, coach_1, day_2, coach_2, notes,
+                    zoom_meeting_id, zoom_join_url, zoom_start_url, zoom_password, created_at, updated_at
              FROM forms WHERE id = :id'
         );
         $stmt->execute(['id' => $id]);
@@ -95,6 +97,42 @@ final class FormRepository
         $stmt->execute(['id' => $id]);
 
         return $stmt->rowCount() > 0;
+    }
+
+    /** @param array{zoom_meeting_id: string, zoom_join_url: ?string, zoom_start_url: ?string, zoom_password: ?string} $zoom */
+    public function updateZoom(int $id, array $zoom): ?array
+    {
+        if ($this->findById($id) === null) {
+            return null;
+        }
+
+        $stmt = $this->pdo->prepare(
+            'UPDATE forms
+             SET zoom_meeting_id = :zoom_meeting_id,
+                 zoom_join_url = :zoom_join_url,
+                 zoom_start_url = :zoom_start_url,
+                 zoom_password = :zoom_password
+             WHERE id = :id'
+        );
+        $stmt->execute([
+            'id' => $id,
+            'zoom_meeting_id' => $zoom['zoom_meeting_id'],
+            'zoom_join_url' => $zoom['zoom_join_url'],
+            'zoom_start_url' => $zoom['zoom_start_url'],
+            'zoom_password' => $zoom['zoom_password'],
+        ]);
+
+        return $this->findById($id);
+    }
+
+    public function clearZoom(int $id): ?array
+    {
+        return $this->updateZoom($id, [
+            'zoom_meeting_id' => '',
+            'zoom_join_url' => null,
+            'zoom_start_url' => null,
+            'zoom_password' => null,
+        ]);
     }
 
     public function nextBatchCode(): string

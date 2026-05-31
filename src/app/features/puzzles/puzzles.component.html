@@ -1,46 +1,46 @@
-<app-card cardTitle="Puzzles">
-  @if (loading()) {
-    <p class="text-muted">Loading…</p>
-  } @else if (error()) {
-    <div class="alert alert-warning">{{ error() }}</div>
-  } @else {
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Title</th>
-          <th>Difficulty</th>
-          <th>FEN</th>
-          @if (canDelete()) {
-            <th class="text-end">Actions</th>
-          }
-        </tr>
-      </thead>
-      <tbody>
-        @for (p of rows(); track p['id']) {
+<app-puzzle-play />
+
+@if (isAdmin()) {
+  <app-card cardTitle="Manage puzzles" class="mt-4">
+    @if (loading()) {
+      <p class="text-muted">Loading…</p>
+    } @else if (error()) {
+      <div class="alert alert-warning">{{ error() }}</div>
+    } @else {
+      <table class="table">
+        <thead>
           <tr>
-            <td>{{ p['title'] || 'Puzzle #' + p['id'] }}</td>
-            <td>{{ p['difficulty'] }}</td>
-            <td><code class="small">{{ p['fen'] }}</code></td>
-            @if (canDelete()) {
+            <th>Title</th>
+            <th>Difficulty</th>
+            <th>FEN</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (p of rows(); track p.id) {
+            <tr>
+              <td>{{ p.title || 'Puzzle #' + p.id }}</td>
+              <td>{{ p.difficulty }}</td>
+              <td><code class="small">{{ p.fen }}</code></td>
               <td class="text-end">
                 <button
                   type="button"
                   class="btn btn-outline-danger btn-sm"
                   title="Delete"
-                  [disabled]="deletingId() === p['id']"
+                  [disabled]="deletingId() === p.id"
                   (click)="deletePuzzle(p)"
                 >
                   <i class="ti ti-trash"></i>
                 </button>
               </td>
-            }
-          </tr>
-        } @empty {
-          <tr>
-            <td [attr.colspan]="canDelete() ? 4 : 3" class="text-muted">No puzzles yet. Add via API or admin tools.</td>
-          </tr>
-        }
-      </tbody>
-    </table>
-  }
-</app-card>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="4" class="text-muted">No puzzles yet. Seed via API or admin tools.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </app-card>
+}

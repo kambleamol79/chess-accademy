@@ -1,5 +1,5 @@
 // Angular import
-import { Component, OnInit, output, inject } from '@angular/core';
+import { Component, OnInit, effect, output, inject } from '@angular/core';
 import { Location } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
@@ -36,13 +36,15 @@ export class NavContentComponent implements OnInit {
   title = 'Demo application for version numbering';
   currentApplicationVersion = environment.appVersion;
 
-  navigations!: NavigationItem[];
+  navigations: NavigationItem[] = [];
   windowWidth: number;
 
   // Constructor
   constructor() {
     this.windowWidth = window.innerWidth;
-    this.navigations = filterNavigationByRole(NavigationItems, this.auth.role());
+    effect(() => {
+      this.navigations = filterNavigationByRole(NavigationItems, this.auth.role());
+    });
   }
 
   // Life cycle events

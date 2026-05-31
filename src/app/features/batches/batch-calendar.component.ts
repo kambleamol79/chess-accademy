@@ -19,6 +19,7 @@ import {
   weekRangeLabel
 } from 'src/app/core/utils/batch-calendar.util';
 import { CoachSlot } from './batch-assign-coach-modal.component';
+import { hasBatchZoom } from 'src/app/core/utils/batch.util';
 
 export type BatchCalendarView = 'month' | 'week';
 
@@ -35,9 +36,11 @@ export class BatchCalendarComponent {
 
   editBatch = output<BatchForm>();
   assignCoach = output<{ batch: BatchForm; slot: CoachSlot }>();
+  joinZoom = output<BatchForm>();
 
   readonly headers = BATCH_CALENDAR_HEADERS;
   readonly trackOccurrence = trackOccurrence;
+  readonly hasBatchZoom = hasBatchZoom;
 
   view = signal<BatchCalendarView>('month');
   focusDate = signal(this.stripTime(new Date()));
@@ -116,6 +119,11 @@ export class BatchCalendarComponent {
     }
     const slot: CoachSlot = o.dayField === 'day_1' ? 'coach_1' : 'coach_2';
     this.assignCoach.emit({ batch: o.batch, slot });
+  }
+
+  onJoinClick(batch: BatchForm, event: Event) {
+    event.stopPropagation();
+    this.joinZoom.emit(batch);
   }
 
   dayAriaLabel(day: { date: Date; occurrences: BatchCalendarOccurrence[] }): string {

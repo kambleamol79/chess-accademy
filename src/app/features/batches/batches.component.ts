@@ -4,7 +4,9 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { CardComponent } from 'src/app/theme/shared/components/card/card.component';
 import { BatchForm } from 'src/app/core/models/form.model';
 import { FormService } from 'src/app/core/services/form.service';
+import { StudentPortalService } from 'src/app/core/services/student-portal.service';
 import { AuthService } from 'src/app/core/services/auth.service';
+import { studentBatchToBatchForm } from 'src/app/core/utils/student-batch.util';
 import { BatchFormModalComponent } from './batch-form-modal.component';
 import {
   BatchAssignCoachModalComponent,
@@ -13,8 +15,9 @@ import {
 import { HttpErrorResponse } from '@angular/common/http';
 import { confirmDelete } from 'src/app/core/utils/confirm.util';
 import { getApiErrorMessage } from 'src/app/core/utils/http-error.util';
-import { groupBatchesByTimeSlot } from 'src/app/core/utils/batch.util';
+import { groupBatchesByTimeSlot, hasBatchZoom } from 'src/app/core/utils/batch.util';
 import { BatchCalendarComponent } from './batch-calendar.component';
+import { BatchZoomModalComponent } from './batch-zoom-modal.component';
 
 export type BatchesPageView = 'calendar' | 'list';
 
@@ -26,21 +29,32 @@ export type BatchesPageView = 'calendar' | 'list';
 })
 export class BatchesComponent implements OnInit {
   private readonly forms = inject(FormService);
+  private readonly studentPortal = inject(StudentPortalService);
   private readonly modal = inject(NgbModal);
   readonly auth = inject(AuthService);
 
   loading = signal(true);
   error = signal('');
+  zoomWarning = signal('');
   deletingId = signal<number | null>(null);
   rows = signal<BatchForm[]>([]);
   pageView = signal<BatchesPageView>('calendar');
   timeSlotGroups = computed(() => groupBatchesByTimeSlot(this.rows()));
 
+  readonly hasBatchZoom = hasBatchZoom;
+  readonly isStudent = computed(() => this.auth.hasRole(['student']));
+
   setPageView(view: BatchesPageView) {
+    if (this.isStudent()) {
+      return;
+    }
     this.pageView.set(view);
   }
 
   ngOnInit() {
+    if (this.isStudent()) {
+      this.pageView.set('list');
+    }
     this.load();
   }
 
@@ -58,6 +72,23 @@ export class BatchesComponent implements OnInit {
 
   load() {
     this.loading.set(true);
+
+    if (this.isStudent()) {
+      this.studentPortal.getMyBatch().subscribe({
+        next: (res) => {
+          const batch = res.data?.batch;
+          this.rows.set(batch ? [studentBatchToBatchForm(batch)] : []);
+          this.loading.set(false);
+          this.error.set('');
+        },
+        error: (err: HttpErrorResponse) => {
+          this.error.set(getApiErrorMessage(err, 'Could not load your batch'));
+          this.loading.set(false);
+        }
+      });
+      return;
+    }
+
     this.forms.list().subscribe({
       next: (res) => {
         this.rows.set(res.data);
@@ -97,7 +128,23 @@ export class BatchesComponent implements OnInit {
     if (defaultTime) {
       ref.componentInstance.defaultTime = defaultTime;
     }
-    ref.closed.subscribe(() => this.load());
+    ref.closed.subscribe((result: { zoomWarning?: string } | undefined) => {
+      if (result?.zoomWarning) {
+        this.zoomWarning.set(result.zoomWarning);
+      }
+      this.load();
+    });
+  }
+
+  openJoinZoom(row: BatchForm) {
+    const ref = this.modal.open(BatchZoomModalComponent, {
+      fullscreen: true,
+      scrollable: false,
+      backdrop: 'static',
+      keyboard: false,
+      modalDialogClass: 'modal-fullscreen batch-zoom-modal-dialog'
+    });
+    ref.componentInstance.batch = row;
   }
 
   openAssignCoach(row: BatchForm, slot: CoachSlot) {

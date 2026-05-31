@@ -1,0 +1,94 @@
+<div class="modal-header">
+  <h5 class="modal-title">Upload PGN game</h5>
+  <button type="button" class="btn-close" aria-label="Close" (click)="dismiss()"></button>
+</div>
+
+<div class="modal-body">
+  @if (error()) {
+    <div class="alert alert-warning">{{ error() }}</div>
+  }
+
+  <div class="mb-3">
+    <label class="form-label" for="pgnStudent">Student</label>
+    <select
+      id="pgnStudent"
+      class="form-select"
+      [(ngModel)]="studentId"
+      name="studentId"
+      [disabled]="loadingStudents()"
+      required
+    >
+      <option [ngValue]="null">Select student…</option>
+      @for (s of studentOptions(); track s['id']) {
+        <option [ngValue]="+s['id']">{{ studentLabel(s) }}</option>
+      }
+    </select>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label" for="pgnTitle">Title (optional)</label>
+    <input id="pgnTitle" class="form-control" [(ngModel)]="title" name="title" placeholder="e.g. Tournament round 3" />
+    <div class="form-text">Auto-filled from PGN tags (Event, White vs Black) when possible.</div>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label" for="pgnFile">PGN file</label>
+    <input
+      id="pgnFile"
+      type="file"
+      class="form-control"
+      accept=".pgn,text/plain"
+      (change)="onFileSelected($event)"
+    />
+    @if (fileName()) {
+      <div class="form-text">{{ fileName() }}</div>
+    }
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label" for="pgnText">Or paste PGN</label>
+    <textarea
+      id="pgnText"
+      class="form-control font-monospace pgn-upload__textarea"
+      rows="10"
+      [(ngModel)]="pgnText"
+      name="pgnText"
+      (ngModelChange)="onPgnInput()"
+      placeholder="[Event &quot;...&quot;]&#10;[White &quot;...&quot;]&#10;[Black &quot;...&quot;]&#10;&#10;1. e4 e5 2. Nf3 ..."
+    ></textarea>
+  </div>
+
+  @if (pgnText.trim()) {
+    <div
+      class="alert mb-3"
+      [class.alert-success]="pgnValid()"
+      [class.alert-danger]="!pgnValid()"
+    >
+      @if (pgnValid()) {
+        PGN looks valid — {{ moveCount() }} half-move{{ moveCount() === 1 ? '' : 's' }} detected.
+      } @else {
+        {{ pgnPreviewError() || 'PGN could not be parsed.' }}
+      }
+    </div>
+  }
+
+  <div class="mb-0">
+    <label class="form-label" for="pgnNotes">Notes for student (optional)</label>
+    <textarea id="pgnNotes" class="form-control" rows="2" [(ngModel)]="notes" name="notes"></textarea>
+  </div>
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-outline-secondary" (click)="dismiss()">Cancel</button>
+  <button
+    type="button"
+    class="btn btn-primary"
+    [disabled]="saving() || !pgnValid() || !studentId"
+    (click)="save()"
+  >
+    @if (saving()) {
+      <span class="spinner-border spinner-border-sm me-1"></span>
+    }
+    Save game
+  </button>
+</div>

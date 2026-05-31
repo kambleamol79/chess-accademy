@@ -149,6 +149,17 @@
   }
 }
 
+.batch-cal__event-zoom {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  margin-top: 0.15rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 .batch-cal__week-wrap {
   border: 1px solid var(--bs-border-color);
   border-radius: 0.375rem;

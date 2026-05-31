@@ -6,6 +6,8 @@ import { Title } from '@angular/platform-browser';
 
 // project import
 import { NavigationItem, NavigationItems } from 'src/app/theme/layout/admin/navigation/navigation';
+import { AuthService } from 'src/app/core/services/auth.service';
+import { filterNavigationByRole } from 'src/app/core/utils/navigation.util';
 import { SharedModule } from '../../shared.module';
 import { environment } from 'src/environments/environment';
 
@@ -26,6 +28,7 @@ interface titleType {
 export class BreadcrumbComponent {
   private route = inject(Router);
   private titleService = inject(Title);
+  private auth = inject(AuthService);
 
   // public props
   @Input() type: string;
@@ -36,7 +39,7 @@ export class BreadcrumbComponent {
 
   // constructor
   constructor() {
-    this.navigations = NavigationItems;
+    this.navigations = filterNavigationByRole(NavigationItems, this.auth.role());
     this.type = 'icon';
     this.setBreadcrumb();
   }

@@ -94,3 +94,8 @@ export function nextBatchCode(existing: string[]): string {
 
   return `${prefix}${maxNum + 1}`;
 }
+
+export function hasBatchZoom(batch: BatchForm): boolean {
+  const meetingId = batch.zoom_meeting_id?.trim();
+  return !!meetingId;
+}

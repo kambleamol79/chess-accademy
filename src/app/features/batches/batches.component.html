@@ -1,29 +1,31 @@
 <app-card [customHeader]="true">
   <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
     <div class="d-flex flex-wrap align-items-center gap-2">
-      <h5 class="mb-0">Batch schedule</h5>
-      <div class="btn-group btn-group-sm" role="group" aria-label="Page view">
-        <button
-          type="button"
-          class="btn"
-          [class.btn-primary]="pageView() === 'calendar'"
-          [class.btn-outline-primary]="pageView() !== 'calendar'"
-          (click)="setPageView('calendar')"
-        >
-          <i class="ti ti-calendar me-1"></i>
-          Calendar
-        </button>
-        <button
-          type="button"
-          class="btn"
-          [class.btn-primary]="pageView() === 'list'"
-          [class.btn-outline-primary]="pageView() !== 'list'"
-          (click)="setPageView('list')"
-        >
-          <i class="ti ti-list me-1"></i>
-          List
-        </button>
-      </div>
+      <h5 class="mb-0">{{ isStudent() ? 'My batch' : 'Batch schedule' }}</h5>
+      @if (!isStudent()) {
+        <div class="btn-group btn-group-sm" role="group" aria-label="Page view">
+          <button
+            type="button"
+            class="btn"
+            [class.btn-primary]="pageView() === 'calendar'"
+            [class.btn-outline-primary]="pageView() !== 'calendar'"
+            (click)="setPageView('calendar')"
+          >
+            <i class="ti ti-calendar me-1"></i>
+            Calendar
+          </button>
+          <button
+            type="button"
+            class="btn"
+            [class.btn-primary]="pageView() === 'list'"
+            [class.btn-outline-primary]="pageView() !== 'list'"
+            (click)="setPageView('list')"
+          >
+            <i class="ti ti-list me-1"></i>
+            List
+          </button>
+        </div>
+      }
     </div>
     @if (canManageBatches()) {
       <button type="button" class="btn btn-primary btn-sm" (click)="openAddBatch()">
@@ -33,19 +35,33 @@
     }
   </div>
 
+  @if (zoomWarning()) {
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+      {{ zoomWarning() }}
+      <button type="button" class="btn-close" aria-label="Close" (click)="zoomWarning.set('')"></button>
+    </div>
+  }
+
   @if (loading()) {
     <p class="text-muted mb-0">Loading…</p>
   } @else if (error()) {
     <div class="alert alert-warning">{{ error() }}</div>
   } @else if (rows().length === 0) {
-    <p class="text-center text-muted py-4 mb-0">No batches yet. Click “Add new batch” to create one.</p>
-  } @else if (pageView() === 'calendar') {
+    <p class="text-center text-muted py-4 mb-0">
+      @if (isStudent()) {
+        You are not assigned to a batch yet. Contact Brainstorm.
+      } @else {
+        No batches yet. Click “Add new batch” to create one.
+      }
+    </p>
+  } @else if (!isStudent() && pageView() === 'calendar') {
     <app-batch-calendar
       [batches]="rows()"
       [canEdit]="canEdit()"
       [canAssignCoach]="canAssignCoach()"
       (editBatch)="openEditBatch($event)"
       (assignCoach)="openAssignCoach($event.batch, $event.slot)"
+      (joinZoom)="openJoinZoom($event)"
     />
   } @else {
     @for (group of timeSlotGroups(); track group.time) {
@@ -68,6 +84,7 @@
                 <th>COACH</th>
                 <th>DAYS</th>
                 <th>COACH</th>
+                <th>Zoom</th>
                 @if (canEdit() || canDelete()) {
                   <th class="text-end">Actions</th>
                 }
@@ -107,6 +124,21 @@
                     }
                     @if (canAssignCoach()) {
                       <i class="ti ti-edit coach-cell__icon"></i>
+                    }
+                  </td>
+                  <td class="text-nowrap">
+                    @if (hasBatchZoom(row)) {
+                      <button
+                        type="button"
+                        class="btn btn-primary btn-sm"
+                        title="Join class in app"
+                        (click)="openJoinZoom(row)"
+                      >
+                        <i class="ti ti-brand-zoom me-1"></i>
+                        Join class
+                      </button>
+                    } @else {
+                      <span class="text-muted">—</span>
                     }
                   </td>
                   @if (canEdit() || canDelete()) {

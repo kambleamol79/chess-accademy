@@ -1,0 +1,72 @@
+<div class="cb-surface">
+  @if (topPlayer) {
+    <div class="cb-player" [class.cb-player--active]="topPlayer.isActive">
+      <div class="cb-player__avatar">{{ topPlayer.avatarLabel || topPlayer.name.charAt(0) }}</div>
+      <div class="cb-player__info">
+        <div class="cb-player__name">{{ topPlayer.name }}</div>
+        @if (topPlayer.subtitle) {
+          <div class="cb-player__sub">{{ topPlayer.subtitle }}</div>
+        }
+      </div>
+      <div
+        class="cb-timer"
+        [class.cb-timer--active]="topPlayer.isActive"
+        [class.cb-timer--low]="topPlayer.isLowTime"
+      >
+        {{ topPlayer.timerText }}
+      </div>
+    </div>
+  }
+
+  <div class="cb-frame">
+    <div class="cb-grid">
+      @for (row of rows; track row) {
+        <div class="cb-row">
+          @for (col of rows; track col) {
+            <button
+              type="button"
+              class="cb-square"
+              [ngClass]="squareClasses(row, col)"
+              [disabled]="disabled"
+              (click)="onSquare(row, col)"
+            >
+              @if (col === 0) {
+                <span class="cb-coord cb-coord--rank">{{ rankForRow(row) }}</span>
+              }
+              @if (row === 7) {
+                <span class="cb-coord cb-coord--file">{{ fileForCol(col) }}</span>
+              }
+              @if (legalTargets.includes(square(row, col)) && !pieceAt(row, col)) {
+                <span class="cb-target-dot"></span>
+              }
+              @if (pieceAt(row, col); as piece) {
+                <span class="cb-piece" [class.cb-piece--white]="piece.color === 'w'">
+                  {{ pieceSymbol(piece.type, piece.color) }}
+                </span>
+              }
+            </button>
+          }
+        </div>
+      }
+    </div>
+  </div>
+
+  @if (bottomPlayer) {
+    <div class="cb-player" [class.cb-player--active]="bottomPlayer.isActive">
+      <div class="cb-player__avatar">{{ bottomPlayer.avatarLabel || bottomPlayer.name.charAt(0) }}</div>
+      <div class="cb-player__info">
+        <div class="cb-player__name">{{ bottomPlayer.name }}</div>
+        @if (bottomPlayer.subtitle) {
+          <div class="cb-player__sub">{{ bottomPlayer.subtitle }}</div>
+        }
+      </div>
+      <div
+        class="cb-timer"
+        [class.cb-timer--active]="bottomPlayer.isActive"
+        [class.cb-timer--low]="bottomPlayer.isLowTime"
+      >
+        {{ bottomPlayer.timerText }}
+      </div>
+    </div>
+  }
+</div>

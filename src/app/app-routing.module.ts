@@ -12,6 +12,7 @@ const routes: Routes = [
     canActivate: [authGuard],
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: 'materials', redirectTo: 'dashboard', pathMatch: 'full' },
       {
         path: 'dashboard',
         loadComponent: () => import('./features/dashboard/dashboard.component').then((c) => c.DashboardComponent)
@@ -53,17 +54,38 @@ const routes: Routes = [
         data: { roles: ['admin', 'student'] }
       },
       {
-        path: 'game-review',
-        loadComponent: () => import('./features/game-review/game-review.component').then((c) => c.GameReviewComponent),
+        path: 'practice',
+        loadComponent: () => import('./features/practice/practice.component').then((c) => c.PracticeComponent),
         canActivate: [roleGuard],
         data: { roles: ['admin', 'student'] }
       },
-      {
-        path: 'materials',
-        loadComponent: () => import('./features/materials/materials.component').then((c) => c.MaterialsComponent),
-        canActivate: [roleGuard],
-        data: { roles: ['admin', 'student'] }
-      },
+      // FEATURE: game review — enable when ready
+      // {
+      //   path: 'game-review',
+      //   loadComponent: () => import('./features/game-review/game-review.component').then((c) => c.GameReviewComponent),
+      //   canActivate: [roleGuard],
+      //   data: { roles: ['admin', 'student'] }
+      // },
+      // FEATURE: live arena — enable when ready
+      // {
+      //   path: 'chess-arena',
+      //   loadComponent: () => import('./features/chess-arena/chess-arena.component').then((c) => c.ChessArenaComponent),
+      //   canActivate: [roleGuard],
+      //   data: { roles: ['student'] }
+      // },
+      // {
+      //   path: 'chess-arena/match/:id',
+      //   loadComponent: () => import('./features/chess-arena/live-match.component').then((c) => c.LiveMatchComponent),
+      //   canActivate: [roleGuard],
+      //   data: { roles: ['student'] }
+      // },
+      // {
+      //   path: 'chess-tournaments',
+      //   loadComponent: () =>
+      //     import('./features/chess-tournaments/chess-tournaments.component').then((c) => c.ChessTournamentsComponent),
+      //   canActivate: [roleGuard],
+      //   data: { roles: ['admin'] }
+      // },
       {
         path: 'settings',
         loadComponent: () => import('./features/settings/settings.component').then((c) => c.SettingsComponent),

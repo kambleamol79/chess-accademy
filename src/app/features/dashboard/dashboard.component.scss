@@ -129,3 +129,28 @@
 .coach-schedule__cell--empty {
   background-color: #fff;
 }
+
+// Student dashboard (no admin metrics)
+.student-dashboard {
+  &__welcome h4 {
+    font-weight: 700;
+  }
+
+  &__meta li {
+    padding: 0.35rem 0;
+    font-size: 0.9375rem;
+  }
+
+  &__reminder-icon {
+    flex-shrink: 0;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 10px;
+    background: var(--bs-primary-bg-subtle, #e8eeff);
+    color: var(--bs-primary, #4f46e5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.125rem;
+  }
+}

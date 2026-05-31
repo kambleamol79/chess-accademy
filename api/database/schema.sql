@@ -9,10 +9,11 @@ USE `chess_academy`;
 
 SET FOREIGN_KEY_CHECKS = 0;
 
+DROP TABLE IF EXISTS `practice_moves`;
+DROP TABLE IF EXISTS `practice_sessions`;
 DROP TABLE IF EXISTS `puzzle_attempts`;
 DROP TABLE IF EXISTS `puzzles`;
 DROP TABLE IF EXISTS `games`;
-DROP TABLE IF EXISTS `class_materials`;
 DROP TABLE IF EXISTS `form_enrollments`;
 DROP TABLE IF EXISTS `invoices`;
 DROP TABLE IF EXISTS `students`;
@@ -71,6 +72,10 @@ CREATE TABLE `forms` (
   `day_2` VARCHAR(10) NOT NULL,
   `coach_2` VARCHAR(100) DEFAULT NULL,
   `notes` VARCHAR(255) DEFAULT NULL,
+  `zoom_meeting_id` VARCHAR(50) DEFAULT NULL,
+  `zoom_join_url` VARCHAR(500) DEFAULT NULL,
+  `zoom_start_url` VARCHAR(500) DEFAULT NULL,
+  `zoom_password` VARCHAR(20) DEFAULT NULL,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -186,6 +191,39 @@ CREATE TABLE `puzzle_attempts` (
   CONSTRAINT `fk_attempt_student` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE `practice_sessions` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id` INT UNSIGNED NOT NULL,
+  `mode` ENUM('vs_computer', 'free_play') NOT NULL DEFAULT 'vs_computer',
+  `level` VARCHAR(20) DEFAULT NULL,
+  `player_color` ENUM('white', 'black') NOT NULL DEFAULT 'white',
+  `time_control_minutes` TINYINT UNSIGNED NOT NULL DEFAULT 10,
+  `start_fen` VARCHAR(120) NOT NULL,
+  `result` ENUM('ongoing', 'win', 'loss', 'draw', 'ended', 'timeout_win', 'timeout_loss') NOT NULL DEFAULT 'ongoing',
+  `ended_at` DATETIME DEFAULT NULL,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_practice_sessions_user_created` (`user_id`, `created_at` DESC),
+  CONSTRAINT `fk_practice_sessions_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE `practice_moves` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `session_id` INT UNSIGNED NOT NULL,
+  `ply` SMALLINT UNSIGNED NOT NULL,
+  `san` VARCHAR(16) NOT NULL,
+  `uci` VARCHAR(12) NOT NULL,
+  `color` ENUM('w', 'b') NOT NULL,
+  `player` ENUM('human', 'opponent') NOT NULL,
+  `fen_after` VARCHAR(120) NOT NULL,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_practice_moves_session_ply` (`session_id`, `ply`),
+  KEY `idx_practice_moves_session` (`session_id`),
+  CONSTRAINT `fk_practice_moves_session` FOREIGN KEY (`session_id`) REFERENCES `practice_sessions` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE `games` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `student_id` INT UNSIGNED NOT NULL,
@@ -200,20 +238,6 @@ CREATE TABLE `games` (
   KEY `idx_games_student` (`student_id`),
   CONSTRAINT `fk_games_student` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_games_coach` FOREIGN KEY (`coach_id`) REFERENCES `coaches` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE `class_materials` (
-  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `form_id` INT UNSIGNED NOT NULL,
-  `title` VARCHAR(200) NOT NULL,
-  `type` ENUM('pdf', 'video', 'link') NOT NULL DEFAULT 'link',
-  `url` VARCHAR(500) NOT NULL,
-  `uploaded_by` INT UNSIGNED DEFAULT NULL,
-  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  KEY `idx_materials_form` (`form_id`),
-  CONSTRAINT `fk_materials_form` FOREIGN KEY (`form_id`) REFERENCES `forms` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_materials_user` FOREIGN KEY (`uploaded_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------------------------------------------------------------------------

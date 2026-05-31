@@ -30,6 +30,17 @@ final class InvoiceRepository
         return $stmt->fetchAll();
     }
 
+    /** @return list<array<string,mixed>> */
+    public function findByStudentId(int $studentId): array
+    {
+        $stmt = $this->pdo->prepare(
+            'SELECT * FROM invoices WHERE student_id = :student_id ORDER BY id DESC'
+        );
+        $stmt->execute(['student_id' => $studentId]);
+
+        return $stmt->fetchAll();
+    }
+
     /** @return array<string,mixed>|null */
     public function findById(int $id): ?array
     {

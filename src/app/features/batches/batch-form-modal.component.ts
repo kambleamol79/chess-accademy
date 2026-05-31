@@ -1,6 +1,6 @@
 import { Component, inject, Input, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { HttpErrorResponse } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { BatchForm } from 'src/app/core/models/form.model';
@@ -9,10 +9,12 @@ import { CoachService } from 'src/app/core/services/coach.service';
 import { getApiErrorMessage } from 'src/app/core/utils/http-error.util';
 import {
   formatTimeSlot,
+  hasBatchZoom,
   isValidTimeSlotRange,
   nextBatchCode,
   parseTimeSlot
 } from 'src/app/core/utils/batch.util';
+import { BatchZoomModalComponent } from './batch-zoom-modal.component';
 
 export interface CoachOption {
   id: number;
@@ -27,6 +29,7 @@ export interface CoachOption {
 })
 export class BatchFormModalComponent implements OnInit {
   private readonly activeModal = inject(NgbActiveModal);
+  private readonly modal = inject(NgbModal);
   private readonly forms = inject(FormService);
   private readonly coachesApi = inject(CoachService);
 
@@ -131,6 +134,24 @@ export class BatchFormModalComponent implements OnInit {
     this.activeModal.dismiss();
   }
 
+  canJoinZoom(): boolean {
+    return !!this.batchRecord && hasBatchZoom(this.batchRecord);
+  }
+
+  openJoinZoom() {
+    if (!this.batchRecord || !hasBatchZoom(this.batchRecord)) {
+      return;
+    }
+    const ref = this.modal.open(BatchZoomModalComponent, {
+      fullscreen: true,
+      scrollable: false,
+      backdrop: 'static',
+      keyboard: false,
+      modalDialogClass: 'modal-fullscreen batch-zoom-modal-dialog'
+    });
+    ref.componentInstance.batch = this.batchRecord;
+  }
+
   save() {
     this.error.set('');
     const batch = this.batch.trim();
@@ -172,7 +193,10 @@ export class BatchFormModalComponent implements OnInit {
           this.error.set(res.message ?? (this.isEdit ? 'Could not update batch' : 'Could not save batch'));
           return;
         }
-        this.activeModal.close(res.data);
+        this.activeModal.close({
+          batch: res.data,
+          zoomWarning: res.zoom_warning
+        });
       },
       error: (err: HttpErrorResponse) => {
         this.saving.set(false);

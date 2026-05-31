@@ -20,12 +20,22 @@ final class JwtAuthMiddleware implements MiddlewareInterface
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $header = $request->getHeaderLine('Authorization');
-        if (!preg_match('/Bearer\s+(\S+)/i', $header, $matches)) {
+        $token = null;
+        if (preg_match('/Bearer\s+(\S+)/i', $header, $matches)) {
+            $token = $matches[1];
+        } else {
+            $query = $request->getQueryParams();
+            $token = isset($query['access_token']) && is_string($query['access_token'])
+                ? trim($query['access_token'])
+                : null;
+        }
+
+        if ($token === null || $token === '') {
             return $this->unauthorized('Missing or invalid Authorization header');
         }
 
         try {
-            $user = $this->jwt->decodeAccessToken($matches[1]);
+            $user = $this->jwt->decodeAccessToken($token);
         } catch (ExpiredException) {
             return $this->unauthorized('Token expired');
         } catch (SignatureInvalidException|\UnexpectedValueException|\InvalidArgumentException) {

@@ -4,6 +4,7 @@
   "type": "project",
   "require": {
     "php": "^8.1",
+    "akondas/chess.php": "^1.0",
     "firebase/php-jwt": "^7.0",
     "monolog/monolog": "^3.8",
     "php-di/php-di": "^7.0",
@@ -18,5 +19,9 @@
   },
   "config": {
     "sort-packages": true
+  },
+  "scripts": {
+    "post-install-cmd": ["@php scripts/patch-akondas-chess.php"],
+    "post-update-cmd": ["@php scripts/patch-akondas-chess.php"]
   }
 }

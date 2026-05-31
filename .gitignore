@@ -106,3 +106,9 @@ dist
 #angular catch file
 .angular
 .vscode/
+
+# Flutter
+student_app/.dart_tool/
+student_app/build/
+student_app/.flutter-plugins-dependencies
+student_app/.idea/

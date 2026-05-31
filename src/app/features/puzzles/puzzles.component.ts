@@ -4,12 +4,14 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { CardComponent } from 'src/app/theme/shared/components/card/card.component';
 import { PuzzleService } from 'src/app/core/services/puzzle.service';
 import { AuthService } from 'src/app/core/services/auth.service';
+import { ChessPuzzle } from 'src/app/core/models/puzzle.model';
+import { PuzzlePlayComponent } from '../puzzle-play/puzzle-play.component';
 import { confirmDelete } from 'src/app/core/utils/confirm.util';
 import { getApiErrorMessage } from 'src/app/core/utils/http-error.util';
 
 @Component({
   selector: 'app-puzzles',
-  imports: [CommonModule, CardComponent],
+  imports: [CommonModule, CardComponent, PuzzlePlayComponent],
   templateUrl: './puzzles.component.html',
   styleUrl: './puzzles.component.scss'
 })
@@ -20,21 +22,25 @@ export class PuzzlesComponent implements OnInit {
   loading = signal(true);
   error = signal('');
   deletingId = signal<number | null>(null);
-  rows = signal<Record<string, unknown>[]>([]);
+  rows = signal<ChessPuzzle[]>([]);
 
   ngOnInit() {
-    this.load();
+    if (this.isAdmin()) {
+      this.loadAdminList();
+    } else {
+      this.loading.set(false);
+    }
   }
 
-  canDelete(): boolean {
-    return this.auth.hasRole(['admin', 'coach']);
+  isAdmin(): boolean {
+    return this.auth.hasRole(['admin']);
   }
 
-  load() {
+  loadAdminList() {
     this.loading.set(true);
     this.puzzles.list().subscribe({
       next: (res) => {
-        this.rows.set(res.data);
+        this.rows.set(res.data ?? []);
         this.loading.set(false);
         this.error.set('');
       },
@@ -45,18 +51,17 @@ export class PuzzlesComponent implements OnInit {
     });
   }
 
-  deletePuzzle(row: Record<string, unknown>) {
-    const id = Number(row['id']);
-    const label = String(row['title'] ?? `Puzzle #${id}`);
+  deletePuzzle(row: ChessPuzzle) {
+    const label = row.title ?? `Puzzle #${row.id}`;
     if (!confirmDelete(label)) {
       return;
     }
 
-    this.deletingId.set(id);
-    this.puzzles.delete(id).subscribe({
+    this.deletingId.set(row.id);
+    this.puzzles.delete(row.id).subscribe({
       next: () => {
         this.deletingId.set(null);
-        this.load();
+        this.loadAdminList();
       },
       error: (err: HttpErrorResponse) => {
         this.deletingId.set(null);

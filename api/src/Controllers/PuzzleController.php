@@ -21,7 +21,40 @@ final class PuzzleController
 
     public function index(Request $request, Response $response): Response
     {
+        $difficulty = $request->getQueryParams()['difficulty'] ?? null;
+        if ($difficulty !== null && in_array($difficulty, ['easy', 'medium', 'hard'], true)) {
+            return $this->success($response, $this->puzzles->findByDifficulty($difficulty));
+        }
+
         return $this->success($response, $this->puzzles->findAll());
+    }
+
+    public function next(Request $request, Response $response): Response
+    {
+        $params = $request->getQueryParams();
+        $difficulty = (string) ($params['difficulty'] ?? 'easy');
+        if (!in_array($difficulty, ['easy', 'medium', 'hard'], true)) {
+            return $this->error($response, 'difficulty must be easy, medium, or hard', 422);
+        }
+
+        $excludeId = isset($params['exclude']) ? (int) $params['exclude'] : null;
+        if ($excludeId !== null && $excludeId <= 0) {
+            $excludeId = null;
+        }
+
+        $studentId = null;
+        $user = $request->getAttribute('user');
+        if (is_array($user) && ($user['role'] ?? '') === 'student') {
+            $profile = $this->students->findByUserId((int) $user['id']);
+            $studentId = $profile ? (int) $profile['id'] : null;
+        }
+
+        $puzzle = $this->puzzles->findNextForStudent($difficulty, $studentId, $excludeId);
+        if ($puzzle === null) {
+            return $this->error($response, 'No puzzles available for this level yet', 404);
+        }
+
+        return $this->success($response, ['puzzle' => $puzzle]);
     }
 
     public function show(Request $request, Response $response, array $args): Response
@@ -62,6 +95,9 @@ final class PuzzleController
         if ($studentId === null && $user['role'] === 'student') {
             $profile = $this->students->findByUserId((int) $user['id']);
             $studentId = $profile ? (int) $profile['id'] : null;
+        }
+        if ($studentId === null && ($user['role'] ?? '') === 'admin') {
+            return $this->success($response, ['is_correct' => $isCorrect], 'Attempt recorded (admin preview)');
         }
         if ($studentId === null) {
             return $this->error($response, 'student_id is required', 422);

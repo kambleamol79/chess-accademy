@@ -1,0 +1,18 @@
+.live-match-actions {
+  position: relative;
+  z-index: 2;
+}
+
+.live-match-board {
+  max-width: min(100%, 520px);
+  margin: 0 auto;
+}
+
+.live-match-remote-audio {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+  overflow: hidden;
+}

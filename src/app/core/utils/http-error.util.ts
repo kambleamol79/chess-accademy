@@ -5,7 +5,7 @@ export function getApiErrorMessage(err: HttpErrorResponse, fallback = 'Request f
     return String((err.error as { message: string }).message);
   }
   if (typeof err.error === 'string' && err.error.includes('Database connection failed')) {
-    return 'Database connection failed. Set DB_PASS in api/.env and restart the PHP server.';
+    return 'Database connection failed. Check that MySQL is running and api/.env DB settings are correct, then restart the API server.';
   }
   if (err.status === 0) {
     return 'Cannot reach API at ' + err.url + '. Start it with: cd api && php -S localhost:8080 -t public';

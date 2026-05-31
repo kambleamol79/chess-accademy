@@ -1,9 +1,21 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { forkJoin } from 'rxjs';
 import { CardComponent } from 'src/app/theme/shared/components/card/card.component';
 import { DashboardMetrics, DashboardService, DashboardStatCard } from 'src/app/core/services/dashboard.service';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { CoachSchedulePayload } from 'src/app/core/services/coach.service';
+import { StudentPortalService } from 'src/app/core/services/student-portal.service';
+import { StudentBatch, StudentReminder } from 'src/app/core/models/student-portal.model';
+import {
+  hasStudentZoomJoin,
+  studentBatchToBatchForm,
+  studentCoachesLabel
+} from 'src/app/core/utils/student-batch.util';
+import { BatchZoomModalComponent } from '../batches/batch-zoom-modal.component';
+import { openZoomExternalFullscreen } from 'src/app/core/utils/zoom-open.util';
 import { HttpErrorResponse } from '@angular/common/http';
 import { getApiErrorMessage } from 'src/app/core/utils/http-error.util';
 import { NgApexchartsModule } from 'ng-apexcharts';
@@ -18,19 +30,36 @@ const CHART_COLORS = ['#6366f1', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#0
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule, CardComponent, NgApexchartsModule],
+  imports: [CommonModule, RouterModule, CardComponent, NgApexchartsModule],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
 export class DashboardComponent implements OnInit {
   private readonly dashboard = inject(DashboardService);
+  private readonly studentPortal = inject(StudentPortalService);
   private readonly auth = inject(AuthService);
+  private readonly modal = inject(NgbModal);
 
   metrics = signal<DashboardMetrics | null>(null);
   coachSchedule = signal<CoachSchedulePayload | null>(null);
+  studentBatch = signal<StudentBatch | null>(null);
+  studentReminders = signal<StudentReminder[]>([]);
 
   loading = signal(true);
   error = signal('');
+
+  readonly isStudent = computed(() => this.auth.role() === 'student');
+  readonly studentDisplayName = computed(() => {
+    const u = this.auth.user();
+    if (!u) return 'Student';
+    return `${u.first_name} ${u.last_name}`.trim() || u.email;
+  });
+  readonly paymentReminders = computed(() =>
+    this.studentReminders().filter((r) => r.type === 'payment')
+  );
+  readonly otherReminders = computed(() =>
+    this.studentReminders().filter((r) => r.type !== 'payment').slice(0, 5)
+  );
 
   statCards = computed(() => {
     const m = this.metrics();
@@ -61,6 +90,11 @@ export class DashboardComponent implements OnInit {
       return;
     }
 
+    if (this.auth.hasRole(['student'])) {
+      this.loadStudentDashboard();
+      return;
+    }
+
     this.dashboard.getMetrics().subscribe({
       next: (res) => {
         const data = res.data;
@@ -74,6 +108,74 @@ export class DashboardComponent implements OnInit {
       },
       error: () => {
         this.error.set('Could not load dashboard. Is the API running?');
+        this.loading.set(false);
+      }
+    });
+  }
+
+  studentCoaches(batch: StudentBatch): string {
+    return studentCoachesLabel(batch);
+  }
+
+  canJoinClass(batch: StudentBatch | null): boolean {
+    return hasStudentZoomJoin(batch);
+  }
+
+  openJoinClass(): void {
+    const batch = this.studentBatch();
+    if (!batch || !this.canJoinClass(batch)) {
+      return;
+    }
+
+    const ref = this.modal.open(BatchZoomModalComponent, {
+      fullscreen: true,
+      scrollable: false,
+      backdrop: 'static',
+      keyboard: false,
+      modalDialogClass: 'modal-fullscreen batch-zoom-modal-dialog'
+    });
+    ref.componentInstance.batch = studentBatchToBatchForm(batch);
+  }
+
+  openZoomLink(): void {
+    const url = this.studentBatch()?.zoom_join_url?.trim();
+    if (url) {
+      openZoomExternalFullscreen(url);
+    }
+  }
+
+  reminderIcon(type: string): string {
+    switch (type) {
+      case 'class':
+        return 'ti ti-school';
+      case 'payment':
+        return 'ti ti-receipt';
+      case 'practice':
+        return 'ti ti-chess';
+      default:
+        return 'ti ti-bell';
+    }
+  }
+
+  reminderAlertClass(priority?: string): string {
+    if (priority === 'high') return 'alert-danger';
+    if (priority === 'medium') return 'alert-warning';
+    return 'alert-info';
+  }
+
+  private loadStudentDashboard(): void {
+    forkJoin({
+      batch: this.studentPortal.getMyBatch(),
+      reminders: this.studentPortal.getReminders()
+    }).subscribe({
+      next: ({ batch, reminders }) => {
+        this.studentBatch.set(batch.data?.batch ?? null);
+        this.studentReminders.set(reminders.data?.reminders ?? []);
+        this.loading.set(false);
+        this.error.set('');
+      },
+      error: (err: HttpErrorResponse) => {
+        this.error.set(getApiErrorMessage(err, 'Could not load your dashboard. Is the API running?'));
         this.loading.set(false);
       }
     });

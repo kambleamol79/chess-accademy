@@ -1,0 +1,76 @@
+<app-card cardTitle="Solve puzzles">
+  <div class="puzzle-play" [class.puzzle-play--student]="isStudent()">
+    <div class="puzzle-play__levels mb-3">
+      <label class="form-label small fw-semibold puzzle-play__levels-label">Level</label>
+      <div class="puzzle-play__levels-btns">
+        @for (d of difficulties; track d.value) {
+          <button
+            type="button"
+            class="btn btn-sm"
+            [class.btn-primary]="level() === d.value"
+            [class.btn-outline-primary]="level() !== d.value"
+            [disabled]="status() === 'loading'"
+            (click)="setLevel(d.value)"
+          >
+            {{ d.label }}
+          </button>
+        }
+      </div>
+    </div>
+
+    @if (error()) {
+      <div class="alert alert-warning">{{ error() }}</div>
+    }
+
+    <div class="row g-4 align-items-start puzzle-play__body">
+      <div [class.col-lg-7]="!isStudent()" [class.col-12]="isStudent()">
+        @if (status() === 'loading') {
+          <p class="text-muted">Loading puzzle…</p>
+        } @else {
+          <app-chess-board
+            [fen]="fen()"
+            [flipped]="boardFlipped()"
+            [selectedSquare]="selectedSquare()"
+            [legalTargets]="legalTargets()"
+            [disabled]="status() !== 'playing'"
+            [topPlayer]="topPlayer()"
+            [bottomPlayer]="bottomPlayer()"
+            (squareClick)="onSquareTap($event)"
+          />
+        }
+      </div>
+      <div [class.col-lg-5]="!isStudent()" [class.col-12]="isStudent()">
+        <div class="puzzle-play__panel" [class.puzzle-play__panel--inline]="isStudent()">
+          <div
+            class="alert mb-0 puzzle-play__status"
+            [class.alert-success]="status() === 'solved'"
+            [class.alert-danger]="status() === 'wrong'"
+            [class.alert-info]="status() === 'playing' || status() === 'loading'"
+            [class.alert-secondary]="status() === 'idle' || status() === 'error'"
+          >
+            {{ message() }}
+          </div>
+          @if (puzzle(); as p) {
+            <p class="small text-muted mb-0 puzzle-play__meta">
+              <strong>{{ p.title || 'Puzzle #' + p.id }}</strong> · {{ p.difficulty }}
+            </p>
+          }
+          <p class="small mb-0 puzzle-play__solved">Solved: <strong>{{ solvedCount() }}</strong></p>
+          <div class="puzzle-play__actions d-flex flex-wrap gap-2">
+            <button type="button" class="btn btn-primary" [disabled]="status() === 'loading'" (click)="loadPuzzle(true)">
+              Next puzzle
+            </button>
+            <button
+              type="button"
+              class="btn btn-outline-secondary"
+              [disabled]="!puzzle() || status() === 'loading'"
+              (click)="resetPuzzle()"
+            >
+              Reset
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</app-card>

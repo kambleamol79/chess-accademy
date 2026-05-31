@@ -10,10 +10,13 @@ use ChessAcademy\Controllers\EnrollmentController;
 use ChessAcademy\Controllers\FormController;
 use ChessAcademy\Controllers\LeadController;
 use ChessAcademy\Controllers\GameController;
-use ChessAcademy\Controllers\MaterialController;
+use ChessAcademy\Controllers\ChessLiveMatchController;
+use ChessAcademy\Controllers\ChessTournamentController;
+use ChessAcademy\Controllers\PracticeSessionController;
 use ChessAcademy\Controllers\PuzzleController;
 use ChessAcademy\Controllers\SettingsController;
 use ChessAcademy\Controllers\StudentController;
+use ChessAcademy\Controllers\StudentPortalController;
 use ChessAcademy\Middleware\JwtAuthMiddleware;
 use ChessAcademy\Middleware\RoleMiddleware;
 use DI\Container;
@@ -38,9 +41,13 @@ return function (App $app, Container $container): void {
             $payload = ['success' => true, 'data' => ['database' => 'connected']];
             $status = 200;
         } catch (\Throwable $e) {
+            $settings = $container->get('settings');
+            $detail = ($settings['app']['debug'] ?? false)
+                ? ' ' . $e->getMessage()
+                : '';
             $payload = [
                 'success' => false,
-                'message' => 'Database connection failed. Set DB_PASS in api/.env and restart the API server.',
+                'message' => 'Database connection failed. Check that MySQL is running and api/.env DB settings are correct.' . $detail,
             ];
             $status = 503;
         }
@@ -60,9 +67,19 @@ return function (App $app, Container $container): void {
         $group->get('/auth/me', [AuthController::class, 'me']);
 
         $group->get('/dashboard/metrics', [DashboardController::class, 'metrics'])
-            ->add(new RoleMiddleware(['admin', 'student', 'accountant']));
+            ->add(new RoleMiddleware(['admin', 'accountant']));
         $group->get('/dashboard/coach-schedule', [DashboardController::class, 'coachSchedule'])
             ->add(new RoleMiddleware(['coach']));
+
+        // Student portal routes must be registered before /students/{id} (otherwise "me" matches {id}).
+        $group->get('/students/me/batch', [StudentPortalController::class, 'myBatch'])
+            ->add(new RoleMiddleware(['student']));
+        $group->get('/students/me/payments', [StudentPortalController::class, 'myPayments'])
+            ->add(new RoleMiddleware(['student']));
+        $group->get('/students/me/reminders', [StudentPortalController::class, 'myReminders'])
+            ->add(new RoleMiddleware(['student']));
+        $group->get('/students/me/notifications', [StudentPortalController::class, 'myNotifications'])
+            ->add(new RoleMiddleware(['student']));
 
         $group->get('/students', [StudentController::class, 'index'])
             ->add(new RoleMiddleware(['admin']));
@@ -116,9 +133,11 @@ return function (App $app, Container $container): void {
             ->add(new RoleMiddleware(['admin']));
 
         $group->get('/forms', [FormController::class, 'index'])
-            ->add(new RoleMiddleware(['admin', 'student', 'accountant']));
+            ->add(new RoleMiddleware(['admin', 'accountant']));
         $group->get('/forms/next-batch', [FormController::class, 'nextBatch'])
             ->add(new RoleMiddleware(['admin']));
+        $group->get('/forms/{id}/zoom/signature', [FormController::class, 'zoomSignature'])
+            ->add(new RoleMiddleware(['admin', 'coach', 'student', 'accountant']));
         $group->get('/forms/{id}', [FormController::class, 'show'])
             ->add(new RoleMiddleware(['admin', 'student', 'accountant']));
         $group->post('/forms', [FormController::class, 'store'])
@@ -154,7 +173,60 @@ return function (App $app, Container $container): void {
         $group->delete('/billing/invoices/{id}', [BillingController::class, 'destroy'])
             ->add(new RoleMiddleware(['admin']));
 
+        $group->get('/chess-tournaments', [ChessTournamentController::class, 'index'])
+            ->add(new RoleMiddleware(['admin', 'student']));
+        $group->get('/chess-tournaments/{id}', [ChessTournamentController::class, 'show'])
+            ->add(new RoleMiddleware(['admin', 'student']));
+        $group->post('/chess-tournaments', [ChessTournamentController::class, 'store'])
+            ->add(new RoleMiddleware(['admin']));
+        $group->patch('/chess-tournaments/{id}', [ChessTournamentController::class, 'updateStatus'])
+            ->add(new RoleMiddleware(['admin']));
+        $group->post('/chess-tournaments/{id}/start-round', [ChessTournamentController::class, 'startRound'])
+            ->add(new RoleMiddleware(['admin']));
+        $group->post('/chess-tournaments/{id}/register', [ChessTournamentController::class, 'register'])
+            ->add(new RoleMiddleware(['student']));
+
+        $group->get('/live-matches/mine', [ChessLiveMatchController::class, 'myMatches'])
+            ->add(new RoleMiddleware(['student']));
+        $group->get('/live-matches/queue', [ChessLiveMatchController::class, 'queueStatus'])
+            ->add(new RoleMiddleware(['student']));
+        $group->post('/live-matches/queue', [ChessLiveMatchController::class, 'joinQueue'])
+            ->add(new RoleMiddleware(['student']));
+        $group->delete('/live-matches/queue', [ChessLiveMatchController::class, 'leaveQueue'])
+            ->add(new RoleMiddleware(['student']));
+        $group->get('/live-matches/{id}/stream', [ChessLiveMatchController::class, 'stream'])
+            ->add(new RoleMiddleware(['student']));
+        $group->get('/live-matches/{id}/revision', [ChessLiveMatchController::class, 'revision'])
+            ->add(new RoleMiddleware(['student']));
+        $group->get('/live-matches/{id}', [ChessLiveMatchController::class, 'show'])
+            ->add(new RoleMiddleware(['student']));
+        $group->post('/live-matches/{id}/moves', [ChessLiveMatchController::class, 'move'])
+            ->add(new RoleMiddleware(['student']));
+        $group->post('/live-matches/{id}/resign', [ChessLiveMatchController::class, 'resign'])
+            ->add(new RoleMiddleware(['student']));
+        $group->get('/live-matches/{id}/voice/signals', [ChessLiveMatchController::class, 'voiceSignals'])
+            ->add(new RoleMiddleware(['student']));
+        $group->post('/live-matches/{id}/voice/clear', [ChessLiveMatchController::class, 'clearVoiceSignals'])
+            ->add(new RoleMiddleware(['student']));
+        $group->post('/live-matches/{id}/voice/signals', [ChessLiveMatchController::class, 'postVoiceSignal'])
+            ->add(new RoleMiddleware(['student']));
+
+        $group->get('/practice-sessions', [PracticeSessionController::class, 'index'])
+            ->add(new RoleMiddleware(['admin', 'student']));
+        $group->post('/practice-sessions', [PracticeSessionController::class, 'store'])
+            ->add(new RoleMiddleware(['admin', 'student']));
+        $group->get('/practice-sessions/{id}', [PracticeSessionController::class, 'show'])
+            ->add(new RoleMiddleware(['admin', 'student']));
+        $group->post('/practice-sessions/{id}/moves', [PracticeSessionController::class, 'addMove'])
+            ->add(new RoleMiddleware(['admin', 'student']));
+        $group->delete('/practice-sessions/{id}/moves/last', [PracticeSessionController::class, 'deleteLastMove'])
+            ->add(new RoleMiddleware(['admin', 'student']));
+        $group->patch('/practice-sessions/{id}', [PracticeSessionController::class, 'finalize'])
+            ->add(new RoleMiddleware(['admin', 'student']));
+
         $group->get('/puzzles', [PuzzleController::class, 'index'])
+            ->add(new RoleMiddleware(['admin', 'student']));
+        $group->get('/puzzles/next', [PuzzleController::class, 'next'])
             ->add(new RoleMiddleware(['admin', 'student']));
         $group->get('/puzzles/{id}', [PuzzleController::class, 'show'])
             ->add(new RoleMiddleware(['admin', 'student']));
@@ -170,19 +242,12 @@ return function (App $app, Container $container): void {
         $group->get('/games/{id}', [GameController::class, 'show'])
             ->add(new RoleMiddleware(['admin', 'student']));
         $group->post('/games', [GameController::class, 'store'])
-            ->add(new RoleMiddleware(['admin', 'student']));
+            ->add(new RoleMiddleware(['admin', 'coach', 'student']));
         $group->put('/games/{id}', [GameController::class, 'update'])
             ->add(new RoleMiddleware(['admin']));
         $group->patch('/games/{id}', [GameController::class, 'update'])
             ->add(new RoleMiddleware(['admin']));
         $group->delete('/games/{id}', [GameController::class, 'destroy'])
-            ->add(new RoleMiddleware(['admin']));
-
-        $group->get('/materials', [MaterialController::class, 'index'])
-            ->add(new RoleMiddleware(['admin', 'student']));
-        $group->post('/materials', [MaterialController::class, 'store'])
-            ->add(new RoleMiddleware(['admin']));
-        $group->delete('/materials/{id}', [MaterialController::class, 'destroy'])
             ->add(new RoleMiddleware(['admin']));
 
         $group->get('/settings', [SettingsController::class, 'index'])

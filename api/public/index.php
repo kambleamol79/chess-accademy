@@ -11,6 +11,8 @@ use Slim\Factory\AppFactory;
 
 require dirname(__DIR__) . '/vendor/autoload.php';
 
+ini_set('display_errors', '0');
+
 $settings = require dirname(__DIR__) . '/config/settings.php';
 
 $corsHeaders = new CorsHeaders(
@@ -40,7 +42,9 @@ $errorMiddleware->setDefaultErrorHandler(
         $pdo = $exception instanceof \PDOException ? $exception : $exception->getPrevious();
         if ($pdo instanceof \PDOException) {
             $response = $response->withStatus(503);
-            $message = 'Database connection failed. Set DB_PASS in api/.env to your MySQL password, then restart the API server.';
+            $message = $displayErrorDetails
+                ? 'Database error: ' . $pdo->getMessage()
+                : 'Database error. Check that MySQL is running and api/.env DB settings are correct, then restart the API server.';
         } elseif ($displayErrorDetails) {
             $message = $exception->getMessage();
         }
