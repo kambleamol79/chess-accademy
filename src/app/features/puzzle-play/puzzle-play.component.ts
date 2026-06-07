@@ -1,5 +1,6 @@
 import { Component, computed, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Chess, Color, Move, Square } from 'chess.js';
 import { CardComponent } from 'src/app/theme/shared/components/card/card.component';
@@ -19,7 +20,7 @@ type PuzzleStatus = 'idle' | 'loading' | 'playing' | 'wrong' | 'solved' | 'error
 
 @Component({
   selector: 'app-puzzle-play',
-  imports: [CommonModule, CardComponent, ChessBoardComponent],
+  imports: [CommonModule, NgbDropdownModule, CardComponent, ChessBoardComponent],
   templateUrl: './puzzle-play.component.html',
   styleUrl: './puzzle-play.component.scss'
 })
@@ -36,6 +37,8 @@ export class PuzzlePlayComponent implements OnInit, OnDestroy {
   error = signal('');
   message = signal('Choose a level and tap Load puzzle.');
   solvedCount = signal(0);
+  showSolution = signal(false);
+  intendedSolution = signal('');
 
   fen = signal('');
   selectedSquare = signal<string | null>(null);
@@ -78,6 +81,8 @@ export class PuzzlePlayComponent implements OnInit, OnDestroy {
     this.puzzle.set(p);
     this.solution = parseSolutionUci(p.solution_moves);
     this.solutionIndex = 0;
+    this.showSolution.set(false);
+    this.intendedSolution.set(this.formatSolution(p));
     this.game = new Chess(p.fen);
     this.fen.set(this.game.fen());
     this.playerColor = this.game.turn();
@@ -191,6 +196,10 @@ export class PuzzlePlayComponent implements OnInit, OnDestroy {
     if (p) this.startPuzzle(p);
   }
 
+  toggleSolution(): void {
+    this.showSolution.update((visible) => !visible);
+  }
+
   topPlayer(): BoardPlayerBar {
     return {
       name: 'Puzzle',
@@ -228,5 +237,28 @@ export class PuzzlePlayComponent implements OnInit, OnDestroy {
   private uciMatches(expected: string, played: string): boolean {
     if (expected === played) return true;
     return expected.slice(0, 4) === played.slice(0, 4);
+  }
+
+  private formatSolution(puzzle: ChessPuzzle): string {
+    const moves = parseSolutionUci(puzzle.solution_moves);
+    if (moves.length === 0) {
+      return 'No solution moves recorded';
+    }
+
+    try {
+      const replay = new Chess(puzzle.fen);
+      return moves
+        .map((uci) => {
+          const move = replay.move({
+            from: uci.slice(0, 2) as Square,
+            to: uci.slice(2, 4) as Square,
+            promotion: (uci[4] ?? 'q') as 'q'
+          });
+          return move.san;
+        })
+        .join(' ');
+    } catch {
+      return moves.join(' ');
+    }
   }
 }

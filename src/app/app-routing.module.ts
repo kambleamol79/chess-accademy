@@ -33,7 +33,7 @@ const routes: Routes = [
         path: 'students',
         loadComponent: () => import('./features/students/students.component').then((c) => c.StudentsComponent),
         canActivate: [roleGuard],
-        data: { roles: ['admin'] }
+        data: { roles: ['admin', 'coach'] }
       },
       {
         path: 'coaches',
@@ -86,6 +86,12 @@ const routes: Routes = [
       //   canActivate: [roleGuard],
       //   data: { roles: ['admin'] }
       // },
+      {
+        path: 'messages',
+        loadComponent: () => import('./features/messages/messages.component').then((c) => c.MessagesComponent),
+        canActivate: [roleGuard],
+        data: { roles: ['admin', 'student'] }
+      },
       {
         path: 'settings',
         loadComponent: () => import('./features/settings/settings.component').then((c) => c.SettingsComponent),

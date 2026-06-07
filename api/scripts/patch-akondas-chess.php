@@ -18,7 +18,7 @@ if ($source === false) {
 }
 
 // Curly-brace string/array offset (removed in PHP 8.4+).
-$patched = preg_replace('/(\$\w+(?:\[[^\]]+\])?)\{(\d+)\}/', '$1[$2]', $source);
+$patched = preg_replace('/(\$\w+(?:\[[^\]]+\])?)\{(\d+)\}/', "\$1[\$2]", $source);
 if ($patched === null) {
     fwrite(STDERR, "Regex patch failed\n");
     exit(1);

@@ -15,54 +15,54 @@
   gap: 8px;
 }
 
-.puzzle-play--student {
-  .puzzle-play__levels {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    padding-bottom: 4px;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .puzzle-play__levels-btns {
-    flex-wrap: nowrap;
-  }
-
-  .puzzle-play__body {
-    --puzzle-board-max: min(100%, calc(100vh - 260px), 900px);
-  }
-
-  .puzzle-play__panel--inline {
-    display: flex;
-    flex-wrap: nowrap;
-    align-items: center;
-    gap: 0.75rem;
-
-    .puzzle-play__status {
-      flex: 1 1 auto;
-      min-width: 0;
-    }
-
-    .puzzle-play__meta,
-    .puzzle-play__solved {
-      flex-shrink: 0;
-      white-space: nowrap;
-    }
-
-    .puzzle-play__actions {
-      flex-shrink: 0;
-      flex-wrap: nowrap !important;
-    }
-  }
-
-  ::ng-deep .cb-grid {
-    max-width: var(--puzzle-board-max);
-    width: 100%;
-  }
-}
-
 .puzzle-play:not(.puzzle-play--student) {
   .puzzle-play__levels-label {
     width: 100%;
     margin-bottom: 0.35rem;
   }
+}
+
+.puzzle-reference {
+  border: 1px solid var(--bs-border-color);
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+  background: var(--bs-tertiary-bg);
+
+  code {
+    display: block;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    color: var(--bs-body-color);
+  }
+}
+
+.puzzle-reference--student {
+  border-color: rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+
+  code {
+    color: rgba(255, 255, 255, 0.88);
+  }
+}
+
+.puzzle-reference__label,
+.puzzle-reference__solution span {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--bs-secondary-color);
+}
+
+.puzzle-reference--student .puzzle-reference__label,
+.puzzle-reference--student .puzzle-reference__solution span {
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.puzzle-reference__solution {
+  margin-top: 0.75rem;
 }

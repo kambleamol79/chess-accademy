@@ -83,6 +83,60 @@ final class AuthService
         }
     }
 
+    /**
+     * Admin-only: create staff login (admin, coach, or accountant).
+     *
+     * @param array<string,mixed> $data
+     * @return array{user:array<string,mixed>}
+     */
+    public function createStaffUser(array $data): array
+    {
+        if ($this->users->findByEmail((string) $data['email']) !== null) {
+            throw new \InvalidArgumentException('Email already registered');
+        }
+
+        $role = (string) ($data['role'] ?? '');
+        if (!in_array($role, ['admin', 'coach', 'accountant'], true)) {
+            throw new \InvalidArgumentException('Role must be admin, coach, or accountant');
+        }
+
+        $password = (string) ($data['password'] ?? '');
+        if (strlen($password) < 8) {
+            throw new \InvalidArgumentException('Password must be at least 8 characters');
+        }
+
+        $this->pdo->beginTransaction();
+        try {
+            $userId = $this->users->create([
+                'email' => $data['email'],
+                'password_hash' => password_hash($password, PASSWORD_BCRYPT),
+                'role' => $role,
+                'first_name' => $data['first_name'],
+                'last_name' => $data['last_name'],
+                'phone' => $data['phone'] ?? null,
+            ]);
+
+            if ($role === 'coach') {
+                $this->users->createCoachProfile($userId, [
+                    'title' => $data['title'] ?? null,
+                    'bio' => $data['bio'] ?? null,
+                    'rating' => $data['rating'] ?? null,
+                ]);
+            }
+
+            $this->pdo->commit();
+            $user = $this->users->findById($userId);
+            if ($user === null) {
+                throw new \RuntimeException('User could not be loaded after create');
+            }
+
+            return ['user' => $this->users->toPublic($user)];
+        } catch (\Throwable $e) {
+            $this->pdo->rollBack();
+            throw $e;
+        }
+    }
+
     /** @return array{user:array,access_token:string,refresh_token:string}|null */
     public function refresh(string $refreshToken): ?array
     {

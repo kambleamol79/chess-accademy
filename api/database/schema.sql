@@ -72,10 +72,9 @@ CREATE TABLE `forms` (
   `day_2` VARCHAR(10) NOT NULL,
   `coach_2` VARCHAR(100) DEFAULT NULL,
   `notes` VARCHAR(255) DEFAULT NULL,
-  `zoom_meeting_id` VARCHAR(50) DEFAULT NULL,
   `zoom_join_url` VARCHAR(500) DEFAULT NULL,
-  `zoom_start_url` VARCHAR(500) DEFAULT NULL,
-  `zoom_password` VARCHAR(20) DEFAULT NULL,
+  `zoom_username` VARCHAR(255) DEFAULT NULL,
+  `zoom_password` VARCHAR(100) DEFAULT NULL,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -138,7 +137,8 @@ CREATE TABLE `form_enrollments` (
   `status` ENUM('active', 'completed', 'dropped') NOT NULL DEFAULT 'active',
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_form_student` (`form_id`, `student_id`),
+  KEY `idx_enrollment_student_status` (`student_id`, `status`),
+  KEY `idx_enrollment_form_status` (`form_id`, `status`),
   CONSTRAINT `fk_enrollment_form` FOREIGN KEY (`form_id`) REFERENCES `forms` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_enrollment_student` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

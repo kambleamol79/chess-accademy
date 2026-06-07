@@ -1,9 +1,10 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { SharedModule } from 'src/app/theme/shared/shared.module';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { CoachProfileModalComponent } from 'src/app/features/coaches/coach-profile-modal.component';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-nav-right',
@@ -14,6 +15,9 @@ import { CoachProfileModalComponent } from 'src/app/features/coaches/coach-profi
 export class NavRightComponent {
   readonly auth = inject(AuthService);
   private readonly modal = inject(NgbModal);
+
+  readonly isStudent = computed(() => this.auth.role() === 'student');
+  readonly todayTournamentUrl = environment.todayTournamentUrl;
 
   canEditProfile(): boolean {
     return this.auth.hasRole(['coach']);

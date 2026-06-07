@@ -9,6 +9,8 @@ import 'app_ui.dart';
 class BatchCard extends StatelessWidget {
   const BatchCard({super.key, required this.batch, this.compact = false});
 
+  static DateTime? _lastZoomLaunch;
+
   final StudentBatch batch;
   final bool compact;
 
@@ -58,6 +60,14 @@ class BatchCard extends StatelessWidget {
               _InfoRow(icon: Icons.sticky_note_2_outlined, label: 'Notes', value: batch.notes!),
             ],
             if (batch.zoomJoinUrl != null && batch.zoomJoinUrl!.isNotEmpty) ...[
+              if (batch.zoomUsername != null && batch.zoomUsername!.isNotEmpty) ...[
+                const SizedBox(height: 10),
+                _InfoRow(icon: Icons.account_circle_rounded, label: 'Zoom username', value: batch.zoomUsername!),
+              ],
+              if (batch.zoomPassword != null && batch.zoomPassword!.isNotEmpty) ...[
+                const SizedBox(height: 10),
+                _InfoRow(icon: Icons.lock_rounded, label: 'Zoom password', value: batch.zoomPassword!),
+              ],
               const SizedBox(height: 18),
               SizedBox(
                 width: double.infinity,
@@ -90,6 +100,13 @@ class BatchCard extends StatelessWidget {
   }
 
   Future<void> _openZoom(BuildContext context, String url) async {
+    final now = DateTime.now();
+    if (_lastZoomLaunch != null &&
+        now.difference(_lastZoomLaunch!) < const Duration(seconds: 2)) {
+      return;
+    }
+    _lastZoomLaunch = now;
+
     final uri = Uri.parse(url);
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);

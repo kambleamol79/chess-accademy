@@ -35,13 +35,6 @@
     }
   </div>
 
-  @if (zoomWarning()) {
-    <div class="alert alert-warning alert-dismissible fade show" role="alert">
-      {{ zoomWarning() }}
-      <button type="button" class="btn-close" aria-label="Close" (click)="zoomWarning.set('')"></button>
-    </div>
-  }
-
   @if (loading()) {
     <p class="text-muted mb-0">Loading…</p>
   } @else if (error()) {
@@ -85,7 +78,7 @@
                 <th>DAYS</th>
                 <th>COACH</th>
                 <th>Zoom</th>
-                @if (canEdit() || canDelete()) {
+                @if (canEdit() || canDelete() || canManageBatches()) {
                   <th class="text-end">Actions</th>
                 }
               </tr>
@@ -131,18 +124,28 @@
                       <button
                         type="button"
                         class="btn btn-primary btn-sm"
-                        title="Join class in app"
+                        title="Open Zoom link"
                         (click)="openJoinZoom(row)"
                       >
                         <i class="ti ti-brand-zoom me-1"></i>
-                        Join class
+                        Open Zoom
                       </button>
                     } @else {
                       <span class="text-muted">—</span>
                     }
                   </td>
-                  @if (canEdit() || canDelete()) {
+                  @if (canEdit() || canDelete() || canManageBatches()) {
                     <td class="text-end text-nowrap align-middle">
+                      @if (canManageBatches()) {
+                        <button
+                          type="button"
+                          class="btn btn-outline-primary btn-sm me-1"
+                          title="Send batch message"
+                          (click)="openBatchMessages(row)"
+                        >
+                          <i class="ti ti-message"></i>
+                        </button>
+                      }
                       @if (canEdit()) {
                         <button type="button" class="btn btn-outline-secondary btn-sm me-1" title="Edit" (click)="openEditBatch(row)">
                           <i class="ti ti-edit"></i>

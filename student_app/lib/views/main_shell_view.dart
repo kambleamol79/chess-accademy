@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
+import '../config/app_config.dart';
 import '../config/theme.dart';
 import '../controllers/auth_controller.dart';
 import '../controllers/batch_controller.dart';
@@ -8,6 +10,7 @@ import '../controllers/home_controller.dart';
 import '../controllers/payments_controller.dart';
 import '../controllers/puzzle_controller.dart';
 import '../controllers/reminders_controller.dart';
+import '../controllers/support_controller.dart';
 import '../widgets/animated_ui.dart';
 import '../widgets/app_ui.dart';
 import '../widgets/loading_view.dart';
@@ -17,6 +20,7 @@ import 'payments_view.dart';
 import 'practice_view.dart';
 import 'puzzles_view.dart';
 import 'reminders_view.dart';
+import 'support_view.dart';
 
 class MainShellView extends StatefulWidget {
   const MainShellView({super.key});
@@ -69,6 +73,28 @@ class _MainShellViewState extends State<MainShellView> {
     );
   }
 
+  void _openSupport() {
+    context.read<SupportController>().load();
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => const _SupportPage(),
+      ),
+    );
+  }
+
+  Future<void> _openTodaysTournament() async {
+    final uri = Uri.parse(AppConfig.todayTournamentUrl);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+      return;
+    }
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not open tournament link')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthController>();
@@ -111,6 +137,44 @@ class _MainShellViewState extends State<MainShellView> {
                         ),
                       ),
                     ),
+                    ScaleTap(
+                      onTap: _openTodaysTournament,
+                      child: Container(
+                        margin: const EdgeInsets.only(right: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                        decoration: BoxDecoration(
+                          color: AppColors.accentOrange,
+                          borderRadius: BorderRadius.circular(999),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.accentOrange.withValues(alpha: 0.35),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.emoji_events_outlined, size: 16, color: AppColors.white),
+                            SizedBox(width: 6),
+                            Text(
+                              "Today's tournament",
+                              style: TextStyle(
+                                color: AppColors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    ScaleTap(
+                      onTap: _openSupport,
+                      child: const _HeaderIconButton(icon: Icons.support_agent_outlined),
+                    ),
+                    const SizedBox(width: 8),
                     ScaleTap(
                       onTap: _openReminders,
                       child: _HeaderIconButton(
@@ -229,6 +293,43 @@ class _HeaderIconButton extends StatelessWidget {
                 ),
               ),
             ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SupportPage extends StatelessWidget {
+  const _SupportPage();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.offWhite,
+      body: Column(
+        children: [
+          AppGradientHeader(
+            child: SafeArea(
+              bottom: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(8, 4, 20, 12),
+                child: Row(
+                  children: [
+                    ScaleTap(
+                      onTap: () => Navigator.of(context).pop(),
+                      child: _HeaderIconButton(icon: Icons.arrow_back_rounded),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Support',
+                      style: Theme.of(context).appBarTheme.titleTextStyle,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const Expanded(child: SupportView()),
         ],
       ),
     );

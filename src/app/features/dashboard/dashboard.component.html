@@ -43,116 +43,161 @@
             Orange and yellow cells are assigned batches. White cells with text are practice sessions (from batch notes).
           </p>
         }
+        <div class="mt-3">
+          <a routerLink="/students" class="btn btn-primary btn-sm">
+            <i class="ti ti-users me-1"></i>
+            Manage students &amp; assign batches
+          </a>
+        </div>
       </app-card>
     </div>
   </div>
 } @else if (isStudent()) {
-  <div class="student-dashboard">
-    <div class="student-dashboard__welcome mb-4">
-      <h4 class="mb-1">Welcome, {{ studentDisplayName() }}</h4>
-      <p class="text-muted mb-0">Your batch schedule, live class, and reminders.</p>
-    </div>
+  <div class="student-hub">
+    <header class="student-hub__hero">
+      <div>
+        <p class="student-hub__eyebrow">Welcome back</p>
+        <h1 class="student-hub__name">{{ studentFirstName() }}</h1>
+        <p class="student-hub__subtitle">{{ batchScheduleLine() }}</p>
+      </div>
+      @if (studentBatch(); as b) {
+        <div class="student-hub__batch-pill">
+          <span class="student-hub__batch-label">{{ b.batch }}</span>
+          @if (b.module) {
+            <span class="student-hub__batch-module">{{ b.module }}</span>
+          }
+        </div>
+      }
+    </header>
+
+    @if (latestAnnouncements().length > 0) {
+      <section class="student-hub__announcements">
+        <div class="student-hub__panel-head">
+          <h2>Announcements</h2>
+          <a routerLink="/messages" class="student-hub__announcements-link">View all</a>
+        </div>
+        @for (item of latestAnnouncements(); track item.id) {
+          <article class="student-hub__announcement">
+            <div class="student-hub__announcement-head">
+              <span class="student-hub__announcement-icon"><i class="ti ti-speakerphone"></i></span>
+              <div>
+                <strong>{{ item.title }}</strong>
+                <span class="student-hub__announcement-date">{{ item.created_at | date: 'medium' }}</span>
+              </div>
+            </div>
+            <p class="student-hub__announcement-body">{{ item.body }}</p>
+          </article>
+        }
+      </section>
+    }
 
     @for (reminder of paymentReminders(); track reminder.id) {
-      <div class="alert mb-3 d-flex align-items-start gap-2" [ngClass]="reminderAlertClass(reminder.priority)">
-        <i class="ti ti-receipt fs-4 flex-shrink-0"></i>
+      <div class="student-hub__alert" [ngClass]="reminderAlertClass(reminder.priority)">
+        <i class="ti ti-receipt"></i>
         <div>
-          <strong class="d-block">{{ reminder.title }}</strong>
+          <strong>{{ reminder.title }}</strong>
           <span>{{ reminder.message }}</span>
-          @if (reminder.due_at) {
-            <div class="small mt-1 opacity-75">Due: {{ reminder.due_at }}</div>
-          }
         </div>
       </div>
     }
 
-    <div class="row g-3">
-      <div class="col-lg-7">
-        <app-card cardTitle="My batch">
-          @if (studentBatch(); as b) {
-            <div class="student-dashboard__batch">
-              <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
-                <span class="badge bg-primary fs-6">{{ b.batch }}</span>
-                @if (b.module) {
-                  <span class="badge bg-secondary">{{ b.module }}</span>
-                }
-              </div>
-              <ul class="list-unstyled student-dashboard__meta mb-3">
-                <li><i class="ti ti-calendar me-2 text-muted"></i>{{ b.days_summary }} ({{ b.day_1 }} / {{ b.day_2 }})</li>
-                <li><i class="ti ti-clock me-2 text-muted"></i>{{ b.time }}</li>
-                <li><i class="ti ti-user me-2 text-muted"></i>{{ studentCoaches(b) }}</li>
-              </ul>
-              <div class="d-flex flex-wrap gap-2">
-                @if (canJoinClass(b)) {
-                  <button type="button" class="btn btn-success" (click)="openJoinClass()">
-                    <i class="ti ti-brand-zoom me-1"></i>
-                    Join live class
-                  </button>
-                  @if (b.zoom_join_url) {
-                    <button type="button" class="btn btn-outline-success" (click)="openZoomLink()">
-                      Open in Zoom app
-                    </button>
-                  }
-                } @else {
-                  <p class="text-muted small mb-0">Live class link is not set up yet. Contact the academy.</p>
-                }
-              </div>
-            </div>
-          } @else {
-            <p class="text-muted mb-0">You are not assigned to a batch yet. Contact Brainstorm.</p>
-          }
-        </app-card>
-      </div>
+    <div class="student-hub__cards">
+      <a routerLink="/practice" class="student-hub__card student-hub__card--featured">
+        <div class="student-hub__card-icon"><i class="ti ti-player-play"></i></div>
+        <div class="student-hub__card-body">
+          <h3>Play now</h3>
+          <p>10-minute practice vs Stockfish or free play.</p>
+          <span class="student-hub__card-cta">Open board</span>
+        </div>
+      </a>
 
-      <div class="col-lg-5">
-        <app-card cardTitle="Quick links">
-          <div class="d-grid gap-2">
-            <a routerLink="/practice" class="btn btn-outline-primary text-start">
-              <i class="ti ti-chess me-2"></i>
-              Practice board
-            </a>
-            <a routerLink="/puzzles" class="btn btn-outline-primary text-start">
-              <i class="ti ti-puzzle me-2"></i>
-              Puzzles
-            </a>
-            <a routerLink="/batches" class="btn btn-outline-secondary text-start">
-              <i class="ti ti-calendar-event me-2"></i>
-              My batch
-            </a>
+      <a routerLink="/puzzles" class="student-hub__card">
+        <div class="student-hub__card-icon"><i class="ti ti-puzzle"></i></div>
+        <div class="student-hub__card-body">
+          <h3>Daily puzzles</h3>
+          <p>Sharpen tactics with rated puzzle sets.</p>
+          <span class="student-hub__card-cta">Solve</span>
+        </div>
+      </a>
+
+      @if (canJoinClass(studentBatch())) {
+        <button type="button" class="student-hub__card student-hub__card--button" (click)="openJoinClass()">
+          <div class="student-hub__card-icon student-hub__card-icon--live"><i class="ti ti-brand-zoom"></i></div>
+          <div class="student-hub__card-body">
+            <h3>Live class</h3>
+            <p>Join your batch session on Zoom now.</p>
+            <span class="student-hub__card-cta">Join class</span>
           </div>
-        </app-card>
-      </div>
+        </button>
+      } @else {
+        <a routerLink="/batches" class="student-hub__card">
+          <div class="student-hub__card-icon"><i class="ti ti-calendar-event"></i></div>
+          <div class="student-hub__card-body">
+            <h3>My batch</h3>
+            <p>View schedule, coaches, and class times.</p>
+            <span class="student-hub__card-cta">View</span>
+          </div>
+        </a>
+      }
     </div>
 
-    <div class="row g-3 mt-1">
-      <div class="col-12">
-        <app-card cardTitle="Reminders">
-          @if (otherReminders().length === 0 && paymentReminders().length === 0) {
-            <p class="text-muted mb-0">All clear — no reminders right now.</p>
-          } @else if (otherReminders().length === 0) {
-            <p class="text-muted mb-0">No other reminders. Payment notices appear above when due.</p>
-          } @else {
-            <ul class="list-group list-group-flush student-dashboard__reminders">
-              @for (r of otherReminders(); track r.id) {
-                <li class="list-group-item px-0">
-                  <div class="d-flex gap-3">
-                    <span class="student-dashboard__reminder-icon">
-                      <i [class]="reminderIcon(r.type)"></i>
-                    </span>
-                    <div>
-                      <strong class="d-block">{{ r.title }}</strong>
-                      <span class="text-muted">{{ r.message }}</span>
-                      @if (r.due_at) {
-                        <div class="small text-muted mt-1">{{ r.due_at }}</div>
-                      }
-                    </div>
-                  </div>
-                </li>
-              }
-            </ul>
+    <div class="student-hub__panels">
+      <section class="student-hub__panel">
+        <div class="student-hub__panel-head">
+          <h2>Class details</h2>
+          @if (canJoinClass(studentBatch())) {
+            <button type="button" class="btn btn-sm student-hub__join-btn" (click)="openJoinClass()">
+              Join class
+            </button>
           }
-        </app-card>
-      </div>
+        </div>
+        @if (studentBatch(); as b) {
+          <ul class="student-hub__meta">
+            <li><i class="ti ti-calendar"></i>{{ b.days_summary }} ({{ b.day_1 }} / {{ b.day_2 }})</li>
+            <li><i class="ti ti-clock"></i>{{ b.time }}</li>
+            <li><i class="ti ti-user"></i>{{ studentCoaches(b) }}</li>
+            @if (b.zoom_username) {
+              <li><i class="ti ti-user-circle"></i>{{ b.zoom_username }}</li>
+            }
+            @if (b.zoom_password) {
+              <li><i class="ti ti-lock"></i>{{ b.zoom_password }}</li>
+            }
+          </ul>
+          @if (b.zoom_join_url && canJoinClass(b)) {
+            <button type="button" class="btn btn-outline-light btn-sm mt-2" (click)="openJoinClass()">
+              Open in Zoom app
+            </button>
+          }
+        } @else {
+          <p class="student-hub__empty">You are not assigned to a batch yet. Contact Brainstorm.</p>
+        }
+      </section>
+
+      <section class="student-hub__panel">
+        <div class="student-hub__panel-head">
+          <h2>Reminders</h2>
+          @if (reminderCount() > 0) {
+            <span class="student-hub__panel-badge">{{ reminderCount() }}</span>
+          }
+        </div>
+        @if (otherReminders().length === 0 && paymentReminders().length === 0) {
+          <p class="student-hub__empty">All clear — no reminders right now.</p>
+        } @else {
+          <ul class="student-hub__reminders">
+            @for (r of otherReminders(); track r.id) {
+              <li>
+                <span class="student-hub__reminder-icon">
+                  <i [class]="reminderIcon(r.type)"></i>
+                </span>
+                <div>
+                  <strong>{{ r.title }}</strong>
+                  <span>{{ r.message }}</span>
+                </div>
+              </li>
+            }
+          </ul>
+        }
+      </section>
     </div>
   </div>
 } @else if (metrics(); as m) {

@@ -12,7 +12,13 @@
   @if (loading()) {
     <p class="text-muted mb-0">Loading batches…</p>
   } @else if (batches().length === 0) {
-    <p class="text-muted mb-0">No batches defined yet. Create batches under the Batches menu first.</p>
+    <p class="text-muted mb-0">
+      @if (auth.hasRole(['coach'])) {
+        No batches are assigned to you yet. Ask an admin to set you as coach on a batch.
+      } @else {
+        No batches defined yet. Create batches under the Batches menu first.
+      }
+    </p>
   } @else {
     <p class="small text-muted mb-2">Select a batch — details are shown for each option.</p>
 

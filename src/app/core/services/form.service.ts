@@ -4,7 +4,6 @@ import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { ApiResponse } from '../models/api.model';
 import { BatchForm } from '../models/form.model';
-import { ZoomJoinSignature } from '../models/zoom.model';
 
 @Injectable({ providedIn: 'root' })
 export class FormService {
@@ -28,9 +27,5 @@ export class FormService {
 
   delete(id: number): Observable<ApiResponse<unknown>> {
     return this.http.delete<ApiResponse<unknown>>(`${environment.apiUrl}/forms/${id}`);
-  }
-
-  zoomSignature(id: number): Observable<ApiResponse<ZoomJoinSignature>> {
-    return this.http.get<ApiResponse<ZoomJoinSignature>>(`${environment.apiUrl}/forms/${id}/zoom/signature`);
   }
 }

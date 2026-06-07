@@ -1,7 +1,7 @@
 import { BatchForm } from '../models/form.model';
 import { StudentBatch } from '../models/student-portal.model';
 
-/** Map student portal batch payload to BatchForm for Zoom modal / shared UI. */
+/** Map student portal batch payload to BatchForm for shared batch UI. */
 export function studentBatchToBatchForm(batch: StudentBatch): BatchForm {
   const highlight = batch.highlight === 'beige' ? 'beige' : 'blue';
 
@@ -17,7 +17,9 @@ export function studentBatchToBatchForm(batch: StudentBatch): BatchForm {
     day_2: batch.day_2,
     coach_2: batch.coach_2 ?? null,
     notes: batch.notes ?? null,
-    zoom_meeting_id: batch.zoom_meeting_id ?? null
+    zoom_join_url: batch.zoom_join_url ?? null,
+    zoom_username: batch.zoom_username ?? null,
+    zoom_password: batch.zoom_password ?? null
   };
 }
 
@@ -27,5 +29,5 @@ export function studentCoachesLabel(batch: StudentBatch): string {
 }
 
 export function hasStudentZoomJoin(batch: StudentBatch | null): boolean {
-  return !!batch?.zoom_join_url?.trim() || !!batch?.zoom_meeting_id?.trim();
+  return !!batch?.zoom_join_url?.trim();
 }

@@ -96,6 +96,5 @@ export function nextBatchCode(existing: string[]): string {
 }
 
 export function hasBatchZoom(batch: BatchForm): boolean {
-  const meetingId = batch.zoom_meeting_id?.trim();
-  return !!meetingId;
+  return !!batch.zoom_join_url?.trim();
 }

@@ -17,6 +17,11 @@ use ChessAcademy\Controllers\PuzzleController;
 use ChessAcademy\Controllers\SettingsController;
 use ChessAcademy\Controllers\StudentController;
 use ChessAcademy\Controllers\StudentPortalController;
+use ChessAcademy\Controllers\SupportTicketController;
+use ChessAcademy\Controllers\BatchMessageController;
+use ChessAcademy\Controllers\BroadcastMessageController;
+use ChessAcademy\Controllers\DeviceTokenController;
+use ChessAcademy\Controllers\UserController;
 use ChessAcademy\Middleware\JwtAuthMiddleware;
 use ChessAcademy\Middleware\RoleMiddleware;
 use DI\Container;
@@ -80,15 +85,45 @@ return function (App $app, Container $container): void {
             ->add(new RoleMiddleware(['student']));
         $group->get('/students/me/notifications', [StudentPortalController::class, 'myNotifications'])
             ->add(new RoleMiddleware(['student']));
+        $group->get('/students/me/support-tickets', [SupportTicketController::class, 'myTickets'])
+            ->add(new RoleMiddleware(['student']));
+        $group->post('/students/me/support-tickets', [SupportTicketController::class, 'storeMine'])
+            ->add(new RoleMiddleware(['student']));
+        $group->get('/students/me/support-tickets/{id}', [SupportTicketController::class, 'show'])
+            ->add(new RoleMiddleware(['student']));
+        $group->post('/students/me/support-tickets/{id}/messages', [SupportTicketController::class, 'addMessage'])
+            ->add(new RoleMiddleware(['student']));
+        $group->get('/students/me/batch-messages', [BatchMessageController::class, 'myBatchMessages'])
+            ->add(new RoleMiddleware(['student']));
+        $group->get('/students/me/broadcast-messages', [BroadcastMessageController::class, 'myMessages'])
+            ->add(new RoleMiddleware(['student']));
+        $group->post('/students/me/device-token', [DeviceTokenController::class, 'store'])
+            ->add(new RoleMiddleware(['student']));
+        $group->delete('/students/me/device-token', [DeviceTokenController::class, 'destroy'])
+            ->add(new RoleMiddleware(['student']));
+
+        $group->get('/broadcast-messages', [BroadcastMessageController::class, 'index'])
+            ->add(new RoleMiddleware(['admin']));
+        $group->post('/broadcast-messages', [BroadcastMessageController::class, 'store'])
+            ->add(new RoleMiddleware(['admin']));
+
+        $group->get('/support-tickets', [SupportTicketController::class, 'index'])
+            ->add(new RoleMiddleware(['admin']));
+        $group->get('/support-tickets/{id}', [SupportTicketController::class, 'show'])
+            ->add(new RoleMiddleware(['admin']));
+        $group->post('/support-tickets/{id}/messages', [SupportTicketController::class, 'addMessage'])
+            ->add(new RoleMiddleware(['admin']));
+        $group->patch('/support-tickets/{id}', [SupportTicketController::class, 'update'])
+            ->add(new RoleMiddleware(['admin']));
 
         $group->get('/students', [StudentController::class, 'index'])
-            ->add(new RoleMiddleware(['admin']));
+            ->add(new RoleMiddleware(['admin', 'coach']));
         $group->get('/students/{id}/payment-receipt', [LeadController::class, 'paymentReceipt'])
             ->add(new RoleMiddleware(['admin', 'accountant']));
         $group->get('/students/{id}', [StudentController::class, 'show'])
-            ->add(new RoleMiddleware(['admin']));
+            ->add(new RoleMiddleware(['admin', 'coach']));
         $group->post('/students', [StudentController::class, 'store'])
-            ->add(new RoleMiddleware(['admin']));
+            ->add(new RoleMiddleware(['admin', 'coach']));
         $group->put('/students/{id}', [StudentController::class, 'update'])
             ->add(new RoleMiddleware(['admin']));
         $group->patch('/students/{id}', [StudentController::class, 'update'])
@@ -133,11 +168,9 @@ return function (App $app, Container $container): void {
             ->add(new RoleMiddleware(['admin']));
 
         $group->get('/forms', [FormController::class, 'index'])
-            ->add(new RoleMiddleware(['admin', 'accountant']));
+            ->add(new RoleMiddleware(['admin', 'accountant', 'coach']));
         $group->get('/forms/next-batch', [FormController::class, 'nextBatch'])
             ->add(new RoleMiddleware(['admin']));
-        $group->get('/forms/{id}/zoom/signature', [FormController::class, 'zoomSignature'])
-            ->add(new RoleMiddleware(['admin', 'coach', 'student', 'accountant']));
         $group->get('/forms/{id}', [FormController::class, 'show'])
             ->add(new RoleMiddleware(['admin', 'student', 'accountant']));
         $group->post('/forms', [FormController::class, 'store'])
@@ -149,12 +182,17 @@ return function (App $app, Container $container): void {
         $group->delete('/forms/{id}', [FormController::class, 'destroy'])
             ->add(new RoleMiddleware(['admin']));
 
+        $group->get('/forms/{form_id}/messages', [BatchMessageController::class, 'index'])
+            ->add(new RoleMiddleware(['admin', 'coach', 'student']));
+        $group->post('/forms/{form_id}/messages', [BatchMessageController::class, 'store'])
+            ->add(new RoleMiddleware(['admin']));
+
         $group->get('/enrollments', [EnrollmentController::class, 'index'])
             ->add(new RoleMiddleware(['admin']));
         $group->post('/enrollments', [EnrollmentController::class, 'store'])
             ->add(new RoleMiddleware(['admin']));
         $group->post('/enrollments/bulk-assign', [EnrollmentController::class, 'bulkAssign'])
-            ->add(new RoleMiddleware(['admin']));
+            ->add(new RoleMiddleware(['admin', 'coach']));
         $group->delete('/enrollments/{id}', [EnrollmentController::class, 'destroy'])
             ->add(new RoleMiddleware(['admin']));
 
@@ -248,6 +286,15 @@ return function (App $app, Container $container): void {
         $group->patch('/games/{id}', [GameController::class, 'update'])
             ->add(new RoleMiddleware(['admin']));
         $group->delete('/games/{id}', [GameController::class, 'destroy'])
+            ->add(new RoleMiddleware(['admin']));
+
+        $group->get('/users', [UserController::class, 'index'])
+            ->add(new RoleMiddleware(['admin']));
+        $group->post('/users', [UserController::class, 'store'])
+            ->add(new RoleMiddleware(['admin']));
+        $group->patch('/users/{id}', [UserController::class, 'update'])
+            ->add(new RoleMiddleware(['admin']));
+        $group->put('/users/{id}', [UserController::class, 'update'])
             ->add(new RoleMiddleware(['admin']));
 
         $group->get('/settings', [SettingsController::class, 'index'])

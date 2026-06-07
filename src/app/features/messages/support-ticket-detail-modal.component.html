@@ -1,0 +1,79 @@
+<div class="modal-header">
+  <h5 class="modal-title">{{ ticket()?.subject || 'Support ticket' }}</h5>
+  <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
+</div>
+
+<div class="modal-body">
+  @if (loading()) {
+    <p class="text-muted mb-0">Loading…</p>
+  } @else {
+    @if (error()) {
+      <div class="alert alert-warning py-2">{{ error() }}</div>
+    }
+
+    @if (ticket()) {
+      <div class="ticket-meta mb-3">
+        <span class="badge me-2" [class.bg-success]="ticket()!.status === 'resolved'" [class.bg-warning]="ticket()!.status === 'open'">
+          {{ ticket()!.status }}
+        </span>
+        @if (ticket()!.assignee_first_name || ticket()!.assignee_last_name) {
+          <span class="text-muted small">
+            Handled by {{ ticket()!.assignee_first_name }} {{ ticket()!.assignee_last_name }}
+          </span>
+        }
+      </div>
+
+      @if (ticket()!.resolution_comment) {
+        <div class="alert alert-success py-2 mb-3">
+          <strong>Resolution:</strong> {{ ticket()!.resolution_comment }}
+        </div>
+      }
+
+      <div class="message-thread mb-3">
+        @for (message of thread(); track message.id) {
+          <div class="message-bubble" [class.message-bubble--admin]="message.sender_role === 'admin'">
+            <div class="message-bubble__meta">
+              <strong>{{ senderName(message) }}</strong>
+              <span>{{ message.created_at | date: 'short' }}</span>
+            </div>
+            <p class="mb-0">{{ message.body }}</p>
+          </div>
+        }
+      </div>
+
+      @if (!isResolved()) {
+        <div class="mb-3">
+          <label class="form-label">Reply</label>
+          <textarea class="form-control" rows="3" [(ngModel)]="replyBody" placeholder="Type your message"></textarea>
+          <button type="button" class="btn btn-primary btn-sm mt-2" [disabled]="saving()" (click)="sendReply()">
+            Send reply
+          </button>
+        </div>
+      }
+
+      @if (canResolve()) {
+        <div class="resolve-box">
+          <label class="form-label">Resolve with comment</label>
+          <textarea
+            class="form-control"
+            rows="2"
+            [(ngModel)]="resolutionComment"
+            placeholder="How was this issue resolved?"
+          ></textarea>
+          <button type="button" class="btn btn-success btn-sm mt-2" [disabled]="saving()" (click)="resolve()">
+            Mark resolved
+          </button>
+        </div>
+      }
+    }
+  }
+</div>
+
+<div class="modal-footer">
+  @if (canAssign()) {
+    <button type="button" class="btn btn-outline-primary" [disabled]="saving()" (click)="assignSelf()">
+      Assign to me
+    </button>
+  }
+  <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
+</div>

@@ -19,6 +19,9 @@ final class FormRepository
         'day_2',
         'coach_2',
         'notes',
+        'zoom_join_url',
+        'zoom_username',
+        'zoom_password',
     ];
 
     public function __construct(private readonly PDO $pdo) {}
@@ -28,7 +31,7 @@ final class FormRepository
     {
         $stmt = $this->pdo->query(
             'SELECT id, highlight, batch, module, `time`, days_summary, day_1, coach_1, day_2, coach_2, notes,
-                    zoom_meeting_id, zoom_join_url, zoom_start_url, zoom_password, created_at, updated_at
+                    zoom_join_url, zoom_username, zoom_password, created_at, updated_at
              FROM forms
              ORDER BY id ASC'
         );
@@ -41,7 +44,7 @@ final class FormRepository
     {
         $stmt = $this->pdo->prepare(
             'SELECT id, highlight, batch, module, `time`, days_summary, day_1, coach_1, day_2, coach_2, notes,
-                    zoom_meeting_id, zoom_join_url, zoom_start_url, zoom_password, created_at, updated_at
+                    zoom_join_url, zoom_username, zoom_password, created_at, updated_at
              FROM forms WHERE id = :id'
         );
         $stmt->execute(['id' => $id]);
@@ -53,8 +56,8 @@ final class FormRepository
     /** @param array<string, mixed> $data */
     public function create(array $data): array
     {
-        $sql = 'INSERT INTO forms (highlight, batch, module, `time`, days_summary, day_1, coach_1, day_2, coach_2, notes)
-                VALUES (:highlight, :batch, :module, :time, :days_summary, :day_1, :coach_1, :day_2, :coach_2, :notes)';
+        $sql = 'INSERT INTO forms (highlight, batch, module, `time`, days_summary, day_1, coach_1, day_2, coach_2, notes, zoom_join_url, zoom_username, zoom_password)
+                VALUES (:highlight, :batch, :module, :time, :days_summary, :day_1, :coach_1, :day_2, :coach_2, :notes, :zoom_join_url, :zoom_username, :zoom_password)';
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute($this->bindParams($data));
         $id = (int) $this->pdo->lastInsertId();
@@ -99,42 +102,6 @@ final class FormRepository
         return $stmt->rowCount() > 0;
     }
 
-    /** @param array{zoom_meeting_id: string, zoom_join_url: ?string, zoom_start_url: ?string, zoom_password: ?string} $zoom */
-    public function updateZoom(int $id, array $zoom): ?array
-    {
-        if ($this->findById($id) === null) {
-            return null;
-        }
-
-        $stmt = $this->pdo->prepare(
-            'UPDATE forms
-             SET zoom_meeting_id = :zoom_meeting_id,
-                 zoom_join_url = :zoom_join_url,
-                 zoom_start_url = :zoom_start_url,
-                 zoom_password = :zoom_password
-             WHERE id = :id'
-        );
-        $stmt->execute([
-            'id' => $id,
-            'zoom_meeting_id' => $zoom['zoom_meeting_id'],
-            'zoom_join_url' => $zoom['zoom_join_url'],
-            'zoom_start_url' => $zoom['zoom_start_url'],
-            'zoom_password' => $zoom['zoom_password'],
-        ]);
-
-        return $this->findById($id);
-    }
-
-    public function clearZoom(int $id): ?array
-    {
-        return $this->updateZoom($id, [
-            'zoom_meeting_id' => '',
-            'zoom_join_url' => null,
-            'zoom_start_url' => null,
-            'zoom_password' => null,
-        ]);
-    }
-
     public function nextBatchCode(): string
     {
         $stmt = $this->pdo->query('SELECT batch FROM forms ORDER BY id ASC');
@@ -172,6 +139,9 @@ final class FormRepository
             'day_2' => $data['day_2'] ?? '',
             'coach_2' => $data['coach_2'] ?? null,
             'notes' => $data['notes'] ?? null,
+            'zoom_join_url' => $data['zoom_join_url'] ?? null,
+            'zoom_username' => $data['zoom_username'] ?? null,
+            'zoom_password' => $data['zoom_password'] ?? null,
         ];
     }
 }

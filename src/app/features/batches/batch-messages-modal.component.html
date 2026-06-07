@@ -1,0 +1,44 @@
+<div class="modal-header">
+  <h5 class="modal-title">Batch message — {{ batchName }}</h5>
+  <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
+</div>
+
+<div class="modal-body">
+  <p class="text-muted small mb-3">
+    This message is visible to all students enrolled in this batch and assigned coaches.
+  </p>
+
+  @if (error()) {
+    <div class="alert alert-warning py-2">{{ error() }}</div>
+  }
+
+  @if (loading()) {
+    <p class="text-muted mb-0">Loading…</p>
+  } @else {
+    <div class="message-thread mb-3">
+      @if (thread().length === 0) {
+        <p class="text-muted mb-0">No messages sent to this batch yet.</p>
+      } @else {
+        @for (message of thread(); track message.id) {
+          <div class="message-bubble">
+            <div class="message-bubble__meta">
+              <strong>{{ senderName(message) }}</strong>
+              <span>{{ message.created_at | date: 'short' }}</span>
+            </div>
+            <p class="mb-0">{{ message.body }}</p>
+          </div>
+        }
+      }
+    </div>
+
+    <label class="form-label">New message</label>
+    <textarea class="form-control" rows="3" [(ngModel)]="body" placeholder="Announcement or update for batch"></textarea>
+    <button type="button" class="btn btn-primary btn-sm mt-2" [disabled]="sending()" (click)="send()">
+      Send to batch
+    </button>
+  }
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
+</div>

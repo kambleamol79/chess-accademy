@@ -1,0 +1,15 @@
+# Copy to: public_html/brainstorm/.htaccess
+
+DirectoryIndex index.html
+
+RewriteEngine On
+
+# API — your server has api/public/index.php (not api/index.php)
+RewriteRule ^api(?:/(.*))?$ api/public/index.php [QSA,L]
+
+# Static files (JS, CSS, images)
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
+
+# Angular app
+RewriteRule ^ index.html [L]

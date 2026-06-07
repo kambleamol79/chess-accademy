@@ -1,0 +1,179 @@
+<app-card [customHeader]="true">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h5 class="mb-0">{{ isStudent() ? 'Messages' : 'Student support & announcements' }}</h5>
+    @if (!isStudent()) {
+      <div class="btn-group btn-group-sm" role="group" aria-label="Status filter">
+        <button
+          type="button"
+          class="btn"
+          [class.btn-primary]="statusFilter() === 'all'"
+          [class.btn-outline-primary]="statusFilter() !== 'all'"
+          (click)="statusFilter.set('all')"
+        >
+          All
+        </button>
+        <button
+          type="button"
+          class="btn"
+          [class.btn-primary]="statusFilter() === 'open'"
+          [class.btn-outline-primary]="statusFilter() !== 'open'"
+          (click)="statusFilter.set('open')"
+        >
+          Open
+        </button>
+        <button
+          type="button"
+          class="btn"
+          [class.btn-primary]="statusFilter() === 'resolved'"
+          [class.btn-outline-primary]="statusFilter() !== 'resolved'"
+          (click)="statusFilter.set('resolved')"
+        >
+          Resolved
+        </button>
+      </div>
+    }
+  </div>
+
+  @if (success()) {
+    <div class="alert alert-success py-2">{{ success() }}</div>
+  }
+  @if (error()) {
+    <div class="alert alert-warning py-2">{{ error() }}</div>
+  }
+
+  <section class="broadcast-panel mb-4">
+    @if (isAdmin()) {
+      <div class="broadcast-compose">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <h6 class="mb-0">Send announcement to all students</h6>
+          <span class="badge bg-primary">Firebase push</span>
+        </div>
+        <p class="text-muted small mb-3">
+          Delivers a push notification to every registered student device and saves the message here.
+        </p>
+        <div class="mb-2">
+          <label class="form-label">Title</label>
+          <input class="form-control" [(ngModel)]="broadcastTitle" placeholder="Announcement title" />
+        </div>
+        <div class="mb-2">
+          <label class="form-label">Message</label>
+          <textarea
+            class="form-control"
+            rows="4"
+            [(ngModel)]="broadcastBody"
+            placeholder="Write your custom message for all students"
+          ></textarea>
+        </div>
+        <button type="button" class="btn btn-primary btn-sm" [disabled]="broadcasting()" (click)="sendBroadcast()">
+          @if (broadcasting()) {
+            Sending…
+          } @else {
+            Send to all students
+          }
+        </button>
+      </div>
+    } @else {
+      <h6 class="mb-2">Academy announcements</h6>
+    }
+
+    @if (broadcastsLoading()) {
+      <p class="text-muted small mb-0 mt-3">Loading announcements…</p>
+    } @else if (broadcasts().length === 0) {
+      <p class="text-muted small mb-0 mt-3">No announcements yet.</p>
+    } @else {
+      <div class="broadcast-list mt-3">
+        @for (item of broadcasts(); track item.id) {
+          <article class="broadcast-item">
+            <div class="broadcast-item__head">
+              <strong>{{ item.title }}</strong>
+              <span class="text-muted small">{{ item.created_at | date: 'medium' }}</span>
+            </div>
+            <p class="mb-1">{{ item.body }}</p>
+            <div class="text-muted small">
+              From {{ broadcastSenderName(item) }}
+              @if (isAdmin() && item.push_sent) {
+                · Push sent
+              }
+            </div>
+          </article>
+        }
+      </div>
+    }
+  </section>
+
+  @if (isStudent()) {
+    <div class="support-compose mb-4">
+      <h6 class="mb-2">New support request</h6>
+      <div class="mb-2">
+        <label class="form-label">Subject</label>
+        <input class="form-control" [(ngModel)]="newSubject" placeholder="e.g. Payment issue, batch change" />
+      </div>
+      <div class="mb-2">
+        <label class="form-label">Message</label>
+        <textarea class="form-control" rows="4" [(ngModel)]="newBody" placeholder="Describe your issue or question"></textarea>
+      </div>
+      <button type="button" class="btn btn-primary btn-sm" [disabled]="creating()" (click)="createTicket()">
+        @if (creating()) {
+          Sending…
+        } @else {
+          Send to admin
+        }
+      </button>
+    </div>
+  }
+
+  @if (!isStudent()) {
+    <h6 class="mb-3">Support tickets</h6>
+  }
+
+  @if (loading()) {
+    <p class="text-muted mb-0">Loading…</p>
+  } @else if (filteredRows().length === 0) {
+    <p class="text-center text-muted py-4 mb-0">
+      @if (isStudent()) {
+        No support requests yet. Use the form above to contact the academy.
+      } @else {
+        No support requests yet.
+      }
+    </p>
+  } @else {
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Subject</th>
+            @if (!isStudent()) {
+              <th>Student</th>
+              <th>Assigned to</th>
+            }
+            <th>Status</th>
+            <th>Updated</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of filteredRows(); track row.id) {
+            <tr>
+              <td><strong>{{ row.subject }}</strong></td>
+              @if (!isStudent()) {
+                <td>{{ studentName(row) }}</td>
+                <td>{{ assigneeName(row) }}</td>
+              }
+              <td>
+                <span class="badge" [class.bg-success]="row.status === 'resolved'" [class.bg-warning]="row.status === 'open'">
+                  {{ row.status }}
+                </span>
+              </td>
+              <td class="text-nowrap">{{ row.updated_at | date: 'medium' }}</td>
+              <td class="text-end">
+                <button type="button" class="btn btn-outline-primary btn-sm" (click)="openTicket(row)">
+                  View
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</app-card>

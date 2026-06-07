@@ -58,27 +58,24 @@
               <div class="batch-cal__day-num">{{ day.dayOfMonth }}</div>
               <div class="batch-cal__day-events">
                 @for (o of day.occurrences; track trackOccurrence(o)) {
-                  <button
-                    type="button"
-                    [ngClass]="eventClasses(o)"
-                    [title]="o.batch.time + ' · ' + eventTitle(o)"
-                    (click)="onEventClick(o, $event)"
-                  >
-                    <span class="batch-cal__event-time">{{ o.batch.time }}</span>
-                    <span class="batch-cal__event-name">{{ eventTitle(o) }}</span>
-                    @if (o.coach) {
-                      <span class="batch-cal__event-coach" (click)="onCoachClick(o, $event)">{{ o.coach }}</span>
-                    } @else if (canAssignCoach()) {
-                      <span class="batch-cal__event-coach batch-cal__event-coach--link" (click)="onCoachClick(o, $event)">
-                        + coach
-                      </span>
-                    }
+                  <div [ngClass]="eventClasses(o)" [title]="o.batch.time + ' · ' + eventTitle(o)">
+                    <button type="button" class="batch-cal__event-main" (click)="onEventClick(o, $event)">
+                      <span class="batch-cal__event-time">{{ o.batch.time }}</span>
+                      <span class="batch-cal__event-name">{{ eventTitle(o) }}</span>
+                      @if (o.coach) {
+                        <span class="batch-cal__event-coach" (click)="onCoachClick(o, $event)">{{ o.coach }}</span>
+                      } @else if (canAssignCoach()) {
+                        <span class="batch-cal__event-coach batch-cal__event-coach--link" (click)="onCoachClick(o, $event)">
+                          + coach
+                        </span>
+                      }
+                    </button>
                     @if (hasBatchZoom(o.batch)) {
-                      <span class="batch-cal__event-zoom" (click)="onJoinClick(o.batch, $event)">
+                      <button type="button" class="batch-cal__event-zoom" (click)="onJoinClick(o.batch, $event)">
                         <i class="ti ti-brand-zoom"></i> Join
-                      </span>
+                      </button>
                     }
-                  </button>
+                  </div>
                 }
               </div>
             </div>
@@ -113,28 +110,26 @@
               @for (day of weekDays(); track day.date.getTime()) {
                 <td class="batch-cal__week-cell">
                   @for (o of weekGridEntries(time, day.weekday); track trackOccurrence(o)) {
-                    <button
-                      type="button"
-                      [ngClass]="eventClasses(o, true)"
-                      (click)="onEventClick(o, $event)"
-                    >
-                      <span class="batch-cal__event-name">{{ eventTitle(o) }}</span>
-                      @if (o.batch.module) {
-                        <span class="batch-cal__event-meta">{{ o.batch.module }}</span>
-                      }
-                      <span
-                        class="batch-cal__event-coach"
-                        [class.batch-cal__event-coach--link]="canAssignCoach() && !o.coach"
-                        (click)="onCoachClick(o, $event)"
-                      >
-                        {{ o.coach || (canAssignCoach() ? 'Assign coach' : '—') }}
-                      </span>
-                      @if (hasBatchZoom(o.batch)) {
-                        <span class="batch-cal__event-zoom" (click)="onJoinClick(o.batch, $event)">
-                          <i class="ti ti-brand-zoom"></i> Join
+                    <div [ngClass]="eventClasses(o, true)">
+                      <button type="button" class="batch-cal__event-main" (click)="onEventClick(o, $event)">
+                        <span class="batch-cal__event-name">{{ eventTitle(o) }}</span>
+                        @if (o.batch.module) {
+                          <span class="batch-cal__event-meta">{{ o.batch.module }}</span>
+                        }
+                        <span
+                          class="batch-cal__event-coach"
+                          [class.batch-cal__event-coach--link]="canAssignCoach() && !o.coach"
+                          (click)="onCoachClick(o, $event)"
+                        >
+                          {{ o.coach || (canAssignCoach() ? 'Assign coach' : '—') }}
                         </span>
+                      </button>
+                      @if (hasBatchZoom(o.batch)) {
+                        <button type="button" class="batch-cal__event-zoom" (click)="onJoinClick(o.batch, $event)">
+                          <i class="ti ti-brand-zoom"></i> Join
+                        </button>
                       }
-                    </button>
+                    </div>
                   }
                 </td>
               }

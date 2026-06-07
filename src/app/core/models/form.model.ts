@@ -10,7 +10,9 @@ export interface BatchForm {
   day_2: string;
   coach_2: string | null;
   notes: string | null;
-  zoom_meeting_id?: string | null;
+  zoom_join_url?: string | null;
+  zoom_username?: string | null;
+  zoom_password?: string | null;
   created_at?: string;
   updated_at?: string;
 }

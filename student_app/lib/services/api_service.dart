@@ -10,6 +10,8 @@ import '../models/puzzle.dart';
 import '../models/chess_game.dart';
 import '../models/payment.dart';
 import '../models/reminder.dart';
+import '../models/support_ticket.dart';
+import '../models/batch_message.dart';
 import '../models/user.dart';
 import '../models/live_match.dart';
 import 'storage_service.dart';
@@ -158,6 +160,71 @@ class ApiService {
     return (data['reminders'] as List<dynamic>? ?? [])
         .map((e) => Reminder.fromJson(e as Map<String, dynamic>))
         .toList();
+  }
+
+  Future<List<SupportTicket>> fetchMySupportTickets() async {
+    final response = await _get('/students/me/support-tickets');
+    final body = await _decode(response);
+    final data = body['data'] as Map<String, dynamic>;
+    return (data['tickets'] as List<dynamic>? ?? [])
+        .map((e) => SupportTicket.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<SupportTicketDetail> fetchSupportTicket(int id) async {
+    final response = await _get('/students/me/support-tickets/$id');
+    final body = await _decode(response);
+    final data = body['data'] as Map<String, dynamic>;
+    return SupportTicketDetail(
+      ticket: SupportTicket.fromJson(data['ticket'] as Map<String, dynamic>),
+      messages: (data['messages'] as List<dynamic>? ?? [])
+          .map((e) => SupportTicketMessage.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+
+  Future<void> createSupportTicket({required String subject, required String body}) async {
+    final response = await _post('/students/me/support-tickets', body: {
+      'subject': subject,
+      'body': body,
+    });
+    await _decode(response);
+  }
+
+  Future<void> replySupportTicket(int ticketId, String body) async {
+    final response = await _post('/students/me/support-tickets/$ticketId/messages', body: {
+      'body': body,
+    });
+    await _decode(response);
+  }
+
+  Future<BatchMessagesResult> fetchMyBatchMessages() async {
+    final response = await _get('/students/me/batch-messages');
+    final body = await _decode(response);
+    final data = body['data'] as Map<String, dynamic>;
+    return BatchMessagesResult(
+      formId: data['form_id'] as int?,
+      messages: (data['messages'] as List<dynamic>? ?? [])
+          .map((e) => BatchMessage.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+
+  Future<void> registerDeviceToken({required String token, required String platform}) async {
+    final response = await _post('/students/me/device-token', body: {
+      'token': token,
+      'platform': platform,
+    });
+    await _decode(response);
+  }
+
+  Future<void> unregisterDeviceToken(String token) async {
+    final response = await http.delete(
+      _uri('/students/me/device-token'),
+      headers: _headers,
+      body: jsonEncode({'token': token}),
+    );
+    await _decode(response);
   }
 
   Future<ChessPuzzle> fetchNextPuzzle(String difficulty, {int? excludeId}) async {
@@ -315,4 +382,18 @@ class ApiService {
     }
     await _storage.clearSession();
   }
+}
+
+class SupportTicketDetail {
+  SupportTicketDetail({required this.ticket, required this.messages});
+
+  final SupportTicket ticket;
+  final List<SupportTicketMessage> messages;
+}
+
+class BatchMessagesResult {
+  BatchMessagesResult({required this.formId, required this.messages});
+
+  final int? formId;
+  final List<BatchMessage> messages;
 }

@@ -40,9 +40,7 @@
                 <span class="cb-target-dot"></span>
               }
               @if (pieceAt(row, col); as piece) {
-                <span class="cb-piece" [class.cb-piece--white]="piece.color === 'w'">
-                  {{ pieceSymbol(piece.type, piece.color) }}
-                </span>
+                <app-chess-piece [type]="piece.type" [color]="piece.color" />
               }
             </button>
           }

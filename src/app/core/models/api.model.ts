@@ -3,7 +3,6 @@ export interface ApiResponse<T> {
   data: T;
   message?: string;
   errors?: Record<string, string>;
-  zoom_warning?: string;
 }
 
 export type UserRole = 'admin' | 'coach' | 'student' | 'accountant';

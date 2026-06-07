@@ -14,6 +14,8 @@ return [
     'app' => [
         'env' => $_ENV['APP_ENV'] ?? 'development',
         'debug' => filter_var($_ENV['APP_DEBUG'] ?? 'true', FILTER_VALIDATE_BOOLEAN),
+        /** URL prefix when hosted in a subdirectory, e.g. /brainstorm */
+        'base_path' => rtrim((string) ($_ENV['APP_BASE_PATH'] ?? ''), '/'),
     ],
     'db' => [
         'host' => $_ENV['DB_HOST'] ?? '127.0.0.1',
@@ -47,14 +49,9 @@ return [
         /** Extra minutes after match time control before idle auto-resign (cron). */
         'idle_grace_minutes' => max(0, (int) ($_ENV['LIVE_MATCH_IDLE_GRACE_MINUTES'] ?? 10)),
     ],
-    'zoom' => [
-        'enabled' => filter_var($_ENV['ZOOM_ENABLED'] ?? 'false', FILTER_VALIDATE_BOOLEAN),
-        'account_id' => $_ENV['ZOOM_ACCOUNT_ID'] ?? '',
-        'client_id' => $_ENV['ZOOM_CLIENT_ID'] ?? '',
-        'client_secret' => $_ENV['ZOOM_CLIENT_SECRET'] ?? '',
-        'user_id' => $_ENV['ZOOM_USER_ID'] ?? '',
-        'timezone' => $_ENV['ZOOM_TIMEZONE'] ?? 'Asia/Kolkata',
-        'sdk_client_id' => $_ENV['ZOOM_SDK_CLIENT_ID'] ?? $_ENV['ZOOM_CLIENT_ID'] ?? '',
-        'sdk_client_secret' => $_ENV['ZOOM_SDK_CLIENT_SECRET'] ?? $_ENV['ZOOM_CLIENT_SECRET'] ?? '',
+    'firebase' => [
+        'project_id' => trim((string) ($_ENV['FIREBASE_PROJECT_ID'] ?? '')),
+        'service_account_path' => trim((string) ($_ENV['FIREBASE_SERVICE_ACCOUNT_PATH'] ?? '')),
+        'students_topic' => trim((string) ($_ENV['FIREBASE_STUDENTS_TOPIC'] ?? 'students')),
     ],
 ];

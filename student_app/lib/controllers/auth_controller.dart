@@ -3,13 +3,15 @@ import 'package:flutter/foundation.dart';
 import '../config/app_config.dart';
 import '../models/user.dart';
 import '../services/api_service.dart';
+import '../services/push_notification_service.dart';
 import '../services/storage_service.dart';
 
 class AuthController extends ChangeNotifier {
-  AuthController(this._api, this._storage);
+  AuthController(this._api, this._storage, [this._push]);
 
   final ApiService _api;
   final StorageService _storage;
+  final PushNotificationService? _push;
 
   User? _user;
   bool _loading = false;
@@ -27,6 +29,7 @@ class AuthController extends ChangeNotifier {
     try {
       _user = await _api.fetchMe();
       await _storage.saveUser(_user!);
+      await _push?.init();
     } catch (_) {
       await _storage.clearSession();
       _user = null;
@@ -46,6 +49,7 @@ class AuthController extends ChangeNotifier {
       }
       await _storage.saveSession(tokens);
       _user = tokens.user;
+      await _push?.init();
       _loading = false;
       notifyListeners();
       return true;
@@ -67,6 +71,7 @@ class AuthController extends ChangeNotifier {
   }
 
   Future<void> logout() async {
+    await _push?.unregister();
     await _api.logout();
     _user = null;
     notifyListeners();

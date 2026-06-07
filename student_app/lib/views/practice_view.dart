@@ -38,31 +38,21 @@ class _PracticeBody extends StatelessWidget {
         : (auth.user?.fullName ?? 'You');
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+      padding: const EdgeInsets.fromLTRB(10, 6, 10, 18),
       children: [
-        _PracticeTabBar(controller: controller),
+        Row(
+          children: [
+            Expanded(child: _PracticeTabBar(controller: controller)),
+            if (controller.screenTab == PracticeScreenTab.board) ...[
+              const SizedBox(width: 10),
+              _PracticeOptionsDropdown(controller: controller),
+            ],
+          ],
+        ),
         const SizedBox(height: 12),
         if (controller.screenTab == PracticeScreenTab.board) ...[
-          AppCard(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _ModeSelector(controller: controller),
-              const SizedBox(height: 14),
-              _TimeControlSelector(controller: controller),
-              if (controller.isVsComputer) ...[
-                const SizedBox(height: 18),
-                _LevelSelector(controller: controller),
-                const SizedBox(height: 14),
-                _ColorSelector(controller: controller),
-              ],
-              const SizedBox(height: 14),
-                _LearningToggle(controller: controller),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
+          _PracticeBoardSummary(controller: controller),
+          const SizedBox(height: 10),
           if (controller.isViewingSavedSession) ...[
             AppCard(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -71,7 +61,10 @@ class _PracticeBody extends StatelessWidget {
                   Expanded(
                     child: Text(
                       controller.statusMessage,
-                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                      ),
                     ),
                   ),
                   TextButton(
@@ -84,76 +77,81 @@ class _PracticeBody extends StatelessWidget {
             const SizedBox(height: 12),
           ],
           if (controller.isReplayMode) ...[
-          _ReplayBanner(controller: controller),
-          const SizedBox(height: 8),
-        ],
-        Stack(
-          children: [
-            ChessBoardWidget(
-              controller: controller,
-              playerName: displayName,
-            ),
-            if (controller.canStartGame)
-              Positioned.fill(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.5),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'Play vs Stockfish',
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w800,
-                              color: Color(0xFFF5F0E8),
+            _ReplayBanner(controller: controller),
+            const SizedBox(height: 8),
+          ],
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              ChessBoardWidget(controller: controller, playerName: displayName),
+              if (controller.canStartGame)
+                Positioned.fill(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.5),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'Play vs Stockfish',
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w800,
+                                color: Color(0xFFF5F0E8),
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            '${controller.level.label} · ${controller.playerColor.label} · ${controller.timeControl.label}',
-                            style: const TextStyle(
-                              fontSize: 13,
-                              color: Color(0xFFB8A898),
+                            const SizedBox(height: 6),
+                            Text(
+                              '${controller.level.label} · ${controller.playerColor.label} · ${controller.timeControl.label}',
+                              style: const TextStyle(
+                                fontSize: 13,
+                                color: Color(0xFFB8A898),
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 18),
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton.icon(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF16A34A),
-                                foregroundColor: AppColors.white,
-                                minimumSize: const Size(0, 52),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
+                            const SizedBox(height: 18),
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton.icon(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF16A34A),
+                                  foregroundColor: AppColors.white,
+                                  minimumSize: const Size(0, 52),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                                onPressed: controller.startGame,
+                                icon: const Icon(
+                                  Icons.play_arrow_rounded,
+                                  size: 26,
+                                ),
+                                label: const Text(
+                                  'Start Game',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w800,
+                                  ),
                                 ),
                               ),
-                              onPressed: controller.startGame,
-                              icon: const Icon(Icons.play_arrow_rounded, size: 26),
-                              label: const Text(
-                                'Start Game',
-                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
-                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-          ],
-        ),
+            ],
+          ),
           const SizedBox(height: 12),
           if (controller.learningHintsEnabled && controller.lastHint != null)
             _LearningHintCard(hint: controller.lastHint!),
-          if (controller.learningHintsEnabled && controller.lastHint != null) const SizedBox(height: 12),
+          if (controller.learningHintsEnabled && controller.lastHint != null)
+            const SizedBox(height: 12),
           if (!controller.isViewingSavedSession) ...[
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -165,7 +163,9 @@ class _PracticeBody extends StatelessWidget {
               child: Row(
                 children: [
                   Icon(
-                    controller.isGameOver ? Icons.flag_rounded : Icons.info_outline_rounded,
+                    controller.isGameOver
+                        ? Icons.flag_rounded
+                        : Icons.info_outline_rounded,
                     color: AppColors.primaryBlue,
                     size: 20,
                   ),
@@ -173,7 +173,10 @@ class _PracticeBody extends StatelessWidget {
                   Expanded(
                     child: Text(
                       controller.statusMessage,
-                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                      ),
                     ),
                   ),
                 ],
@@ -191,7 +194,9 @@ class _PracticeBody extends StatelessWidget {
                 ),
                 OutlinedButton.icon(
                   onPressed: controller.canEndGame ? controller.endGame : null,
-                  style: OutlinedButton.styleFrom(foregroundColor: AppColors.error),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.error,
+                  ),
                   icon: const Icon(Icons.stop_circle_outlined, size: 18),
                   label: const Text('End game'),
                 ),
@@ -200,93 +205,110 @@ class _PracticeBody extends StatelessWidget {
                     backgroundColor: AppColors.accentOrange,
                     foregroundColor: AppColors.white,
                     minimumSize: const Size(0, 48),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.sm)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppRadius.sm),
+                    ),
                   ),
-                  onPressed: controller.aiThinking ? null : controller.resetBoard,
+                  onPressed: controller.aiThinking
+                      ? null
+                      : controller.resetBoard,
                   icon: const Icon(Icons.refresh_rounded, size: 18),
-                  label: Text(controller.isVsComputer ? 'New game' : 'Reset board'),
+                  label: Text(
+                    controller.isVsComputer ? 'New game' : 'Reset board',
+                  ),
                 ),
               ],
             ),
           ],
           if (controller.gameHistory.isNotEmpty) ...[
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Text(
-                controller.isViewingSavedSession ? 'Saved moves' : 'Move history',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 14),
-              ),
-              const Spacer(),
-              Text(
-                'Tap to review',
-                style: TextStyle(fontSize: 11, color: AppColors.textMuted),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: controller.gameHistory
-                  .map(
-                    (entry) => Padding(
-                      padding: const EdgeInsets.only(right: 6),
-                      child: Material(
-                        color: controller.isHistoryMoveActive(entry.ply)
-                            ? AppColors.lightBlue
-                            : AppColors.white,
-                        borderRadius: BorderRadius.circular(8),
-                        child: InkWell(
-                          onTap: () => controller.goToReplayIndex(entry.ply),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Text(
+                  controller.isViewingSavedSession
+                      ? 'Saved moves'
+                      : 'Move history',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleMedium?.copyWith(fontSize: 14),
+                ),
+                const Spacer(),
+                Text(
+                  'Tap to review',
+                  style: TextStyle(fontSize: 11, color: AppColors.textMuted),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: controller.gameHistory
+                    .map(
+                      (entry) => Padding(
+                        padding: const EdgeInsets.only(right: 6),
+                        child: Material(
+                          color: controller.isHistoryMoveActive(entry.ply)
+                              ? AppColors.lightBlue
+                              : AppColors.white,
                           borderRadius: BorderRadius.circular(8),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: controller.isHistoryMoveActive(entry.ply)
-                                    ? AppColors.primaryBlue
-                                    : AppColors.border,
+                          child: InkWell(
+                            onTap: () => controller.goToReplayIndex(entry.ply),
+                            borderRadius: BorderRadius.circular(8),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 6,
                               ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                if (entry.color == 'w')
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color:
+                                      controller.isHistoryMoveActive(entry.ply)
+                                      ? AppColors.primaryBlue
+                                      : AppColors.border,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  if (entry.color == 'w')
+                                    Text(
+                                      '${controller.practiceMoveNumber(entry)}. ',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 11,
+                                        color: AppColors.textMuted,
+                                      ),
+                                    ),
                                   Text(
-                                    '${controller.practiceMoveNumber(entry)}. ',
+                                    entry.san,
                                     style: const TextStyle(
                                       fontWeight: FontWeight.w700,
-                                      fontSize: 11,
-                                      color: AppColors.textMuted,
+                                      fontSize: 12,
                                     ),
                                   ),
-                                Text(
-                                  entry.san,
-                                  style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  entry.player == 'human' ? 'YOU' : 'SF',
-                                  style: TextStyle(
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.w700,
-                                    color: entry.player == 'human'
-                                        ? AppColors.success
-                                        : AppColors.textMuted,
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    entry.player == 'human' ? 'YOU' : 'SF',
+                                    style: TextStyle(
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.w700,
+                                      color: entry.player == 'human'
+                                          ? AppColors.success
+                                          : AppColors.textMuted,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                  )
-                  .toList(),
+                    )
+                    .toList(),
+              ),
             ),
-          ),
           ],
         ] else ...[
           AppCard(
@@ -324,7 +346,9 @@ class _PracticeTabBar extends StatelessWidget {
               label: 'Saved games',
               icon: Icons.history_rounded,
               selected: controller.screenTab == PracticeScreenTab.saved,
-              badge: controller.savedSessions.isNotEmpty ? controller.savedSessions.length : null,
+              badge: controller.savedSessions.isNotEmpty
+                  ? controller.savedSessions.length
+                  : null,
               onTap: () => controller.setScreenTab(PracticeScreenTab.saved),
             ),
           ),
@@ -362,7 +386,11 @@ class _PracticeTabChip extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 18, color: selected ? AppColors.white : AppColors.textMuted),
+              Icon(
+                icon,
+                size: 18,
+                color: selected ? AppColors.white : AppColors.textMuted,
+              ),
               const SizedBox(width: 6),
               Flexible(
                 child: Text(
@@ -378,9 +406,14 @@ class _PracticeTabChip extends StatelessWidget {
               if (badge != null) ...[
                 const SizedBox(width: 6),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
-                    color: selected ? AppColors.white.withValues(alpha: 0.25) : AppColors.border,
+                    color: selected
+                        ? AppColors.white.withValues(alpha: 0.25)
+                        : AppColors.border,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
@@ -396,6 +429,169 @@ class _PracticeTabChip extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _PracticeBoardSummary extends StatelessWidget {
+  const _PracticeBoardSummary({required this.controller});
+
+  final PracticeController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final parts = <String>[
+      controller.mode.label,
+      controller.timeControl.label,
+      if (controller.isVsComputer) controller.level.label,
+      if (controller.isVsComputer) controller.playerColor.label,
+    ];
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppColors.lightBlue,
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.tune_rounded,
+            size: 18,
+            color: AppColors.primaryBlue,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              parts.join(' · '),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: AppColors.primaryBlue,
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            controller.learningHintsEnabled ? 'Hints on' : 'Hints off',
+            style: const TextStyle(
+              color: AppColors.textMuted,
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PracticeOptionsDropdown extends StatelessWidget {
+  const _PracticeOptionsDropdown({required this.controller});
+
+  final PracticeController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.white,
+      borderRadius: BorderRadius.circular(AppRadius.sm),
+      child: InkWell(
+        onTap: () => _showOptions(context),
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppRadius.sm),
+            border: Border.all(color: AppColors.border),
+            boxShadow: AppShadows.card,
+          ),
+          child: const Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.filter_list_rounded,
+                color: AppColors.primaryBlue,
+                size: 20,
+              ),
+              SizedBox(width: 6),
+              Text(
+                'Filter',
+                style: TextStyle(
+                  color: AppColors.primaryBlue,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showOptions(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      useSafeArea: true,
+      showDragHandle: true,
+      backgroundColor: AppColors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (_) => ChangeNotifierProvider.value(
+        value: controller,
+        child: const _PracticeOptionsSheet(),
+      ),
+    );
+  }
+}
+
+class _PracticeOptionsSheet extends StatelessWidget {
+  const _PracticeOptionsSheet();
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = context.watch<PracticeController>();
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(20, 4, 20, 28),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.filter_list_rounded,
+                color: AppColors.primaryBlue,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Board filters',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _ModeSelector(controller: controller),
+          const SizedBox(height: 14),
+          _TimeControlSelector(controller: controller),
+          if (controller.isVsComputer) ...[
+            const SizedBox(height: 18),
+            _LevelSelector(controller: controller),
+            const SizedBox(height: 14),
+            _ColorSelector(controller: controller),
+          ],
+          const SizedBox(height: 14),
+          _LearningToggle(controller: controller),
+        ],
       ),
     );
   }
@@ -417,7 +613,11 @@ class _LearningToggle extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.lightbulb_outline_rounded, color: AppColors.accentOrange, size: 20),
+          const Icon(
+            Icons.lightbulb_outline_rounded,
+            color: AppColors.accentOrange,
+            size: 20,
+          ),
           const SizedBox(width: 10),
           const Expanded(
             child: Text(
@@ -429,7 +629,9 @@ class _LearningToggle extends StatelessWidget {
             value: controller.learningHintsEnabled,
             activeTrackColor: AppColors.primaryBlue.withValues(alpha: 0.5),
             activeThumbColor: AppColors.primaryBlue,
-            onChanged: controller.aiThinking ? null : controller.setLearningHintsEnabled,
+            onChanged: controller.aiThinking
+                ? null
+                : controller.setLearningHintsEnabled,
           ),
         ],
       ),
@@ -445,9 +647,21 @@ class _LearningHintCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (icon, color, bg) = switch (hint.kind) {
-      HintKind.greatMove => (Icons.thumb_up_alt_rounded, AppColors.success, const Color(0xFFDCFCE7)),
-      HintKind.alternative => (Icons.tips_and_updates_rounded, AppColors.warning, const Color(0xFFFEF3C7)),
-      HintKind.nextMove => (Icons.lightbulb_rounded, AppColors.primaryBlue, AppColors.lightBlue),
+      HintKind.greatMove => (
+        Icons.thumb_up_alt_rounded,
+        AppColors.success,
+        const Color(0xFFDCFCE7),
+      ),
+      HintKind.alternative => (
+        Icons.tips_and_updates_rounded,
+        AppColors.warning,
+        const Color(0xFFFEF3C7),
+      ),
+      HintKind.nextMove => (
+        Icons.lightbulb_rounded,
+        AppColors.primaryBlue,
+        AppColors.lightBlue,
+      ),
     };
 
     return Container(
@@ -467,12 +681,19 @@ class _LearningHintCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   hint.title,
-                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14, color: color),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 14,
+                    color: color,
+                  ),
                 ),
               ),
               if (hint.suggestedSan != null)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.white,
                     borderRadius: BorderRadius.circular(8),
@@ -480,7 +701,11 @@ class _LearningHintCard extends StatelessWidget {
                   ),
                   child: Text(
                     hint.suggestedSan!,
-                    style: TextStyle(fontWeight: FontWeight.w800, color: color, fontSize: 13),
+                    style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      color: color,
+                      fontSize: 13,
+                    ),
                   ),
                 ),
             ],
@@ -488,13 +713,21 @@ class _LearningHintCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             hint.message,
-            style: const TextStyle(fontSize: 13, height: 1.4, color: AppColors.textDark),
+            style: const TextStyle(
+              fontSize: 13,
+              height: 1.4,
+              color: AppColors.textDark,
+            ),
           ),
           if (hint.highlightFrom != null && hint.highlightTo != null) ...[
             const SizedBox(height: 8),
             Text(
               'Green squares show the suggested move on the board.',
-              style: TextStyle(fontSize: 11, color: color.withValues(alpha: 0.85), fontWeight: FontWeight.w500),
+              style: TextStyle(
+                fontSize: 11,
+                color: color.withValues(alpha: 0.85),
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ],
         ],
@@ -519,11 +752,15 @@ class _ModeSelector extends StatelessWidget {
             padding: EdgeInsets.only(right: isLast ? 0 : 8),
             child: _ChoiceTile(
               label: mode.label,
-              icon: mode == PracticeMode.freePlay ? Icons.open_in_full_rounded : Icons.smart_toy_rounded,
+              icon: mode == PracticeMode.freePlay
+                  ? Icons.open_in_full_rounded
+                  : Icons.smart_toy_rounded,
               selected: selected,
-              onTap: controller.aiThinking || controller.gameActive && controller.isVsComputer
-                ? null
-                : () => controller.setMode(mode),
+              onTap:
+                  controller.aiThinking ||
+                      controller.gameActive && controller.isVsComputer
+                  ? null
+                  : () => controller.setMode(mode),
             ),
           ),
         );
@@ -546,7 +783,10 @@ class _TimeControlSelector extends StatelessWidget {
           children: [
             Icon(Icons.timer_outlined, size: 18, color: AppColors.primaryBlue),
             SizedBox(width: 8),
-            Text('Time control', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+            Text(
+              'Time control',
+              style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+            ),
           ],
         ),
         const SizedBox(height: 8),
@@ -584,7 +824,10 @@ class _LevelSelector extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Computer level', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+        const Text(
+          'Computer level',
+          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+        ),
         const SizedBox(height: 8),
         Row(
           children: ComputerLevel.values.map((level) {
@@ -598,7 +841,9 @@ class _LevelSelector extends StatelessWidget {
                   selected: selected,
                   compact: true,
                   accentColor: AppColors.accentOrange,
-                  onTap: controller.aiThinking ? null : () => controller.setLevel(level),
+                  onTap: controller.aiThinking
+                      ? null
+                      : () => controller.setLevel(level),
                 ),
               ),
             );
@@ -624,7 +869,10 @@ class _ColorSelector extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('You play as', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+        const Text(
+          'You play as',
+          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+        ),
         const SizedBox(height: 8),
         Row(
           children: [
@@ -633,7 +881,9 @@ class _ColorSelector extends StatelessWidget {
                 label: 'White',
                 isWhitePiece: true,
                 selected: controller.playerColor == PlayerColor.white,
-                onTap: controller.aiThinking ? null : () => controller.setPlayerColor(PlayerColor.white),
+                onTap: controller.aiThinking
+                    ? null
+                    : () => controller.setPlayerColor(PlayerColor.white),
               ),
             ),
             const SizedBox(width: 8),
@@ -642,7 +892,9 @@ class _ColorSelector extends StatelessWidget {
                 label: 'Black',
                 isWhitePiece: false,
                 selected: controller.playerColor == PlayerColor.black,
-                onTap: controller.aiThinking ? null : () => controller.setPlayerColor(PlayerColor.black),
+                onTap: controller.aiThinking
+                    ? null
+                    : () => controller.setPlayerColor(PlayerColor.black),
               ),
             ),
           ],
@@ -678,7 +930,10 @@ class _ChoiceTile extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(AppRadius.sm),
         child: Container(
-          padding: EdgeInsets.symmetric(vertical: compact ? 10 : 12, horizontal: 8),
+          padding: EdgeInsets.symmetric(
+            vertical: compact ? 10 : 12,
+            horizontal: 8,
+          ),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(AppRadius.sm),
             border: Border.all(
@@ -690,7 +945,11 @@ class _ChoiceTile extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (icon != null) ...[
-                Icon(icon, size: 16, color: selected ? AppColors.white : AppColors.textMuted),
+                Icon(
+                  icon,
+                  size: 16,
+                  color: selected ? AppColors.white : AppColors.textMuted,
+                ),
                 const SizedBox(width: 6),
               ],
               Flexible(
@@ -750,17 +1009,30 @@ class _PieceColorTile extends StatelessWidget {
                 width: 28,
                 height: 28,
                 decoration: BoxDecoration(
-                  color: isWhitePiece ? const Color(0xFFF8FAFC) : const Color(0xFF0F172A),
+                  color: isWhitePiece
+                      ? const Color(0xFFF8FAFC)
+                      : const Color(0xFF0F172A),
                   shape: BoxShape.circle,
-                  border: Border.all(color: const Color(0xFF334155), width: 1.5),
-                  boxShadow: const [BoxShadow(color: Color(0x22000000), blurRadius: 2, offset: Offset(0, 1))],
+                  border: Border.all(
+                    color: const Color(0xFF334155),
+                    width: 1.5,
+                  ),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x22000000),
+                      blurRadius: 2,
+                      offset: Offset(0, 1),
+                    ),
+                  ],
                 ),
                 alignment: Alignment.center,
                 child: Text(
                   '♞',
                   style: TextStyle(
                     fontSize: 16,
-                    color: isWhitePiece ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+                    color: isWhitePiece
+                        ? const Color(0xFF0F172A)
+                        : const Color(0xFFF8FAFC),
                   ),
                 ),
               ),
@@ -775,7 +1047,11 @@ class _PieceColorTile extends StatelessWidget {
               ),
               if (selected) ...[
                 const SizedBox(width: 4),
-                const Icon(Icons.check_circle_rounded, size: 16, color: AppColors.primaryBlue),
+                const Icon(
+                  Icons.check_circle_rounded,
+                  size: 16,
+                  color: AppColors.primaryBlue,
+                ),
               ],
             ],
           ),
@@ -811,7 +1087,9 @@ class _ReplayBanner extends StatelessWidget {
             children: [
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: controller.canReplayPrevious ? controller.replayPrevious : null,
+                  onPressed: controller.canReplayPrevious
+                      ? controller.replayPrevious
+                      : null,
                   icon: const Icon(Icons.chevron_left, size: 18),
                   label: const Text('Previous'),
                 ),
@@ -819,7 +1097,9 @@ class _ReplayBanner extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: controller.canReplayNext ? controller.replayNext : null,
+                  onPressed: controller.canReplayNext
+                      ? controller.replayNext
+                      : null,
                   icon: const Icon(Icons.chevron_right, size: 18),
                   label: const Text('Next'),
                 ),
@@ -856,10 +1136,10 @@ class _SavedGamesSection extends StatelessWidget {
         Text(
           'Saved games',
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontSize: 16,
-                fontWeight: FontWeight.w800,
-                color: AppColors.textDark,
-              ),
+            fontSize: 16,
+            fontWeight: FontWeight.w800,
+            color: AppColors.textDark,
+          ),
         ),
         const SizedBox(height: 6),
         const Text(
@@ -868,7 +1148,10 @@ class _SavedGamesSection extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         if (controller.loadingSavedSessions)
-          const Text('Loading saved games…', style: TextStyle(fontSize: 12, color: AppColors.textMuted))
+          const Text(
+            'Loading saved games…',
+            style: TextStyle(fontSize: 12, color: AppColors.textMuted),
+          )
         else if (controller.savedSessions.isEmpty)
           const Text(
             'Play a game to save your moves for later.',
@@ -880,7 +1163,7 @@ class _SavedGamesSection extends StatelessWidget {
             child: ListView.separated(
               shrinkWrap: true,
               itemCount: controller.savedSessions.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 6),
+              separatorBuilder: (context, index) => const SizedBox(height: 6),
               itemBuilder: (context, index) {
                 final session = controller.savedSessions[index];
                 final selected = controller.viewingSavedSessionId == session.id;
@@ -891,18 +1174,25 @@ class _SavedGamesSection extends StatelessWidget {
                     onTap: () => controller.openSavedSession(session.id),
                     borderRadius: BorderRadius.circular(8),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 10,
+                      ),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: selected ? AppColors.primaryBlue : AppColors.border,
+                          color: selected
+                              ? AppColors.primaryBlue
+                              : AppColors.border,
                         ),
                       ),
                       child: Text(
                         session.label,
                         style: TextStyle(
                           fontSize: 12,
-                          fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                          fontWeight: selected
+                              ? FontWeight.w700
+                              : FontWeight.w500,
                         ),
                       ),
                     ),

@@ -1,5 +1,6 @@
 import { Component, computed, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
 import { Chess, Color, Move, Square } from 'chess.js';
 import { CardComponent } from 'src/app/theme/shared/components/card/card.component';
 import { ChessBoardComponent } from 'src/app/theme/shared/components/chess-board/chess-board.component';
@@ -28,7 +29,7 @@ export type PracticeTab = 'board' | 'saved';
 
 @Component({
   selector: 'app-practice',
-  imports: [CommonModule, CardComponent, ChessBoardComponent],
+  imports: [CommonModule, NgbDropdownModule, CardComponent, ChessBoardComponent],
   templateUrl: './practice.component.html',
   styleUrl: './practice.component.scss'
 })
@@ -37,6 +38,18 @@ export class PracticeComponent implements OnInit, OnDestroy {
   private readonly sessionApi = inject(PracticeSessionService);
   readonly auth = inject(AuthService);
   readonly isStudent = computed(() => this.auth.hasRole(['student']));
+  readonly settingsSummary = computed(() => {
+    const parts = [
+      this.mode() === 'vsComputer' ? 'Vs Stockfish' : 'Free play',
+      `${this.timeControl()} min`
+    ];
+    if (this.mode() === 'vsComputer') {
+      const level = COMPUTER_LEVELS.find((l) => l.value === this.level());
+      parts.push(level?.label ?? this.level());
+      parts.push(this.playerColor() === 'white' ? 'White' : 'Black');
+    }
+    return parts.join(' · ');
+  });
 
   readonly savedSessions = signal<PracticeSessionSummary[]>([]);
   readonly loadingSavedSessions = signal(false);

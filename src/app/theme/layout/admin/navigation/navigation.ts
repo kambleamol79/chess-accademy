@@ -73,7 +73,7 @@ export const NavigationItems: NavigationItem[] = [
         classes: 'nav-item',
         url: '/students',
         icon: 'ti ti-users',
-        role: ['admin']
+        role: ['admin', 'coach']
       },
       {
         id: 'coaches',
@@ -83,6 +83,24 @@ export const NavigationItems: NavigationItem[] = [
         url: '/coaches',
         icon: 'ti ti-user-star',
         role: ['admin']
+      },
+      {
+        id: 'messages',
+        title: 'Messages',
+        type: 'item',
+        classes: 'nav-item',
+        url: '/messages',
+        icon: 'ti ti-headset',
+        role: ['admin']
+      },
+      {
+        id: 'support',
+        title: 'Support',
+        type: 'item',
+        classes: 'nav-item',
+        url: '/messages',
+        icon: 'ti ti-headset',
+        role: ['student']
       }
     ]
   },

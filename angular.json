@@ -30,6 +30,8 @@
           },
           "configurations": {
             "production": {
+              "baseHref": "/brainstorm/",
+              "deployUrl": "/brainstorm/",
               "budgets": [
                 {
                   "type": "initial",

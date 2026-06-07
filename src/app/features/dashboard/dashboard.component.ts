@@ -1,20 +1,19 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { forkJoin } from 'rxjs';
 import { CardComponent } from 'src/app/theme/shared/components/card/card.component';
 import { DashboardMetrics, DashboardService, DashboardStatCard } from 'src/app/core/services/dashboard.service';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { CoachSchedulePayload } from 'src/app/core/services/coach.service';
 import { StudentPortalService } from 'src/app/core/services/student-portal.service';
+import { MessageService } from 'src/app/core/services/message.service';
+import { BroadcastMessage } from 'src/app/core/models/message.model';
 import { StudentBatch, StudentReminder } from 'src/app/core/models/student-portal.model';
 import {
   hasStudentZoomJoin,
-  studentBatchToBatchForm,
   studentCoachesLabel
 } from 'src/app/core/utils/student-batch.util';
-import { BatchZoomModalComponent } from '../batches/batch-zoom-modal.component';
 import { openZoomExternalFullscreen } from 'src/app/core/utils/zoom-open.util';
 import { HttpErrorResponse } from '@angular/common/http';
 import { getApiErrorMessage } from 'src/app/core/utils/http-error.util';
@@ -37,13 +36,14 @@ const CHART_COLORS = ['#6366f1', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#0
 export class DashboardComponent implements OnInit {
   private readonly dashboard = inject(DashboardService);
   private readonly studentPortal = inject(StudentPortalService);
+  private readonly messages = inject(MessageService);
   private readonly auth = inject(AuthService);
-  private readonly modal = inject(NgbModal);
 
   metrics = signal<DashboardMetrics | null>(null);
   coachSchedule = signal<CoachSchedulePayload | null>(null);
   studentBatch = signal<StudentBatch | null>(null);
   studentReminders = signal<StudentReminder[]>([]);
+  studentAnnouncements = signal<BroadcastMessage[]>([]);
 
   loading = signal(true);
   error = signal('');
@@ -60,6 +60,18 @@ export class DashboardComponent implements OnInit {
   readonly otherReminders = computed(() =>
     this.studentReminders().filter((r) => r.type !== 'payment').slice(0, 5)
   );
+  readonly studentFirstName = computed(() => {
+    const u = this.auth.user();
+    if (!u) return 'Student';
+    return u.first_name?.trim() || this.studentDisplayName();
+  });
+  readonly reminderCount = computed(() => this.studentReminders().length);
+  readonly batchScheduleLine = computed(() => {
+    const b = this.studentBatch();
+    if (!b) return 'No batch assigned yet';
+    return `${b.days_summary} · ${b.time}`;
+  });
+  readonly latestAnnouncements = computed(() => this.studentAnnouncements().slice(0, 5));
 
   statCards = computed(() => {
     const m = this.metrics();
@@ -127,21 +139,7 @@ export class DashboardComponent implements OnInit {
       return;
     }
 
-    const ref = this.modal.open(BatchZoomModalComponent, {
-      fullscreen: true,
-      scrollable: false,
-      backdrop: 'static',
-      keyboard: false,
-      modalDialogClass: 'modal-fullscreen batch-zoom-modal-dialog'
-    });
-    ref.componentInstance.batch = studentBatchToBatchForm(batch);
-  }
-
-  openZoomLink(): void {
-    const url = this.studentBatch()?.zoom_join_url?.trim();
-    if (url) {
-      openZoomExternalFullscreen(url);
-    }
+    openZoomExternalFullscreen(batch.zoom_join_url?.trim() ?? '');
   }
 
   reminderIcon(type: string): string {
@@ -166,11 +164,13 @@ export class DashboardComponent implements OnInit {
   private loadStudentDashboard(): void {
     forkJoin({
       batch: this.studentPortal.getMyBatch(),
-      reminders: this.studentPortal.getReminders()
+      reminders: this.studentPortal.getReminders(),
+      announcements: this.messages.listMyBroadcastMessages()
     }).subscribe({
-      next: ({ batch, reminders }) => {
+      next: ({ batch, reminders, announcements }) => {
         this.studentBatch.set(batch.data?.batch ?? null);
         this.studentReminders.set(reminders.data?.reminders ?? []);
+        this.studentAnnouncements.set(announcements.data?.messages ?? []);
         this.loading.set(false);
         this.error.set('');
       },

@@ -17,6 +17,11 @@ use ChessAcademy\Controllers\PuzzleController;
 use ChessAcademy\Controllers\SettingsController;
 use ChessAcademy\Controllers\StudentController;
 use ChessAcademy\Controllers\StudentPortalController;
+use ChessAcademy\Controllers\SupportTicketController;
+use ChessAcademy\Controllers\BatchMessageController;
+use ChessAcademy\Controllers\BroadcastMessageController;
+use ChessAcademy\Controllers\DeviceTokenController;
+use ChessAcademy\Controllers\UserController;
 use ChessAcademy\Database\Connection;
 use ChessAcademy\Middleware\JwtAuthMiddleware;
 use ChessAcademy\Repositories\CoachRepository;
@@ -32,20 +37,22 @@ use ChessAcademy\Repositories\PracticeSessionRepository;
 use ChessAcademy\Repositories\PuzzleRepository;
 use ChessAcademy\Repositories\SettingsRepository;
 use ChessAcademy\Repositories\StudentRepository;
+use ChessAcademy\Repositories\SupportTicketRepository;
+use ChessAcademy\Repositories\BatchMessageRepository;
+use ChessAcademy\Repositories\BroadcastMessageRepository;
+use ChessAcademy\Repositories\DeviceTokenRepository;
 use ChessAcademy\Repositories\UserRepository;
 use ChessAcademy\Services\AuthService;
-use ChessAcademy\Services\BatchZoomService;
 use ChessAcademy\Services\JwtService;
 use ChessAcademy\Services\LeadConversionService;
 use ChessAcademy\Services\LeadCsvParser;
 use ChessAcademy\Services\PaymentReceiptUploadService;
-use ChessAcademy\Services\ZoomSdkService;
-use ChessAcademy\Services\ZoomService;
 use ChessAcademy\Services\ChessLiveMatchService;
 use ChessAcademy\Services\ChessRulesService;
 use ChessAcademy\Services\LiveMatchBroadcaster;
 use ChessAcademy\Services\LiveMatchVoiceSignaling;
 use ChessAcademy\Services\StudentPortalService;
+use ChessAcademy\Services\MessagingService;
 use DI\Container;
 
 /** @param array<string,mixed> $settings */
@@ -62,19 +69,6 @@ return function (array $settings): Container {
 
     $container->set(UserRepository::class, fn (Container $c) => new UserRepository($c->get(PDO::class)));
     $container->set(FormRepository::class, fn (Container $c) => new FormRepository($c->get(PDO::class)));
-    $container->set(ZoomService::class, fn () => new ZoomService(
-        filter_var($settings['zoom']['enabled'] ?? 'false', FILTER_VALIDATE_BOOLEAN),
-        (string) ($settings['zoom']['account_id'] ?? ''),
-        (string) ($settings['zoom']['client_id'] ?? ''),
-        (string) ($settings['zoom']['client_secret'] ?? ''),
-        (string) ($settings['zoom']['user_id'] ?? ''),
-        (string) ($settings['zoom']['timezone'] ?? 'Asia/Kolkata'),
-    ));
-    $container->set(BatchZoomService::class, fn (Container $c) => new BatchZoomService($c->get(ZoomService::class)));
-    $container->set(ZoomSdkService::class, fn () => new ZoomSdkService(
-        (string) ($settings['zoom']['sdk_client_id'] ?? ''),
-        (string) ($settings['zoom']['sdk_client_secret'] ?? ''),
-    ));
     $container->set(LeadRepository::class, fn (Container $c) => new LeadRepository($c->get(PDO::class)));
     $container->set(LeadCsvParser::class, fn () => new LeadCsvParser());
     $container->set(PaymentReceiptUploadService::class, fn (Container $c) => new PaymentReceiptUploadService(
@@ -90,6 +84,10 @@ return function (array $settings): Container {
     $container->set(StudentRepository::class, fn (Container $c) => new StudentRepository($c->get(PDO::class)));
     $container->set(CoachRepository::class, fn (Container $c) => new CoachRepository($c->get(PDO::class)));
     $container->set(EnrollmentRepository::class, fn (Container $c) => new EnrollmentRepository($c->get(PDO::class)));
+    $container->set(SupportTicketRepository::class, fn (Container $c) => new SupportTicketRepository($c->get(PDO::class)));
+    $container->set(BatchMessageRepository::class, fn (Container $c) => new BatchMessageRepository($c->get(PDO::class)));
+    $container->set(BroadcastMessageRepository::class, fn (Container $c) => new BroadcastMessageRepository($c->get(PDO::class)));
+    $container->set(DeviceTokenRepository::class, fn (Container $c) => new DeviceTokenRepository($c->get(PDO::class)));
     $container->set(InvoiceRepository::class, fn (Container $c) => new InvoiceRepository($c->get(PDO::class)));
     $container->set(PuzzleRepository::class, fn (Container $c) => new PuzzleRepository($c->get(PDO::class)));
     $container->set(GameRepository::class, fn (Container $c) => new GameRepository($c->get(PDO::class)));
@@ -109,12 +107,13 @@ return function (array $settings): Container {
         $c->get(AuthService::class),
         $c->get(UserRepository::class)
     ));
+    $container->set(UserController::class, fn (Container $c) => new UserController(
+        $c->get(UserRepository::class),
+        $c->get(AuthService::class),
+    ));
     $container->set(FormController::class, fn (Container $c) => new FormController(
         $c->get(FormRepository::class),
-        $c->get(BatchZoomService::class),
-        $c->get(ZoomSdkService::class),
-        $c->get(ZoomService::class),
-        $c->get(UserRepository::class),
+        $c->get(CoachRepository::class),
     ));
     $container->set(LeadController::class, fn (Container $c) => new LeadController(
         $c->get(LeadRepository::class),
@@ -136,6 +135,13 @@ return function (array $settings): Container {
         $c->get(EnrollmentRepository::class),
         $c->get(InvoiceRepository::class),
     ));
+    $container->set(MessagingService::class, fn (Container $c) => new MessagingService(
+        $c->get(SupportTicketRepository::class),
+        $c->get(EnrollmentRepository::class),
+        $c->get(CoachRepository::class),
+        $c->get(FormRepository::class),
+        $c->get(StudentRepository::class),
+    ));
     $container->set(StudentPortalController::class, fn (Container $c) => new StudentPortalController(
         $c->get(StudentRepository::class),
         $c->get(StudentPortalService::class),
@@ -144,7 +150,10 @@ return function (array $settings): Container {
         $c->get(CoachRepository::class),
         $c->get(AuthService::class)
     ));
-    $container->set(EnrollmentController::class, fn (Container $c) => new EnrollmentController($c->get(EnrollmentRepository::class)));
+    $container->set(EnrollmentController::class, fn (Container $c) => new EnrollmentController(
+        $c->get(EnrollmentRepository::class),
+        $c->get(CoachRepository::class),
+    ));
     $container->set(BillingController::class, fn (Container $c) => new BillingController($c->get(InvoiceRepository::class)));
     $container->set(ChessTournamentRepository::class, fn (Container $c) => new ChessTournamentRepository($c->get(PDO::class)));
     $container->set(ChessLiveMatchRepository::class, fn (Container $c) => new ChessLiveMatchRepository($c->get(PDO::class)));
@@ -191,6 +200,24 @@ return function (array $settings): Container {
         $c->get(CoachRepository::class),
     ));
     $container->set(SettingsController::class, fn (Container $c) => new SettingsController($c->get(SettingsRepository::class)));
+    $container->set(SupportTicketController::class, fn (Container $c) => new SupportTicketController(
+        $c->get(SupportTicketRepository::class),
+        $c->get(StudentRepository::class),
+        $c->get(MessagingService::class),
+    ));
+    $container->set(BatchMessageController::class, fn (Container $c) => new BatchMessageController(
+        $c->get(BatchMessageRepository::class),
+        $c->get(MessagingService::class),
+        $c->get(StudentRepository::class),
+        $c->get(EnrollmentRepository::class),
+    ));
+    $container->set(BroadcastMessageController::class, fn (Container $c) => new BroadcastMessageController(
+        $c->get(BroadcastMessageRepository::class),
+        $c->get(DeviceTokenRepository::class),
+    ));
+    $container->set(DeviceTokenController::class, fn (Container $c) => new DeviceTokenController(
+        $c->get(DeviceTokenRepository::class),
+    ));
 
     return $container;
 };

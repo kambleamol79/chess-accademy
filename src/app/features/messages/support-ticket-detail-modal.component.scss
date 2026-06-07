@@ -1,0 +1,31 @@
+.message-thread {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.message-bubble {
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  background: var(--bs-light);
+}
+
+.message-bubble--admin {
+  background: rgba(var(--bs-primary-rgb), 0.08);
+}
+
+.message-bubble__meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+  font-size: 0.85rem;
+  color: var(--bs-secondary-color);
+}
+
+.resolve-box {
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--bs-border-color);
+}

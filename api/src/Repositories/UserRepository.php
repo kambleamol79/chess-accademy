@@ -21,6 +21,24 @@ final class UserRepository
         return $row === false ? null : $row;
     }
 
+    /** @return list<array<string,mixed>> */
+    public function findStaffUsers(): array
+    {
+        $stmt = $this->pdo->query(
+            "SELECT id, email, role, first_name, last_name, phone, is_active, created_at
+             FROM users
+             WHERE role IN ('admin', 'coach', 'accountant')
+             ORDER BY FIELD(role, 'admin', 'coach', 'accountant'), first_name, last_name"
+        );
+
+        $rows = [];
+        foreach ($stmt->fetchAll() as $row) {
+            $rows[] = $this->toPublic($row);
+        }
+
+        return $rows;
+    }
+
     /** @return array<string,mixed>|null */
     public function findById(int $id): ?array
     {
@@ -29,6 +47,24 @@ final class UserRepository
         $row = $stmt->fetch();
 
         return $row === false ? null : $row;
+    }
+
+    public function isStaffRole(string $role): bool
+    {
+        return in_array($role, ['admin', 'coach', 'accountant'], true);
+    }
+
+    public function updatePassword(int $id, string $passwordHash): bool
+    {
+        $stmt = $this->pdo->prepare(
+            'UPDATE users SET password_hash = :password_hash WHERE id = :id'
+        );
+        $stmt->execute([
+            'password_hash' => $passwordHash,
+            'id' => $id,
+        ]);
+
+        return $stmt->rowCount() > 0;
     }
 
     /** @param array<string,mixed> $data */

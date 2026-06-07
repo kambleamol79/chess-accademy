@@ -21,8 +21,8 @@ export class LoginComponent {
   loading = signal(false);
   error = signal('');
 
-  email = 'admin@chessacademy.local';
-  password = 'Admin@123456';
+  email = '';
+  password = '';
 
   onSubmit(event: Event) {
     event.preventDefault();
@@ -50,7 +50,10 @@ export class LoginComponent {
           this.error.set(res.message ?? 'Invalid credentials');
           return;
         }
-        this.router.navigate(['/dashboard']);
+        const role = res.data?.user?.role;
+        const target =
+          role === 'coach' ? '/students' : role === 'accountant' ? '/billing' : '/dashboard';
+        this.router.navigate([target]);
       },
       error: (err: HttpErrorResponse) => {
         this.loading.set(false);

@@ -7,7 +7,12 @@ class AppConfig {
   AppConfig._();
 
   static const String appName = 'Brainstorm';
-  static const int apiPort = 8080;
+
+  static const String todayTournamentUrl =
+      'https://www.chess.com/play/arena/31279193';
+
+  static const String firebaseStudentsTopic = 'students';
+
   static const String apiPath = '/api/v1';
 
   static const String accessTokenKey = 'ca_access_token';
@@ -26,17 +31,33 @@ class AppConfig {
   /// `--dart-define=API_HOST=192.168.x.x` (physical device on same Wi‑Fi).
   static String get apiBaseUrl {
     const fullOverride = String.fromEnvironment('API_URL');
-    if (fullOverride.isNotEmpty) return fullOverride;
+    if (fullOverride.isNotEmpty) return _normalizeApiUrl(fullOverride);
 
-    final host = _apiHost;
-    return 'http://$host:$apiPort$apiPath';
+    const hostOverride = String.fromEnvironment('API_HOST');
+    if (hostOverride.isNotEmpty && _looksLikeFullUrl(hostOverride)) {
+      return _normalizeApiUrl(hostOverride);
+    }
+
+    return 'https://alphasynctechnology.com/brainstorm$apiPath';
   }
 
-  static String get _apiHost {
-    const hostOverride = String.fromEnvironment('API_HOST');
-    if (hostOverride.isNotEmpty) return hostOverride;
+  static String get _defaultApiHost {
+    if (kIsWeb) return 'localhost';
+    if (Platform.isAndroid) return '10.0.2.2';
+    if (Platform.isIOS) return 'localhost';
+    return '127.0.0.1';
+  }
 
-    return 'https://alphasynctechnology.com/chess_backend/';
+  static bool _looksLikeFullUrl(String value) {
+    return value.startsWith('http://') || value.startsWith('https://');
+  }
+
+  static String _normalizeApiUrl(String value) {
+    var url = value.trim();
+    while (url.endsWith('/')) {
+      url = url.substring(0, url.length - 1);
+    }
+    return url.endsWith(apiPath) ? url : '$url$apiPath';
   }
 
   /// User-friendly hint when the API cannot be reached.

@@ -1,10 +1,11 @@
 // Angular import
-import { AfterViewInit, Component, effect, inject } from '@angular/core';
+import { AfterViewInit, Component, computed, effect, inject } from '@angular/core';
 import { CommonModule, Location, LocationStrategy } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ChangeDetectorRef } from '@angular/core';
 
 // Project import
+import { AuthService } from 'src/app/core/services/auth.service';
 import { ConfigurationComponent } from './configuration/configuration.component';
 import { NavBarComponent } from './nav-bar/nav-bar.component';
 import { NavigationComponent } from './navigation/navigation.component';
@@ -22,6 +23,9 @@ export class AdminComponent implements AfterViewInit {
   private locationStrategy = inject(LocationStrategy);
   cdr = inject(ChangeDetectorRef);
   private layoutState = inject(LayoutStateService);
+  private auth = inject(AuthService);
+
+  readonly isStudent = computed(() => this.auth.role() === 'student');
 
   // public props
   currentLayout!: string;

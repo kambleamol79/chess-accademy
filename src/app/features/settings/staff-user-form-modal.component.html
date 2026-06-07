@@ -1,0 +1,64 @@
+<div class="modal-header">
+  <h5 class="modal-title">Add staff account</h5>
+  <button type="button" class="btn-close" aria-label="Close" (click)="dismiss()"></button>
+</div>
+
+<div class="modal-body">
+  <div class="row g-3">
+    <div class="col-md-6">
+      <label class="form-label" for="staffRole">Role</label>
+      <select id="staffRole" class="form-select" [(ngModel)]="role" name="role">
+        @for (opt of roleOptions; track opt.value) {
+          <option [value]="opt.value">{{ opt.label }}</option>
+        }
+      </select>
+      <div class="form-text">{{ roleHint() }}</div>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label" for="staffPhone">Phone</label>
+      <input id="staffPhone" type="text" class="form-control" [(ngModel)]="phone" name="phone" />
+    </div>
+    <div class="col-md-6">
+      <label class="form-label" for="staffFirst">First name</label>
+      <input id="staffFirst" type="text" class="form-control" [(ngModel)]="first_name" name="first_name" required />
+    </div>
+    <div class="col-md-6">
+      <label class="form-label" for="staffLast">Last name</label>
+      <input id="staffLast" type="text" class="form-control" [(ngModel)]="last_name" name="last_name" required />
+    </div>
+    <div class="col-12">
+      <label class="form-label" for="staffEmail">Email (login)</label>
+      <input id="staffEmail" type="email" class="form-control" [(ngModel)]="email" name="email" required />
+    </div>
+    <div class="col-12">
+      <label class="form-label" for="staffPassword">Password</label>
+      <input
+        id="staffPassword"
+        type="password"
+        class="form-control"
+        [(ngModel)]="password"
+        name="password"
+        minlength="8"
+        required
+      />
+      <div class="form-text">Minimum 8 characters. Share securely with the new user.</div>
+    </div>
+    @if (isCoach) {
+      <div class="col-12">
+        <label class="form-label" for="staffTitle">Coach title (optional)</label>
+        <input id="staffTitle" type="text" class="form-control" [(ngModel)]="title" name="title" placeholder="e.g. FIDE Instructor" />
+      </div>
+    }
+  </div>
+
+  @if (error()) {
+    <div class="alert alert-danger mt-3 mb-0">{{ error() }}</div>
+  }
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-outline-secondary" (click)="dismiss()" [disabled]="saving()">Cancel</button>
+  <button type="button" class="btn btn-primary" (click)="save()" [disabled]="saving()">
+    {{ saving() ? 'Creating…' : 'Create account' }}
+  </button>
+</div>

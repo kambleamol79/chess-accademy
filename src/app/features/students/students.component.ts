@@ -79,7 +79,7 @@ export class StudentsComponent implements OnInit {
   }
 
   canAddStudent(): boolean {
-    return this.auth.hasRole(['admin']);
+    return this.auth.hasRole(['admin', 'coach']);
   }
 
   canAssignBatch(): boolean {

@@ -1,0 +1,221 @@
+// Student-only CRM shell — dark play hub (inspired layout, academy-branded)
+
+$student-bg: #1f1d1b;
+$student-surface: #262421;
+$student-surface-2: #302e2b;
+$student-border: #3d3a37;
+$student-text: #f0ebe3;
+$student-muted: #a8a097;
+$student-accent: #81b64c;
+$student-accent-dark: #5f8f34;
+$student-blue: #5fa8d3;
+
+.student-portal-nav.pc-sidebar {
+  background: $student-surface;
+  border-right: 1px solid $student-border;
+  box-shadow: none;
+  top: 0;
+
+  .m-header .logo-lg,
+  .m-header .logo-sm {
+    filter: brightness(1.15);
+  }
+
+  .coded-menu-caption label {
+    color: $student-muted;
+  }
+
+  .coded-inner-navbar {
+    > app-nav-group > app-nav-collapse li,
+    app-nav-item > li.nav-item {
+      > a {
+        color: $student-text;
+
+        .coded-micon i {
+          color: $student-muted;
+        }
+      }
+
+      &.active > a,
+      &.coded-trigger > a,
+      &:hover > a {
+        background: rgba($student-accent, 0.14) !important;
+        color: $student-accent !important;
+
+        .coded-micon i {
+          color: $student-accent !important;
+        }
+      }
+    }
+  }
+}
+
+.student-portal-header.pc-header {
+  background: $student-surface;
+  border-bottom: 1px solid $student-border;
+  color: $student-text;
+
+  .pc-head-link,
+  .pc-head-link i {
+    color: $student-text;
+  }
+
+  .student-tournament-cta {
+    background: linear-gradient(135deg, #ffd166 0%, #ff9f1c 55%, #ff6b35 100%);
+    border: 1px solid #ff8c42;
+    color: #1a1208;
+    padding: 7px 14px;
+    font-weight: 800;
+    box-shadow: 0 0 18px rgba(255, 159, 28, 0.45);
+
+    &:hover {
+      background: linear-gradient(135deg, #ffe08a 0%, #ffb347 55%, #ff8052 100%);
+      border-color: #ffb347;
+      color: #1a1208;
+      transform: translateY(-1px);
+    }
+
+    i {
+      font-size: 1.05rem;
+    }
+  }
+
+  .dropdown-menu {
+    background: $student-surface-2;
+    border-color: $student-border;
+    color: $student-text;
+
+    .dropdown-header h5,
+    .dropdown-item {
+      color: $student-text;
+    }
+
+    .dropdown-item:hover {
+      background: rgba($student-accent, 0.12);
+      color: $student-accent;
+    }
+  }
+}
+
+.student-portal-main.pc-container {
+  background: $student-bg !important;
+  border-radius: 0;
+  box-shadow: none;
+  margin-right: 0;
+  min-height: calc(100vh - 74px);
+
+  .coded-wrapper,
+  .coded-content,
+  .coded-inner-content,
+  .main-body,
+  .page-wrapper {
+    background: transparent !important;
+  }
+
+  .coded-content {
+    padding: 12px 16px 20px;
+  }
+}
+
+.student-portal-page {
+  padding-top: 0;
+  color: $student-text;
+
+  .card,
+  app-card .card {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: $student-text;
+  }
+
+  app-card .card-header {
+    display: none;
+  }
+
+  app-card .card-block {
+    padding: 0 !important;
+  }
+
+  .card-header,
+  .card-title,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    color: $student-text;
+  }
+
+  .text-muted,
+  .form-text {
+    color: $student-muted !important;
+  }
+
+  .alert-info {
+    background: rgba($student-blue, 0.12);
+    border-color: rgba($student-blue, 0.35);
+    color: #bae6fd;
+  }
+
+  .alert-secondary {
+    background: $student-surface-2;
+    border-color: $student-border;
+    color: $student-text;
+  }
+
+  .btn-primary {
+    background: $student-accent;
+    border-color: $student-accent-dark;
+    color: #102010;
+
+    &:hover {
+      background: #9ad45f;
+      border-color: #7bb84a;
+      color: #102010;
+    }
+  }
+
+  .btn-outline-primary {
+    color: $student-accent;
+    border-color: rgba($student-accent, 0.45);
+
+    &:hover {
+      background: rgba($student-accent, 0.12);
+      color: $student-accent;
+    }
+  }
+
+  .btn-outline-secondary {
+    color: $student-muted;
+    border-color: $student-border;
+
+    &:hover {
+      background: $student-surface-2;
+      color: $student-text;
+    }
+  }
+
+  .btn-secondary,
+  .badge.bg-secondary {
+    background: $student-surface-2 !important;
+    border-color: $student-border;
+    color: $student-text;
+  }
+
+  .nav-tabs {
+    border-color: $student-border;
+
+    .nav-link {
+      color: $student-muted;
+      border-color: transparent;
+
+      &.active {
+        background: $student-surface-2;
+        border-color: $student-border $student-border transparent;
+        color: $student-accent;
+      }
+    }
+  }
+}

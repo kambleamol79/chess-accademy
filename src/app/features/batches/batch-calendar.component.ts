@@ -95,9 +95,9 @@ export class BatchCalendarComponent {
 
   eventClasses(o: BatchCalendarOccurrence, compact = false): Record<string, boolean> {
     return {
-      'batch-cal__event': true,
-      'batch-cal__event--compact': compact,
-      [`batch-cal__event--${occurrenceTone(o)}`]: true
+      'batch-cal__event-wrap': true,
+      'batch-cal__event-wrap--compact': compact,
+      [`batch-cal__event-wrap--${occurrenceTone(o)}`]: true
     };
   }
 
@@ -123,6 +123,7 @@ export class BatchCalendarComponent {
 
   onJoinClick(batch: BatchForm, event: Event) {
     event.stopPropagation();
+    event.preventDefault();
     this.joinZoom.emit(batch);
   }
 

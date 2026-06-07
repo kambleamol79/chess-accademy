@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace ChessAcademy\Controllers;
 
 use ChessAcademy\Http\JsonResponse;
+use ChessAcademy\Repositories\CoachRepository;
 use ChessAcademy\Repositories\EnrollmentRepository;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -13,7 +14,10 @@ final class EnrollmentController
 {
     use JsonResponse;
 
-    public function __construct(private readonly EnrollmentRepository $enrollments) {}
+    public function __construct(
+        private readonly EnrollmentRepository $enrollments,
+        private readonly CoachRepository $coaches,
+    ) {}
 
     public function index(Request $request, Response $response): Response
     {
@@ -60,6 +64,14 @@ final class EnrollmentController
         }
         if (!is_array($studentIds) || $studentIds === []) {
             return $this->error($response, 'student_ids must be a non-empty array', 422);
+        }
+
+        $authUser = $request->getAttribute('user');
+        if (is_array($authUser) && ($authUser['role'] ?? '') === 'coach') {
+            $coach = $this->coaches->findByUserId((int) $authUser['id']);
+            if ($coach === null || !$this->coaches->isAssignedToForm((int) $coach['id'], $formId)) {
+                return $this->error($response, 'You can only assign students to your own batches', 403);
+            }
         }
 
         $result = $this->enrollments->assignBatch($formId, $studentIds);

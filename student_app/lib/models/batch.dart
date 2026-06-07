@@ -15,7 +15,8 @@ class StudentBatch {
     this.enrolledAt,
     this.status,
     this.zoomJoinUrl,
-    this.zoomMeetingId,
+    this.zoomUsername,
+    this.zoomPassword,
   });
 
   factory StudentBatch.fromJson(Map<String, dynamic> json) {
@@ -35,7 +36,8 @@ class StudentBatch {
       enrolledAt: json['enrolled_at'] as String?,
       status: json['status'] as String?,
       zoomJoinUrl: json['zoom_join_url'] as String?,
-      zoomMeetingId: json['zoom_meeting_id'] as String?,
+      zoomUsername: json['zoom_username'] as String?,
+      zoomPassword: json['zoom_password'] as String?,
     );
   }
 
@@ -54,7 +56,8 @@ class StudentBatch {
   final String? enrolledAt;
   final String? status;
   final String? zoomJoinUrl;
-  final String? zoomMeetingId;
+  final String? zoomUsername;
+  final String? zoomPassword;
 
   String get coachesLabel {
     final parts = [coach1, coach2].where((c) => c != null && c.isNotEmpty).toList();

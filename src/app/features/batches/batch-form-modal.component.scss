@@ -25,3 +25,24 @@ input[type='time'].form-control {
     cursor: pointer;
   }
 }
+
+.batch-zoom-fields {
+  border: 1px solid var(--bs-border-color);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  background: var(--bs-tertiary-bg);
+}
+
+.batch-zoom-fields__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+
+  > i {
+    color: var(--bs-primary);
+    font-size: 1.5rem;
+    line-height: 1;
+  }
+}

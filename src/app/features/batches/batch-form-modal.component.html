@@ -6,14 +6,13 @@
 <div class="modal-body">
   <div class="row g-3">
     <div class="col-md-6">
-      <label class="form-label" for="batchCode">Batch number</label>
+      <label class="form-label" for="batchCode">Batch Name</label>
       <input
         id="batchCode"
         class="form-control"
         [(ngModel)]="batch"
         name="batch"
         placeholder="e.g. IB - 9"
-        [readonly]="!isEdit"
         required
       />
       @if (!isEdit) {
@@ -137,23 +136,47 @@
       <input id="notes" class="form-control" [(ngModel)]="notes" name="notes" />
     </div>
 
-    @if (isEdit && canJoinZoom()) {
-      <div class="col-12">
-        <label class="form-label">Live class</label>
-        <button type="button" class="btn btn-primary btn-sm" (click)="openJoinZoom()">
-          <i class="ti ti-brand-zoom me-1"></i>
-          Join class in app
-        </button>
-        <div class="form-text">Opens the batch Zoom meeting inside Brainstorm.</div>
-      </div>
-    } @else if (!isEdit) {
-      <div class="col-12">
-        <div class="alert alert-info mb-0 py-2">
-          <i class="ti ti-brand-zoom me-1"></i>
-          A recurring Zoom meeting will be created automatically when Zoom is enabled on the server.
+    <div class="col-12">
+      <div class="batch-zoom-fields">
+        <div class="batch-zoom-fields__header">
+          <div>
+            <label class="form-label mb-1" for="zoomJoinUrl">Zoom class link</label>
+            <div class="form-text mt-0">Enter the meeting link manually. Username and password are optional.</div>
+          </div>
+          <i class="ti ti-brand-zoom"></i>
+        </div>
+        <input
+          id="zoomJoinUrl"
+          type="url"
+          class="form-control"
+          [(ngModel)]="zoomJoinUrl"
+          name="zoomJoinUrl"
+          placeholder="https://zoom.us/j/..."
+        />
+        <div class="row g-2 mt-1">
+          <div class="col-md-6">
+            <label class="form-label small" for="zoomUsername">Zoom username (optional)</label>
+            <input
+              id="zoomUsername"
+              class="form-control"
+              [(ngModel)]="zoomUsername"
+              name="zoomUsername"
+              autocomplete="off"
+            />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small" for="zoomPassword">Zoom password (optional)</label>
+            <input
+              id="zoomPassword"
+              class="form-control"
+              [(ngModel)]="zoomPassword"
+              name="zoomPassword"
+              autocomplete="off"
+            />
+          </div>
         </div>
       </div>
-    }
+    </div>
   </div>
 
   @if (error()) {

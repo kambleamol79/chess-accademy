@@ -1,6 +1,6 @@
 import { Component, inject, Input, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { HttpErrorResponse } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { BatchForm } from 'src/app/core/models/form.model';
@@ -9,12 +9,10 @@ import { CoachService } from 'src/app/core/services/coach.service';
 import { getApiErrorMessage } from 'src/app/core/utils/http-error.util';
 import {
   formatTimeSlot,
-  hasBatchZoom,
   isValidTimeSlotRange,
   nextBatchCode,
   parseTimeSlot
 } from 'src/app/core/utils/batch.util';
-import { BatchZoomModalComponent } from './batch-zoom-modal.component';
 
 export interface CoachOption {
   id: number;
@@ -29,7 +27,6 @@ export interface CoachOption {
 })
 export class BatchFormModalComponent implements OnInit {
   private readonly activeModal = inject(NgbActiveModal);
-  private readonly modal = inject(NgbModal);
   private readonly forms = inject(FormService);
   private readonly coachesApi = inject(CoachService);
 
@@ -62,6 +59,9 @@ export class BatchFormModalComponent implements OnInit {
   coach2 = '';
   highlight: 'blue' | 'beige' = 'beige';
   notes = '';
+  zoomJoinUrl = '';
+  zoomUsername = '';
+  zoomPassword = '';
 
   get isEdit(): boolean {
     return this.mode === 'edit';
@@ -83,6 +83,9 @@ export class BatchFormModalComponent implements OnInit {
       this.coach2 = this.batchRecord.coach_2 ?? '';
       this.highlight = (this.batchRecord.highlight === 'blue' ? 'blue' : 'beige') as 'blue' | 'beige';
       this.notes = this.batchRecord.notes ?? '';
+      this.zoomJoinUrl = this.batchRecord.zoom_join_url ?? '';
+      this.zoomUsername = this.batchRecord.zoom_username ?? '';
+      this.zoomPassword = this.batchRecord.zoom_password ?? '';
     } else {
       if (this.defaultTime) {
         this.applyTimeSlot(this.defaultTime);
@@ -134,24 +137,6 @@ export class BatchFormModalComponent implements OnInit {
     this.activeModal.dismiss();
   }
 
-  canJoinZoom(): boolean {
-    return !!this.batchRecord && hasBatchZoom(this.batchRecord);
-  }
-
-  openJoinZoom() {
-    if (!this.batchRecord || !hasBatchZoom(this.batchRecord)) {
-      return;
-    }
-    const ref = this.modal.open(BatchZoomModalComponent, {
-      fullscreen: true,
-      scrollable: false,
-      backdrop: 'static',
-      keyboard: false,
-      modalDialogClass: 'modal-fullscreen batch-zoom-modal-dialog'
-    });
-    ref.componentInstance.batch = this.batchRecord;
-  }
-
   save() {
     this.error.set('');
     const batch = this.batch.trim();
@@ -179,7 +164,10 @@ export class BatchFormModalComponent implements OnInit {
       day_2: this.day2,
       coach_1: this.coach1.trim() || null,
       coach_2: this.coach2.trim() || null,
-      notes: this.notes.trim() || null
+      notes: this.notes.trim() || null,
+      zoom_join_url: this.zoomJoinUrl.trim() || null,
+      zoom_username: this.zoomUsername.trim() || null,
+      zoom_password: this.zoomPassword.trim() || null
     };
 
     const req = this.isEdit
@@ -194,8 +182,7 @@ export class BatchFormModalComponent implements OnInit {
           return;
         }
         this.activeModal.close({
-          batch: res.data,
-          zoomWarning: res.zoom_warning
+          batch: res.data
         });
       },
       error: (err: HttpErrorResponse) => {

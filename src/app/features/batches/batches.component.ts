@@ -17,7 +17,8 @@ import { confirmDelete } from 'src/app/core/utils/confirm.util';
 import { getApiErrorMessage } from 'src/app/core/utils/http-error.util';
 import { groupBatchesByTimeSlot, hasBatchZoom } from 'src/app/core/utils/batch.util';
 import { BatchCalendarComponent } from './batch-calendar.component';
-import { BatchZoomModalComponent } from './batch-zoom-modal.component';
+import { BatchMessagesModalComponent } from './batch-messages-modal.component';
+import { openZoomExternalFullscreen } from 'src/app/core/utils/zoom-open.util';
 
 export type BatchesPageView = 'calendar' | 'list';
 
@@ -35,7 +36,6 @@ export class BatchesComponent implements OnInit {
 
   loading = signal(true);
   error = signal('');
-  zoomWarning = signal('');
   deletingId = signal<number | null>(null);
   rows = signal<BatchForm[]>([]);
   pageView = signal<BatchesPageView>('calendar');
@@ -128,23 +128,30 @@ export class BatchesComponent implements OnInit {
     if (defaultTime) {
       ref.componentInstance.defaultTime = defaultTime;
     }
-    ref.closed.subscribe((result: { zoomWarning?: string } | undefined) => {
-      if (result?.zoomWarning) {
-        this.zoomWarning.set(result.zoomWarning);
-      }
+    ref.closed.subscribe(() => {
       this.load();
     });
   }
 
   openJoinZoom(row: BatchForm) {
-    const ref = this.modal.open(BatchZoomModalComponent, {
-      fullscreen: true,
-      scrollable: false,
-      backdrop: 'static',
-      keyboard: false,
-      modalDialogClass: 'modal-fullscreen batch-zoom-modal-dialog'
+    const url = row.zoom_join_url?.trim();
+    if (url) {
+      openZoomExternalFullscreen(url);
+    }
+  }
+
+  openBatchMessages(row: BatchForm) {
+    if (!this.canManageBatches()) {
+      return;
+    }
+
+    const ref = this.modal.open(BatchMessagesModalComponent, {
+      size: 'lg',
+      scrollable: true,
+      centered: true
     });
-    ref.componentInstance.batch = row;
+    ref.componentInstance.formId = row.id;
+    ref.componentInstance.batchName = row.batch;
   }
 
   openAssignCoach(row: BatchForm, slot: CoachSlot) {

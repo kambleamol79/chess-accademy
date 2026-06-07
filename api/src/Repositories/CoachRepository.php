@@ -106,7 +106,52 @@ final class CoachRepository
     }
 
     /**
-     * Batch rows where coach_1 or coach_2 matches this coach (flexible name match).
+     * Full batch (form) rows where coach_1 or coach_2 matches this coach.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function findAssignedForms(int $id): array
+    {
+        $coach = $this->findById($id);
+        if ($coach === null) {
+            return [];
+        }
+
+        $forms = $this->pdo->query(
+            'SELECT id, highlight, batch, module, `time`, days_summary, day_1, coach_1, day_2, coach_2, notes,
+                    zoom_join_url, zoom_username, zoom_password, created_at, updated_at
+             FROM forms
+             ORDER BY `time` ASC, id ASC'
+        )->fetchAll();
+
+        $assigned = [];
+        foreach ($forms as $form) {
+            if ($this->formAssignedToCoach($form, $coach)) {
+                $assigned[] = $form;
+            }
+        }
+
+        return $assigned;
+    }
+
+    public function isAssignedToForm(int $coachId, int $formId): bool
+    {
+        $coach = $this->findById($coachId);
+        if ($coach === null) {
+            return false;
+        }
+
+        $stmt = $this->pdo->prepare(
+            'SELECT coach_1, coach_2 FROM forms WHERE id = :id LIMIT 1'
+        );
+        $stmt->execute(['id' => $formId]);
+        $form = $stmt->fetch();
+
+        return $form !== false && $this->formAssignedToCoach($form, $coach);
+    }
+
+    /**
+     * Schedule cells where coach_1 or coach_2 matches this coach (flexible name match).
      *
      * @return list<array<string, mixed>>
      */
@@ -117,14 +162,8 @@ final class CoachRepository
             return [];
         }
 
-        $forms = $this->pdo->query(
-            'SELECT id, highlight, batch, module, `time`, days_summary, day_1, coach_1, day_2, coach_2, notes
-             FROM forms
-             ORDER BY `time` ASC, id ASC'
-        )->fetchAll();
-
         $assignments = [];
-        foreach ($forms as $form) {
+        foreach ($this->findAssignedForms($id) as $form) {
             if ($this->coachNameMatches((string) ($form['coach_1'] ?? ''), $coach)) {
                 $assignments[] = $this->assignmentRow($form, 'day_1', 'coach_1');
             }
@@ -134,6 +173,16 @@ final class CoachRepository
         }
 
         return $assignments;
+    }
+
+    /**
+     * @param array<string, mixed> $form
+     * @param array<string, mixed> $coach
+     */
+    private function formAssignedToCoach(array $form, array $coach): bool
+    {
+        return $this->coachNameMatches((string) ($form['coach_1'] ?? ''), $coach)
+            || $this->coachNameMatches((string) ($form['coach_2'] ?? ''), $coach);
     }
 
     /** @param array<string, mixed> $form */

@@ -1,0 +1,13 @@
+# Copy to: public_html/brainstorm/api/.htaccess
+DirectoryIndex index.php
+
+<IfModule mod_rewrite.c>
+RewriteEngine On
+
+# Block sensitive folders (do not block public/ — that is the Slim entry point)
+RewriteRule ^(?:vendor|config|src|database|scripts|storage|var|realtime)(?:/|$) - [F,L]
+
+# If request hits /brainstorm/api/... without parent rewrite, route here
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^ public/index.php [QSA,L]
+</IfModule>

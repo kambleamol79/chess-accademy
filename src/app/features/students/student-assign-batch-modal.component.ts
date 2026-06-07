@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { HttpErrorResponse } from '@angular/common/http';
 import { BatchForm } from 'src/app/core/models/form.model';
+import { AuthService } from 'src/app/core/services/auth.service';
 import { FormService } from 'src/app/core/services/form.service';
 import { EnrollmentService } from 'src/app/core/services/enrollment.service';
 import { getApiErrorMessage } from 'src/app/core/utils/http-error.util';
@@ -19,6 +20,7 @@ export class StudentAssignBatchModalComponent implements OnInit {
   private readonly activeModal = inject(NgbActiveModal);
   private readonly forms = inject(FormService);
   private readonly enrollments = inject(EnrollmentService);
+  readonly auth = inject(AuthService);
 
   @Input({ required: true }) studentIds!: number[];
   @Input() studentNames: string[] = [];

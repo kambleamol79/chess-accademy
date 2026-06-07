@@ -17,6 +17,7 @@ Import database (order matters):
 mysql -u root -p < database/schema.sql
 mysql -u root -p < database/seeds/forms_seed.sql
 mysql -u root -p < database/seeds/admin_seed.sql
+mysql -u root -p < database/seeds/coach_seed.sql
 # optional:
 mysql -u root -p < database/seeds/sample_data.sql
 ```
@@ -27,33 +28,47 @@ Run server:
 php -S localhost:8080 -t public
 ```
 
-**Default admin:** `admin@chessacademy.local` / `Admin@123456`
+**Default admin:** `admin@chessacademy.local` / `Admin@123456`  
+**Default coach:** `coach@chessacademy.local` / `Coach@123456` (students + batch assign)
 
-## Zoom (recurring meetings on batch create)
+## Zoom details on batches
 
-When enabled, creating or updating a batch schedule automatically creates/updates a **weekly recurring Zoom meeting** matching the batch days and time slot.
+Batch schedules store manual Zoom details entered by an admin: meeting link, optional username, and optional password.
 
-1. Create a [Server-to-Server OAuth app](https://marketplace.zoom.us/) with scopes `meeting:write:admin` and `meeting:read:admin`.
-2. Add to `api/.env`:
-
-```env
-ZOOM_ENABLED=true
-ZOOM_ACCOUNT_ID=your_account_id
-ZOOM_CLIENT_ID=your_client_id
-ZOOM_CLIENT_SECRET=your_client_secret
-ZOOM_USER_ID=host@yourdomain.com
-ZOOM_TIMEZONE=Asia/Kolkata
-```
-
-3. Run migration if upgrading an existing database:
+Run migration if upgrading an existing database that already has the earlier Zoom columns:
 
 ```bash
-mysql -u root chess_academy < database/zoom_migration.sql
+mysql -u root chess_academy < database/manual_zoom_fields_migration.sql
 ```
 
-4. Restart the API server after changing `.env`.
+## Messaging (support + batch announcements)
 
-Batch rows store `zoom_join_url`, `zoom_start_url`, and passcode. If Zoom fails, the batch is still saved and the API returns a `zoom_warning` message.
+Run migration on existing databases:
+
+```bash
+mysql -u root chess_academy < database/messaging_migration.sql
+```
+
+**Student support (student ↔ admin only)**
+
+| Method | URL | Roles |
+|--------|-----|-------|
+| GET | `/api/v1/students/me/support-tickets` | student |
+| POST | `/api/v1/students/me/support-tickets` | student |
+| GET | `/api/v1/students/me/support-tickets/{id}` | student |
+| POST | `/api/v1/students/me/support-tickets/{id}/messages` | student |
+| GET | `/api/v1/support-tickets` | admin |
+| GET | `/api/v1/support-tickets/{id}` | admin |
+| POST | `/api/v1/support-tickets/{id}/messages` | admin |
+| PATCH | `/api/v1/support-tickets/{id}` | admin (`assign_self`, `status: resolved`, `resolution_comment`) |
+
+**Batch messages (admin sends; visible to enrolled students + assigned coaches)**
+
+| Method | URL | Roles |
+|--------|-----|-------|
+| GET | `/api/v1/forms/{form_id}/messages` | admin, coach, student |
+| POST | `/api/v1/forms/{form_id}/messages` | admin |
+| GET | `/api/v1/students/me/batch-messages` | student |
 
 ## Auth
 
@@ -116,6 +131,7 @@ Use header on protected routes: `Authorization: Bearer <access_token>`
 | Puzzles | `/api/v1/puzzles`, `POST .../attempt` |
 | Game review | `/api/v1/games` |
 | Settings | `/api/v1/settings` (admin) |
+| Staff users | `GET/POST /api/v1/users`, `PATCH /api/v1/users/{id}` (password; admin only) |
 
 ## `forms` columns (spreadsheet)
 
@@ -124,7 +140,7 @@ Use header on protected routes: `Authorization: Bearer <access_token>`
 ## Roles
 
 - **admin** — full access
-- **coach** — forms, enrollments, puzzles, games
+- **coach** — students (add), assign students to **own** batches only (`coach_1` / `coach_2` on batch), dashboard schedule
 - **student** — own profile, puzzles, games, student portal (`/students/me/*`)
 - **accountant** — billing
 

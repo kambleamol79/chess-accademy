@@ -2,14 +2,13 @@ import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core
 import { CommonModule } from '@angular/common';
 import { Chess, Square } from 'chess.js';
 import { BoardPlayerBar } from 'src/app/core/models/chess-practice.model';
+import { ChessPieceComponent } from '../chess-piece/chess-piece.component';
 
 const FILES = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
-const LIGHT = '#f0debb';
-const DARK = '#b58863';
 
 @Component({
   selector: 'app-chess-board',
-  imports: [CommonModule],
+  imports: [CommonModule, ChessPieceComponent],
   templateUrl: './chess-board.component.html',
   styleUrl: './chess-board.component.scss'
 })
@@ -67,26 +66,6 @@ export class ChessBoardComponent implements OnChanges {
     const piece = this._game.get(sq as Square);
     if (!piece) return null;
     return { type: piece.type, color: piece.color };
-  }
-
-  pieceSymbol(type: string, color: 'w' | 'b'): string {
-    const white: Record<string, string> = {
-      p: '♙',
-      n: '♘',
-      b: '♗',
-      r: '♖',
-      q: '♕',
-      k: '♔'
-    };
-    const black: Record<string, string> = {
-      p: '♟',
-      n: '♞',
-      b: '♝',
-      r: '♜',
-      q: '♛',
-      k: '♚'
-    };
-    return color === 'w' ? white[type] : black[type];
   }
 
   squareClasses(displayRow: number, displayCol: number): Record<string, boolean> {

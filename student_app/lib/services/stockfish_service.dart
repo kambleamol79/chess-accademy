@@ -1,17 +1,16 @@
 import 'dart:async';
-import 'dart:io' show Platform;
 
 import 'package:chess/chess.dart' as chess_lib;
 import 'package:flutter/foundation.dart';
-import 'package:stockfish/stockfish.dart';
 
 import '../models/chess_game.dart';
 import 'chess_bot_worker.dart';
 import 'chess_engine.dart';
+import 'stockfish_adapter.dart';
 
 /// On-device Stockfish (UCI) with fast fallback to the built-in engine.
 class StockfishService extends ChangeNotifier {
-  Stockfish? _engine;
+  StockfishAdapter? _engine;
   StreamSubscription<String>? _stdoutSub;
   Completer<String>? _bestMoveCompleter;
   Completer<void>? _readyOkCompleter;
@@ -26,7 +25,7 @@ class StockfishService extends ChangeNotifier {
 
   bool get isNativeSupported {
     if (kIsWeb) return false;
-    return Platform.isAndroid || Platform.isIOS;
+    return StockfishAdapter.isSupported;
   }
 
   bool get isStockfishActive => _ready && isNativeSupported && !_initAbandoned;
@@ -55,10 +54,12 @@ class StockfishService extends ChangeNotifier {
       final uciOk = Completer<void>();
       final readyOk = Completer<void>();
 
-      _engine = await stockfishAsync().timeout(
-        const Duration(seconds: 20),
-        onTimeout: () => throw TimeoutException('Stockfish start'),
-      );
+      final engine = StockfishAdapter();
+      await engine.start().timeout(
+            const Duration(seconds: 20),
+            onTimeout: () => throw TimeoutException('Stockfish start'),
+          );
+      _engine = engine;
 
       _stdoutSub = _engine!.stdout.listen((line) {
         final trimmed = line.trim();

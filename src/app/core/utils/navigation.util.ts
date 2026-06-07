@@ -2,7 +2,7 @@ import { NavigationItem } from 'src/app/theme/layout/admin/navigation/navigation
 import { UserRole } from '../models/api.model';
 
 /** Nav item ids allowed for students (excludes removed features like materials). */
-const STUDENT_NAV_IDS = new Set(['dashboard', 'my-batch', 'practice', 'puzzles']);
+const STUDENT_NAV_IDS = new Set(['dashboard', 'my-batch', 'practice', 'puzzles', 'support']);
 
 /** Legacy / removed ids — never show even if re-added to NavigationItems by mistake. */
 const REMOVED_NAV_IDS = new Set(['materials', 'chess-arena', 'chess-tournaments', 'game-review']);

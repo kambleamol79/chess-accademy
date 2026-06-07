@@ -73,6 +73,30 @@ final class EnrollmentRepository
         return $stmt->rowCount() > 0;
     }
 
+    public function markStatus(int $id, string $status): bool
+    {
+        if (!in_array($status, ['active', 'completed', 'dropped'], true)) {
+            return false;
+        }
+
+        $stmt = $this->pdo->prepare('UPDATE form_enrollments SET status = :status WHERE id = :id');
+        $stmt->execute(['id' => $id, 'status' => $status]);
+
+        return $stmt->rowCount() > 0;
+    }
+
+    public function hasActiveEnrollment(int $studentId, int $formId): bool
+    {
+        $stmt = $this->pdo->prepare(
+            'SELECT 1 FROM form_enrollments
+             WHERE student_id = :student_id AND form_id = :form_id AND status = \'active\'
+             LIMIT 1'
+        );
+        $stmt->execute(['student_id' => $studentId, 'form_id' => $formId]);
+
+        return $stmt->fetch() !== false;
+    }
+
     /** @return array<string,mixed>|null */
     public function findActiveByStudent(int $studentId): ?array
     {
@@ -96,7 +120,7 @@ final class EnrollmentRepository
             'SELECT e.id AS enrollment_id, e.enrolled_at, e.status,
                     f.id AS form_id, f.highlight, f.batch, f.module, f.time, f.days_summary,
                     f.day_1, f.coach_1, f.day_2, f.coach_2, f.notes,
-                    f.zoom_meeting_id, f.zoom_join_url
+                    f.zoom_join_url, f.zoom_username, f.zoom_password
              FROM form_enrollments e
              INNER JOIN forms f ON f.id = e.form_id
              WHERE e.student_id = :student_id AND e.status = \'active\'
@@ -109,6 +133,9 @@ final class EnrollmentRepository
     }
 
     /**
+     * Assign students to a batch. Existing active enrollments are marked dropped
+     * (history) before creating a new active enrollment.
+     *
      * @param list<int> $studentIds
      * @return array{created: int, skipped: list<array{student_id: int, reason: string}>}
      */
@@ -124,22 +151,16 @@ final class EnrollmentRepository
             }
 
             $existing = $this->findActiveByStudent($studentId);
-            if ($existing !== null) {
-                if ((int) $existing['form_id'] === $formId) {
-                    $skipped[] = [
-                        'student_id' => $studentId,
-                        'reason' => 'Already assigned to this batch',
-                    ];
-                } else {
-                    $skipped[] = [
-                        'student_id' => $studentId,
-                        'reason' => 'Already in batch ' . ($existing['batch'] ?? ''),
-                    ];
-                }
-                continue;
-            }
 
             try {
+                if ($existing !== null && !$this->markStatus((int) $existing['id'], 'dropped')) {
+                    $skipped[] = [
+                        'student_id' => $studentId,
+                        'reason' => 'Could not archive previous enrollment',
+                    ];
+                    continue;
+                }
+
                 $this->create([
                     'form_id' => $formId,
                     'student_id' => $studentId,
@@ -148,6 +169,9 @@ final class EnrollmentRepository
                 ]);
                 $created++;
             } catch (\PDOException) {
+                if ($existing !== null) {
+                    $this->markStatus((int) $existing['id'], 'active');
+                }
                 $skipped[] = [
                     'student_id' => $studentId,
                     'reason' => 'Could not enroll student',

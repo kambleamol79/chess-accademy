@@ -81,7 +81,7 @@
   max-height: 6.5rem;
 }
 
-.batch-cal__event {
+.batch-cal__event-wrap {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -124,6 +124,20 @@
   }
 }
 
+.batch-cal__event-main {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
 .batch-cal__event-time {
   font-weight: 700;
   opacity: 0.85;
@@ -154,10 +168,14 @@
   align-items: center;
   gap: 0.15rem;
   margin-top: 0.15rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
   font-size: 0.65rem;
   font-weight: 600;
   text-decoration: underline;
   cursor: pointer;
+  color: inherit;
 }
 
 .batch-cal__week-wrap {

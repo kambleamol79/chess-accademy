@@ -14,7 +14,8 @@ export interface StudentBatch {
   enrolled_at?: string | null;
   status?: string | null;
   zoom_join_url?: string | null;
-  zoom_meeting_id?: string | null;
+  zoom_username?: string | null;
+  zoom_password?: string | null;
 }
 
 export type StudentReminderType = 'class' | 'payment' | 'practice' | 'profile' | 'info';
