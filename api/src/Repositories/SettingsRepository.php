@@ -22,6 +22,18 @@ final class SettingsRepository
         return $out;
     }
 
+    public function get(string $key, mixed $default = null): mixed
+    {
+        $stmt = $this->pdo->prepare('SELECT `value` FROM settings WHERE `key` = :key LIMIT 1');
+        $stmt->execute(['key' => $key]);
+        $row = $stmt->fetch();
+        if ($row === false) {
+            return $default;
+        }
+
+        return json_decode((string) $row['value'], true);
+    }
+
     public function set(string $key, mixed $value): void
     {
         $json = json_encode($value, JSON_THROW_ON_ERROR);

@@ -78,14 +78,109 @@
   </div>
 
   <div class="col-12">
+    <app-card cardTitle="Student tournament link">
+      <p class="text-muted small mb-3">
+        Shown in the header for students as the join-tournament button. Leave the URL empty to hide the button.
+        Optionally restrict visibility to a date range in the selected timezone.
+      </p>
+      @if (loading()) {
+        <p class="text-muted mb-0">Loading…</p>
+      } @else {
+        @if (tournamentMessage()) {
+          <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ tournamentMessage() }}
+            <button type="button" class="btn-close" aria-label="Close" (click)="tournamentMessage.set('')"></button>
+          </div>
+        }
+        @if (tournamentError()) {
+          <div class="alert alert-warning">{{ tournamentError() }}</div>
+        }
+        <form class="row g-3" (ngSubmit)="saveTournamentCta()">
+          <div class="col-12">
+            <label class="form-label" for="tournamentUrl">Tournament URL</label>
+            <input
+              id="tournamentUrl"
+              class="form-control"
+              type="url"
+              name="tournamentUrl"
+              [(ngModel)]="tournamentUrl"
+              placeholder="https://www.chess.com/play/arena/..."
+            />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" for="tournamentLabel">Button text</label>
+            <input
+              id="tournamentLabel"
+              class="form-control"
+              type="text"
+              name="tournamentLabel"
+              [(ngModel)]="tournamentLabel"
+              placeholder="Today's tournament"
+            />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" for="tournamentTimezone">Timezone</label>
+            <select
+              id="tournamentTimezone"
+              class="form-select"
+              name="tournamentTimezone"
+              [(ngModel)]="tournamentTimezone"
+            >
+              @for (tz of timezoneOptions; track tz) {
+                <option [value]="tz">{{ tz }}</option>
+              }
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" for="tournamentVisibleFrom">Visible from date</label>
+            <input
+              id="tournamentVisibleFrom"
+              class="form-control"
+              type="date"
+              name="tournamentVisibleFrom"
+              [(ngModel)]="tournamentVisibleFrom"
+            />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" for="tournamentVisibleUntil">Visible until date</label>
+            <input
+              id="tournamentVisibleUntil"
+              class="form-control"
+              type="date"
+              name="tournamentVisibleUntil"
+              [(ngModel)]="tournamentVisibleUntil"
+            />
+          </div>
+          <div class="col-12">
+            <p class="form-text mb-0">
+              Leave both dates empty to show the button every day. Dates use the timezone above (inclusive).
+            </p>
+          </div>
+          <div class="col-12">
+            <button type="submit" class="btn btn-primary btn-sm" [disabled]="tournamentSaving()">
+              @if (tournamentSaving()) {
+                Saving…
+              } @else {
+                Save tournament link
+              }
+            </button>
+          </div>
+        </form>
+      }
+    </app-card>
+  </div>
+
+  <div class="col-12">
     <app-card cardTitle="Academy settings">
       @if (loading()) {
         <p class="text-muted">Loading…</p>
+      } @else if (otherSettings().length === 0) {
+        <p class="text-muted mb-0">No other academy settings configured.</p>
       } @else {
         <dl class="row mb-0">
-          @for (entry of settings() | keyvalue; track entry.key) {
-            <dt class="col-sm-4">{{ entry.key }}</dt>
-            <dd class="col-sm-8">{{ entry.value }}</dd>
+          @for (entry of otherSettings(); track entry[0]) {
+            <dt class="col-sm-4">{{ entry[0] }}</dt>
+            <dd class="col-sm-8">{{ entry[1] }}</dd>
           }
         </dl>
       }

@@ -102,6 +102,9 @@ return function (App $app, Container $container): void {
         $group->delete('/students/me/device-token', [DeviceTokenController::class, 'destroy'])
             ->add(new RoleMiddleware(['student']));
 
+        $group->get('/settings/tournament-cta', [SettingsController::class, 'tournamentCta'])
+            ->add(new RoleMiddleware(['student']));
+
         $group->get('/broadcast-messages', [BroadcastMessageController::class, 'index'])
             ->add(new RoleMiddleware(['admin']));
         $group->post('/broadcast-messages', [BroadcastMessageController::class, 'store'])
